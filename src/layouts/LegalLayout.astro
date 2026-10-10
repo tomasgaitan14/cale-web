@@ -1,0 +1,110 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import { BUSINESS_NAME, LEGAL_LAST_UPDATED } from '../config';
+
+interface Props {
+  heading: string;
+  description: string;
+  path: string;
+}
+
+const { heading, description, path } = Astro.props;
+
+const lastUpdatedLabel = new Intl.DateTimeFormat('es-AR', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+}).format(new Date(`${LEGAL_LAST_UPDATED}T00:00:00Z`));
+---
+
+<BaseLayout title={`${heading} · ${BUSINESS_NAME}`} description={description} path={path}>
+  <article class="container legal">
+    <header class="legal-header enter">
+      <p class="eyebrow">Legal</p>
+      <h1>{heading}</h1>
+      <p class="legal-updated">
+        Última actualización: <time datetime={LEGAL_LAST_UPDATED}>{lastUpdatedLabel}</time>
+      </p>
+    </header>
+    <div class="prose">
+      <slot />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .legal {
+    max-width: 46rem;
+    padding-block: clamp(3.5rem, 9vw, 6rem) var(--section-space);
+  }
+
+  .legal-header {
+    padding-bottom: 2rem;
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  h1 {
+    font-size: clamp(2.25rem, 6vw, 3.25rem);
+  }
+
+  .legal-updated {
+    margin-top: 1rem;
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+  }
+
+  /* Estilos del contenido del slot: necesitan :global porque vienen de la página */
+  .prose :global(h2) {
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    font-size: 1.625rem;
+  }
+
+  .prose :global(h3) {
+    margin-top: 1.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .prose :global(p),
+  .prose :global(ul),
+  .prose :global(ol) {
+    margin-bottom: 1rem;
+  }
+
+  .prose :global(ul),
+  .prose :global(ol) {
+    padding-left: 1.25rem;
+  }
+
+  .prose :global(li + li) {
+    margin-top: 0.375rem;
+  }
+
+  .prose :global(li::marker) {
+    color: var(--color-muted);
+  }
+
+  .prose :global(a) {
+    text-decoration-color: var(--color-muted);
+  }
+
+  .prose :global(strong) {
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+
+  .prose :global(.callout) {
+    margin-block: 1.5rem;
+    padding: 1.25rem 1.5rem;
+    background: var(--color-surface-alt);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+  }
+
+  .prose :global(.callout p:last-child) {
+    margin-bottom: 0;
+  }
+</style>

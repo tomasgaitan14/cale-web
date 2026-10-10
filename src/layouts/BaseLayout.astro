@@ -1,0 +1,216 @@
+---
+import '../styles/global.css';
+import { BUSINESS_NAME, CONTACT_EMAIL, LOCATION, OWNER_NAME, ROUTES } from '../config';
+import { canonicalUrl, mailtoUrl } from '../lib/url';
+
+interface Props {
+  title: string;
+  description: string;
+  // Ruta canónica. Sin ruta (como en la 404), la página no se indexa.
+  path?: string;
+}
+
+const { title, description, path } = Astro.props;
+const canonical = path ? canonicalUrl(path) : undefined;
+const year = new Date().getFullYear();
+
+const NAV_LINKS = [
+  { href: `${ROUTES.home}#como-funciona`, label: 'Cómo funciona' },
+  { href: `${ROUTES.home}#para-quien`, label: 'Para quién' },
+  { href: `${ROUTES.home}#contacto`, label: 'Contacto' },
+];
+
+const LEGAL_LINKS = [
+  { href: ROUTES.privacy, label: 'Política de privacidad' },
+  { href: ROUTES.terms, label: 'Términos de servicio' },
+  { href: ROUTES.dataDeletion, label: 'Eliminar mis datos' },
+];
+---
+
+<!doctype html>
+<html lang="es-AR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {canonical && <link rel="canonical" href={canonical} />}
+    <meta name="robots" content={canonical ? 'index, follow' : 'noindex'} />
+    <meta name="author" content={OWNER_NAME} />
+    <meta name="theme-color" content="#fbfbfa" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_AR" />
+    <meta property="og:site_name" content={BUSINESS_NAME} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {canonical && <meta property="og:url" content={canonical} />}
+    <meta name="twitter:card" content="summary" />
+  </head>
+  <body>
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="wordmark" href={ROUTES.home} aria-label={`${BUSINESS_NAME}, inicio`}>
+          <img src="/favicon.svg" alt="" width="24" height="24" />
+          <span>{BUSINESS_NAME}</span>
+        </a>
+        <nav aria-label="Principal">
+          <ul class="nav-list">
+            {
+              NAV_LINKS.map((link) => (
+                <li>
+                  <a href={link.href}>{link.label}</a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="contenido">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div class="footer-identity">
+          <p class="footer-name">{BUSINESS_NAME}</p>
+          <p>Recordatorios de turnos por WhatsApp.</p>
+          <p>Un servicio de {OWNER_NAME} · {LOCATION}</p>
+          <p>
+            <a href={mailtoUrl(CONTACT_EMAIL)}>{CONTACT_EMAIL}</a>
+          </p>
+        </div>
+        <nav aria-label="Legal">
+          <ul class="footer-links">
+            {
+              LEGAL_LINKS.map((link) => (
+                <li>
+                  <a href={link.href}>{link.label}</a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+      </div>
+      <div class="container footer-meta">
+        <p>© {year} {BUSINESS_NAME} · {OWNER_NAME}</p>
+        <p>
+          WhatsApp y Meta son marcas de Meta Platforms, Inc. {BUSINESS_NAME} es un servicio independiente que usa la
+          WhatsApp Business Platform.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgb(251 251 250 / 0.85);
+    border-bottom: 1px solid var(--color-border);
+    backdrop-filter: saturate(180%) blur(12px);
+    -webkit-backdrop-filter: saturate(180%) blur(12px);
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    height: 4rem;
+  }
+
+  .wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    color: var(--color-ink);
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    text-decoration: none;
+  }
+
+  .nav-list {
+    display: flex;
+    gap: 1.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.9375rem;
+  }
+
+  .nav-list a {
+    color: var(--color-muted);
+    text-decoration: none;
+    transition: color 200ms ease;
+  }
+
+  .nav-list a:hover {
+    color: var(--color-ink);
+  }
+
+  /* En mobile queda solo "Contacto": el resto se alcanza scrolleando */
+  @media (max-width: 40rem) {
+    .nav-list li:not(:last-child) {
+      display: none;
+    }
+  }
+
+  .site-footer {
+    padding-block: 3.5rem 2.5rem;
+    background: var(--color-surface-alt);
+    border-top: 1px solid var(--color-border);
+    font-size: 0.9375rem;
+  }
+
+  .footer-grid {
+    display: grid;
+    gap: 2rem;
+  }
+
+  @media (min-width: 48rem) {
+    .footer-grid {
+      grid-template-columns: 1fr auto;
+    }
+  }
+
+  .footer-identity {
+    display: grid;
+    gap: 0.25rem;
+    color: var(--color-muted);
+  }
+
+  .footer-name {
+    color: var(--color-ink);
+    font-family: var(--font-serif);
+    font-size: 1.375rem;
+    letter-spacing: -0.02em;
+  }
+
+  .footer-links {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .footer-meta {
+    display: grid;
+    gap: 0.375rem;
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+    color: var(--color-muted);
+    font-size: 0.8125rem;
+  }
+</style>
