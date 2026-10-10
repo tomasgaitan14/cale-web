@@ -1,0 +1,49 @@
+---
+// Íconos Phosphor (peso Bold) como SVG inline: sin JS ni pedidos extra.
+import arrowsClockwise from '@phosphor-icons/core/bold/arrows-clockwise-bold.svg?raw';
+import bellRinging from '@phosphor-icons/core/bold/bell-ringing-bold.svg?raw';
+import calendarCheck from '@phosphor-icons/core/bold/calendar-check-bold.svg?raw';
+import checkCircle from '@phosphor-icons/core/bold/check-circle-bold.svg?raw';
+import envelopeSimple from '@phosphor-icons/core/bold/envelope-simple-bold.svg?raw';
+import handTap from '@phosphor-icons/core/bold/hand-tap-bold.svg?raw';
+import mapPin from '@phosphor-icons/core/bold/map-pin-bold.svg?raw';
+import plugsConnected from '@phosphor-icons/core/bold/plugs-connected-bold.svg?raw';
+import scissors from '@phosphor-icons/core/bold/scissors-bold.svg?raw';
+import shieldCheck from '@phosphor-icons/core/bold/shield-check-bold.svg?raw';
+import sparkle from '@phosphor-icons/core/bold/sparkle-bold.svg?raw';
+import stethoscope from '@phosphor-icons/core/bold/stethoscope-bold.svg?raw';
+import storefront from '@phosphor-icons/core/bold/storefront-bold.svg?raw';
+import user from '@phosphor-icons/core/bold/user-bold.svg?raw';
+import wallet from '@phosphor-icons/core/bold/wallet-bold.svg?raw';
+import xCircle from '@phosphor-icons/core/bold/x-circle-bold.svg?raw';
+
+const ICONS = {
+  'arrows-clockwise': arrowsClockwise,
+  'bell-ringing': bellRinging,
+  'calendar-check': calendarCheck,
+  'check-circle': checkCircle,
+  'envelope-simple': envelopeSimple,
+  'hand-tap': handTap,
+  'map-pin': mapPin,
+  'plugs-connected': plugsConnected,
+  scissors,
+  'shield-check': shieldCheck,
+  sparkle,
+  stethoscope,
+  storefront,
+  user,
+  wallet,
+  'x-circle': xCircle,
+} as const;
+
+export type IconName = keyof typeof ICONS;
+
+interface Props {
+  name: IconName;
+  class?: string;
+}
+
+const { name, class: className } = Astro.props;
+---
+
+<span class:list={['icon', className]} aria-hidden="true" set:html={ICONS[name]} />
