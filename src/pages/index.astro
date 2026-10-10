@@ -1,0 +1,715 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon, { type IconName } from '../components/Icon.astro';
+import { BUSINESS_NAME, CONTACT_EMAIL, LOCATION, OWNER_NAME, ROUTES } from '../config';
+import { mailtoUrl } from '../lib/url';
+
+const contactHref = mailtoUrl(CONTACT_EMAIL, `Quiero usar ${BUSINESS_NAME}`);
+
+const STEPS: { icon: IconName; title: string; text: string }[] = [
+  {
+    icon: 'plugs-connected',
+    title: 'Conectás tu WhatsApp',
+    text: 'El negocio vincula su número de WhatsApp a Cale con el proceso de conexión oficial de Meta. Los mensajes salen de tu número y con tu nombre.',
+  },
+  {
+    icon: 'bell-ringing',
+    title: 'Cale manda los recordatorios',
+    text: 'Antes de cada turno, Cale le envía al cliente un mensaje con el día, la hora y el servicio, usando plantillas aprobadas por Meta.',
+  },
+  {
+    icon: 'hand-tap',
+    title: 'El cliente responde con un botón',
+    text: 'Confirmar, cancelar o reprogramar. La respuesta queda registrada en el turno, sin llamadas ni mensajes de ida y vuelta.',
+  },
+];
+
+const AUDIENCES: { icon: IconName; title: string; text: string; featured?: boolean }[] = [
+  {
+    icon: 'scissors',
+    title: 'Peluquerías y barberías',
+    text: 'Donde un turno vacío es una silla vacía. El recordatorio llega antes del turno y el cliente avisa si no puede venir, con tiempo para ofrecer ese horario a otra persona.',
+    featured: true,
+  },
+  {
+    icon: 'sparkle',
+    title: 'Centros de estética',
+    text: 'Tratamientos largos, cabinas reservadas y profesionales con agenda propia.',
+  },
+  {
+    icon: 'stethoscope',
+    title: 'Consultorios',
+    text: 'Kinesiología, odontología, nutrición, psicología y otras especialidades con turnos.',
+  },
+  {
+    icon: 'storefront',
+    title: 'Cualquier negocio con agenda',
+    text: 'Estudios de tatuajes, entrenadores, veterinarias o talleres: si trabajás con turnos, Cale te sirve.',
+    featured: true,
+  },
+];
+
+const PRINCIPLES: { icon: IconName; title: string; text: string }[] = [
+  {
+    icon: 'shield-check',
+    title: 'API oficial de Meta',
+    text: 'Cale usa la WhatsApp Business Platform (Cloud API). No usamos herramientas no oficiales que pongan en riesgo tu número.',
+  },
+  {
+    icon: 'user',
+    title: 'Solo a clientes que aceptaron',
+    text: 'Los recordatorios se mandan a clientes que dieron su consentimiento para recibir mensajes del negocio por WhatsApp.',
+  },
+  {
+    icon: 'wallet',
+    title: 'Costos de Meta, a la vista',
+    text: 'Cada negocio le paga a Meta sus mensajes directamente, desde su propia cuenta. Ese costo va aparte del servicio de Cale.',
+  },
+  {
+    icon: 'calendar-check',
+    title: 'Datos solo para los turnos',
+    text: 'Usamos los datos de tus clientes solo para los recordatorios y la gestión de turnos. No los vendemos ni los usamos para publicidad.',
+  },
+];
+
+const FAQS = [
+  {
+    question: '¿Necesito una cuenta de WhatsApp Business?',
+    answer:
+      'Sí. El negocio necesita un número de WhatsApp que se pueda conectar a la WhatsApp Business Platform de Meta. Te acompañamos en la conexión.',
+  },
+  {
+    question: '¿Quién paga los mensajes?',
+    answer:
+      'Meta cobra los mensajes según sus propias tarifas. Ese costo lo paga cada negocio directamente a Meta y es independiente de lo que cobra Cale.',
+  },
+  {
+    question: '¿Qué pasa si el cliente no responde?',
+    answer:
+      'El turno queda sin confirmar y el negocio decide qué hacer: mantenerlo, llamar al cliente o escribirle.',
+  },
+  {
+    question: '¿Cuánto cuesta Cale?',
+    answer:
+      'Depende de la cantidad de turnos que maneja tu negocio. Escribinos y te pasamos una propuesta.',
+  },
+];
+---
+
+<BaseLayout
+  title={`${BUSINESS_NAME} · Recordatorios de turnos por WhatsApp`}
+  description={`${BUSINESS_NAME} manda recordatorios de turnos por WhatsApp para peluquerías, centros de estética y consultorios. El cliente confirma, cancela o reprograma con un botón.`}
+  path={ROUTES.home}
+>
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-copy enter">
+        <p class="eyebrow">Recordatorios de turnos por WhatsApp</p>
+        <h1>Que cada cliente confirme su turno con un toque.</h1>
+        <p class="lede">
+          {BUSINESS_NAME} le manda a cada cliente un recordatorio por WhatsApp antes de su turno. El cliente confirma,
+          cancela o pide reprogramar con un botón, y el negocio se entera sin tener que llamar a nadie.
+        </p>
+        <div class="hero-actions">
+          <a class="button button-primary" href={contactHref}>
+            <Icon name="envelope-simple" />
+            Escribinos
+          </a>
+          <a class="button button-secondary" href="#como-funciona">Cómo funciona</a>
+        </div>
+        <p class="hero-note">Funciona con el número de WhatsApp de tu negocio, a través de la plataforma oficial de Meta.</p>
+      </div>
+
+      <figure class="chat enter-delayed">
+        <div class="chat-window">
+          <div class="chat-bar">
+            <span class="chat-avatar" aria-hidden="true">BR</span>
+            <div>
+              <p class="chat-business">Barbería Ribera</p>
+              <p class="chat-account">Cuenta de empresa</p>
+            </div>
+          </div>
+          <div class="chat-body">
+            <div class="bubble bubble-in">
+              <p>Hola, Lucía. Te recordamos tu turno de mañana jueves a las 17:30 en Barbería Ribera (corte de pelo).</p>
+              <p>¿Nos confirmás si venís?</p>
+              <span class="bubble-time">10:02</span>
+            </div>
+            <ul class="quick-replies" aria-label="Botones del mensaje">
+              <li><Icon name="check-circle" />Confirmar</li>
+              <li><Icon name="x-circle" />Cancelar</li>
+              <li><Icon name="arrows-clockwise" />Reprogramar</li>
+            </ul>
+            <div class="bubble bubble-out">
+              <p>Confirmar</p>
+              <span class="bubble-time">10:14</span>
+            </div>
+          </div>
+          <div class="chat-status">
+            <span class="tag tag-green"><Icon name="check-circle" />Turno confirmado</span>
+            <span class="chat-status-meta">Jueves · 17:30</span>
+          </div>
+        </div>
+        <figcaption>Ejemplo ilustrativo de un recordatorio enviado con {BUSINESS_NAME}.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section" id="como-funciona" aria-labelledby="como-funciona-titulo">
+    <div class="container">
+      <div class="section-heading reveal">
+        <p class="eyebrow">Cómo funciona</p>
+        <h2 id="como-funciona-titulo">Tres pasos, sin cambiar cómo trabajás.</h2>
+      </div>
+      <ol class="steps stagger">
+        {
+          STEPS.map((step, index) => (
+            <li class="card">
+              <div class="card-top">
+                <span class="card-icon">
+                  <Icon name={step.icon} />
+                </span>
+                <span class="step-number">{String(index + 1).padStart(2, '0')}</span>
+              </div>
+              <h3>{step.title}</h3>
+              <p>{step.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" id="para-quien" aria-labelledby="para-quien-titulo">
+    <div class="container">
+      <div class="section-heading reveal">
+        <p class="eyebrow">Para quién es</p>
+        <h2 id="para-quien-titulo">Para negocios que viven de su agenda.</h2>
+        <p class="lede">
+          Si un cliente que no avisa te deja un hueco en el día, un recordatorio con respuesta en un toque te devuelve ese
+          tiempo.
+        </p>
+      </div>
+      <ul class="bento stagger">
+        {
+          AUDIENCES.map((audience) => (
+            <li class:list={['card', { 'card-featured': audience.featured }]}>
+              <span class="card-icon">
+                <Icon name={audience.icon} />
+              </span>
+              <h3>{audience.title}</h3>
+              <p>{audience.text}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section-alt" aria-labelledby="principios-titulo">
+    <div class="container">
+      <div class="section-heading reveal">
+        <p class="eyebrow">Cómo trabajamos</p>
+        <h2 id="principios-titulo">Reglas claras con tus clientes y con Meta.</h2>
+      </div>
+      <ul class="principles stagger">
+        {
+          PRINCIPLES.map((principle) => (
+            <li>
+              <Icon name={principle.icon} class="principle-icon" />
+              <div>
+                <h3>{principle.title}</h3>
+                <p>{principle.text}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="principles-more reveal">
+        Más detalle en la <a href={ROUTES.privacy}>política de privacidad</a> y los <a href={ROUTES.terms}
+          >términos de servicio</a
+        >.
+      </p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="preguntas-titulo">
+    <div class="container faq-grid">
+      <div class="section-heading reveal">
+        <p class="eyebrow">Preguntas frecuentes</p>
+        <h2 id="preguntas-titulo">Lo que suelen preguntarnos.</h2>
+      </div>
+      <div class="faq reveal">
+        {
+          FAQS.map((faq) => (
+            <details>
+              <summary>{faq.question}</summary>
+              <p>{faq.answer}</p>
+            </details>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="contacto" aria-labelledby="contacto-titulo">
+    <div class="container contact-grid">
+      <div class="section-heading reveal">
+        <p class="eyebrow">Contacto</p>
+        <h2 id="contacto-titulo">Hablemos de tu negocio.</h2>
+        <p class="lede">
+          Contanos qué tipo de negocio tenés y cuántos turnos manejás por semana. Te respondemos por mail.
+        </p>
+        <a class="button button-primary contact-cta" href={contactHref}>
+          <Icon name="envelope-simple" />
+          Escribir un mail
+        </a>
+      </div>
+      <dl class="contact-card reveal">
+        <div>
+          <dt><Icon name="envelope-simple" />Email</dt>
+          <dd><a href={mailtoUrl(CONTACT_EMAIL)}>{CONTACT_EMAIL}</a></dd>
+        </div>
+        <div>
+          <dt><Icon name="user" />Responsable</dt>
+          <dd>{OWNER_NAME}</dd>
+        </div>
+        <div>
+          <dt><Icon name="map-pin" />Ubicación</dt>
+          <dd>{LOCATION}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* --- Hero --- */
+
+  .hero {
+    padding-block: clamp(3.5rem, 9vw, 7rem) var(--section-space);
+    background: radial-gradient(56rem 28rem at 88% 0%, rgb(251 243 219 / 0.55), transparent 70%);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .hero-grid {
+    display: grid;
+    gap: 3.5rem;
+    align-items: center;
+  }
+
+  @media (min-width: 60rem) {
+    .hero-grid {
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 4rem;
+    }
+  }
+
+  .hero h1 {
+    font-size: clamp(2.5rem, 7vw, 4.25rem);
+    letter-spacing: -0.035em;
+  }
+
+  .hero .lede {
+    margin-top: 1.5rem;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+
+  .hero-note {
+    margin-top: 1.25rem;
+    color: var(--color-muted);
+    font-size: 0.875rem;
+  }
+
+  /* --- Mock del chat --- */
+
+  .chat {
+    margin: 0;
+    width: 100%;
+    max-width: 26rem;
+    justify-self: center;
+  }
+
+  .chat-window {
+    overflow: hidden;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: 0 24px 48px -24px rgb(17 17 17 / 0.05);
+  }
+
+  .chat-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.125rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .chat-avatar {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    background: var(--color-surface-alt);
+    border: 1px solid var(--color-border);
+    border-radius: 9999px;
+    color: var(--color-ink);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .chat-business {
+    color: var(--color-ink);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .chat-account {
+    color: var(--color-muted);
+    font-size: 0.75rem;
+  }
+
+  .chat-body {
+    display: grid;
+    gap: 0.625rem;
+    padding: 1.25rem 1.125rem;
+    background: var(--color-surface-alt);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+
+  .bubble {
+    position: relative;
+    display: grid;
+    gap: 0.375rem;
+    max-width: 88%;
+    padding: 0.75rem 0.875rem 1.375rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+  }
+
+  .bubble-in {
+    background: var(--color-surface);
+    border-top-left-radius: 4px;
+  }
+
+  .bubble-out {
+    justify-self: end;
+    min-width: 7.5rem;
+    background: var(--color-green-bg);
+    border-color: transparent;
+    border-top-right-radius: 4px;
+    color: var(--color-green-text);
+    font-weight: 500;
+  }
+
+  .bubble-time {
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.375rem;
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+  }
+
+  .quick-replies {
+    display: grid;
+    gap: 0.375rem;
+    max-width: 88%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .quick-replies li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-blue-text);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .quick-replies :global(.icon) {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .chat-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.875rem 1.125rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .chat-status :global(.icon) {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+
+  .chat-status-meta {
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+  }
+
+  .chat figcaption {
+    margin-top: 0.875rem;
+    color: var(--color-muted);
+    font-size: 0.8125rem;
+    text-align: center;
+  }
+
+  /* --- Secciones --- */
+
+  .section-alt {
+    background: var(--color-surface-alt);
+  }
+
+  .section-heading {
+    max-width: 40rem;
+    margin-bottom: 3rem;
+  }
+
+  .section-heading h2 {
+    font-size: clamp(2rem, 5vw, 3rem);
+  }
+
+  .section-heading .lede {
+    margin-top: 1.25rem;
+  }
+
+  .card {
+    display: grid;
+    align-content: start;
+    gap: 0.75rem;
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition: box-shadow 200ms ease;
+  }
+
+  .card:hover {
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.04);
+  }
+
+  .card p {
+    color: var(--color-muted);
+  }
+
+  .card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-bottom: 0.5rem;
+    background: var(--color-surface-alt);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-ink);
+  }
+
+  .step-number {
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+  }
+
+  .steps,
+  .bento,
+  .principles {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .steps {
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (min-width: 52rem) {
+    .steps {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* Bento asimétrico: las tarjetas destacadas ocupan dos columnas */
+  .bento {
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (min-width: 52rem) {
+    .bento {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .card-featured {
+      grid-column: span 2;
+    }
+  }
+
+  .principles {
+    display: grid;
+    gap: 2rem 3rem;
+  }
+
+  @media (min-width: 48rem) {
+    .principles {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .principles li {
+    display: flex;
+    gap: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .principles :global(.principle-icon) {
+    margin-top: 0.125rem;
+    color: var(--color-ink);
+  }
+
+  .principles p {
+    margin-top: 0.375rem;
+    color: var(--color-muted);
+  }
+
+  .principles-more {
+    margin-top: 3rem;
+    color: var(--color-muted);
+    font-size: 0.9375rem;
+  }
+
+  /* --- Preguntas frecuentes: sin cajas, solo divisores --- */
+
+  .faq-grid,
+  .contact-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (min-width: 60rem) {
+    .faq-grid,
+    .contact-grid {
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 4rem;
+      align-items: start;
+    }
+  }
+
+  .faq details {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .faq details:first-child {
+    border-top: 1px solid var(--color-border);
+  }
+
+  .faq summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: 1.25rem;
+    color: var(--color-ink);
+    font-weight: 500;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .faq summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq summary::after {
+    content: '+';
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+
+  .faq details[open] summary::after {
+    content: '−';
+  }
+
+  .faq details p {
+    padding-bottom: 1.25rem;
+    color: var(--color-muted);
+    max-width: 36rem;
+  }
+
+  /* --- Contacto --- */
+
+  .contact-cta {
+    margin-top: 2rem;
+  }
+
+  .contact-card {
+    display: grid;
+    margin: 0;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+  }
+
+  .contact-card > div {
+    display: grid;
+    gap: 0.25rem;
+    padding: 1.5rem clamp(1.25rem, 3vw, 2rem);
+  }
+
+  .contact-card > div + div {
+    border-top: 1px solid var(--color-border);
+  }
+
+  .contact-card dt {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .contact-card dt :global(.icon) {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .contact-card dd {
+    margin: 0;
+    color: var(--color-ink);
+    font-size: 1.125rem;
+    overflow-wrap: anywhere;
+  }
+</style>
