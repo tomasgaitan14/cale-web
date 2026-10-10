@@ -1,0 +1,83 @@
+---
+import LegalLayout from '../layouts/LegalLayout.astro';
+import { BUSINESS_NAME, CONTACT_EMAIL, RESPONSE_DEADLINES, RETENTION, ROUTES } from '../config';
+import { mailtoUrl } from '../lib/url';
+
+const DELETION_SUBJECT = 'Eliminar mis datos';
+const deletionHref = mailtoUrl(CONTACT_EMAIL, DELETION_SUBJECT);
+---
+
+<LegalLayout
+  heading="Eliminar mis datos"
+  description={`Cómo pedir que ${BUSINESS_NAME} borre tus datos personales: nombre, teléfono, turnos y mensajes de WhatsApp. Respondemos dentro de los ${RESPONSE_DEADLINES.deletionBusinessDays} días hábiles.`}
+  path={ROUTES.dataDeletion}
+>
+  <p>
+    Si recibiste recordatorios de turnos por WhatsApp enviados con {BUSINESS_NAME}, podés pedir que borremos todos los
+    datos que tenemos sobre vos. No hace falta dar explicaciones y el trámite es gratuito.
+  </p>
+
+  <h2 id="como-pedirlo">Cómo pedirlo</h2>
+  <ol>
+    <li>
+      Escribinos a <a href={deletionHref}>{CONTACT_EMAIL}</a> con el asunto <strong>“{DELETION_SUBJECT}”</strong>.
+    </li>
+    <li>
+      Incluí el número de WhatsApp en el que recibiste los recordatorios, con código de país y de área (por ejemplo,
+      +54 9 11 …), y el nombre del negocio que te dio el turno, si lo sabés.
+    </li>
+    <li>
+      Para evitar que otra persona borre tus datos, podemos pedirte que confirmes que el número es tuyo antes de
+      eliminarlos.
+    </li>
+  </ol>
+  <p>
+    <a class="button button-primary" href={deletionHref}>Pedir la eliminación por mail</a>
+  </p>
+
+  <h2 id="plazo">Plazo</h2>
+  <p>
+    Borramos los datos y te confirmamos por mail dentro de los <strong
+      >{RESPONSE_DEADLINES.deletionBusinessDays} días hábiles</strong
+    > desde que recibimos el pedido, como
+    establece el artículo 16 de la Ley 25.326.
+  </p>
+
+  <h2 id="que-se-borra">Qué se borra</h2>
+  <ul>
+    <li>Tu nombre y tu número de teléfono.</li>
+    <li>Los datos de tus turnos.</li>
+    <li>El contenido de los mensajes que te enviamos y de tus respuestas.</li>
+    <li>Los estados de entrega de esos mensajes.</li>
+  </ul>
+  <p>
+    Una vez borrados, no vas a recibir más recordatorios a través de {BUSINESS_NAME}, salvo que vuelvas a sacar un turno
+    y aceptes recibirlos.
+  </p>
+
+  <h2 id="que-no-se-borra">Lo que queda fuera de nuestro alcance</h2>
+  <ul>
+    <li>
+      Los mensajes que ya están en tu teléfono: los podés borrar desde tu propio WhatsApp.
+    </li>
+    <li>
+      Los registros que el negocio guarde por su cuenta, fuera de {BUSINESS_NAME} (por ejemplo, en su propia agenda).
+      Para esos, escribile directamente al negocio.
+    </li>
+    <li>
+      Los datos que Meta conserva para operar WhatsApp, que se rigen por la política de privacidad de WhatsApp.
+    </li>
+  </ul>
+
+  <h2 id="negocios">Si sos un negocio</h2>
+  <p>
+    Para dar de baja el servicio y borrar los datos de tu negocio y de todos tus clientes, escribinos desde el email
+    con el que contrataste {BUSINESS_NAME}. Completamos el borrado dentro de los {
+      RETENTION.afterTerminationDays
+    } días siguientes a la baja.
+  </p>
+
+  <p>
+    Para más detalle sobre qué datos tratamos y por qué, leé la <a href={ROUTES.privacy}>política de privacidad</a>.
+  </p>
+</LegalLayout>
