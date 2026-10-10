@@ -31,7 +31,7 @@ Ninguno por ahora.
 
 ## Estado actual
 
-Sitio completo en local, 75 tests en verde. **Sin repo ni deploy todavía.**
+Sitio completo, 75 tests en verde. Repo público en `github.com/tomasgaitan14/cale-web`. **Falta importarlo en Vercel.**
 
 ## Decisiones tomadas
 
@@ -48,17 +48,19 @@ Sitio completo en local, 75 tests en verde. **Sin repo ni deploy todavía.**
   y la CSP.
 - **Rol legal:** Cale trata datos por cuenta del negocio (art. 25, Ley 25.326); el negocio es responsable y
   tiene que tener el opt-in de sus clientes.
+- **Identidad pública:** el sitio muestra **CRM Solutions**, **Argentina** y `crmsolutionsgchu@gmail.com`, no
+  datos personales. Para la verificación de Meta, "CRM Solutions" tiene que coincidir con la documentación legal.
 - **Plazos de conservación** (`RETENTION` en `config.ts`): 12 meses desde el turno; 30 días después de la baja
-  de un negocio. **Propuestos por Claude, pendientes de confirmar por Tom.**
+  de un negocio. Confirmados el 2026-10-10.
+- **Repo público:** en Hobby, Vercel no deploya repos privados cuando el autor del commit (`tomasgaitan14`) no es
+  el dueño de la cuenta de Vercel (`tomasagustingaitan`).
 
 ## Próximos pasos
 
-1. Confirmar los plazos de conservación.
-2. Crear el repo público `cale-web` en `tomasgaitan14` y conectarlo a Vercel (`tomasg-projects`) con el nombre
-   `cale-turnos`.
-3. Comprar el `.com.ar`, cambiar `SITE_URL` y crear un email en ese dominio antes de pedir la verificación de Meta.
-4. Cuando la base pase de Supabase a AWS: actualizar la sección 7 de `/privacidad` y `LEGAL_LAST_UPDATED`.
-5. Que un abogado revise los textos legales.
+1. Importar el repo en Vercel (`tomasg-projects`) con el nombre `cale-turnos` y verificar las 4 rutas.
+2. Comprar el `.com.ar`, cambiar `SITE_URL` y crear un email en ese dominio antes de pedir la verificación de Meta.
+3. Cuando la base pase de Supabase a AWS: actualizar la sección 7 de `/privacidad` y `LEGAL_LAST_UPDATED`.
+4. Que un abogado revise los textos legales.
 
 ## Archivos clave
 
