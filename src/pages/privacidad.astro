@@ -1,0 +1,206 @@
+---
+import LegalLayout from '../layouts/LegalLayout.astro';
+import { BUSINESS_NAME, CONTACT_EMAIL, LOCATION, OWNER_NAME, RESPONSE_DEADLINES, RETENTION, ROUTES } from '../config';
+import { mailtoUrl } from '../lib/url';
+---
+
+<LegalLayout
+  heading="Política de privacidad"
+  description={`Qué datos trata ${BUSINESS_NAME} al enviar recordatorios de turnos por WhatsApp, para qué los usa, cuánto tiempo los guarda y cómo pedir que se borren, según la Ley 25.326.`}
+  path={ROUTES.privacy}
+>
+  <p>
+    Esta política explica qué datos personales trata {BUSINESS_NAME} cuando presta su servicio de recordatorios de
+    turnos por WhatsApp, para qué los usa, con quién los comparte, cuánto tiempo los guarda y cómo ejercer los derechos
+    que da la Ley 25.326 de Protección de los Datos Personales de la República Argentina.
+  </p>
+
+  <h2 id="quienes-somos">1. Quiénes somos</h2>
+  <p>
+    {BUSINESS_NAME} es un servicio prestado por <strong>{OWNER_NAME}</strong>, con domicilio en {LOCATION}. Para
+    cualquier consulta sobre esta política o sobre tus datos, escribinos a <a href={mailtoUrl(CONTACT_EMAIL)}
+      >{CONTACT_EMAIL}</a
+    >.
+  </p>
+
+  <h2 id="roles">2. Quién es responsable de los datos</h2>
+  <p>
+    {BUSINESS_NAME} envía recordatorios en nombre de negocios que trabajan con turnos (peluquerías, centros de estética,
+    consultorios y similares). Por eso hay dos roles distintos:
+  </p>
+  <ul>
+    <li>
+      <strong>El negocio</strong> que contrata {BUSINESS_NAME} es el responsable de la base de datos de sus clientes:
+      decide a quién se le envían recordatorios y con qué datos.
+    </li>
+    <li>
+      <strong>{BUSINESS_NAME}</strong> trata esos datos por cuenta y orden del negocio, como prestador de servicios de
+      tratamiento en los términos del artículo 25 de la Ley 25.326. Solo los usa para prestar el servicio contratado y
+      según las instrucciones del negocio.
+    </li>
+  </ul>
+  <p>
+    Además, {BUSINESS_NAME} es responsable de los datos de contacto de los propios negocios que contratan el servicio.
+  </p>
+
+  <h2 id="datos">3. Qué datos tratamos</h2>
+  <h3>De los clientes finales de cada negocio</h3>
+  <ul>
+    <li>Nombre.</li>
+    <li>Número de teléfono de WhatsApp.</li>
+    <li>
+      Datos del turno: fecha, hora, servicio y, si el negocio los carga, el profesional o la sucursal que atiende.
+    </li>
+    <li>
+      Contenido de los mensajes que se envían y de las respuestas que da el cliente, incluidas las respuestas con
+      botones (confirmar, cancelar o reprogramar).
+    </li>
+    <li>
+      Estados de entrega de cada mensaje que informa Meta (enviado, entregado, leído o fallido), con su fecha y hora.
+    </li>
+  </ul>
+  <h3>De los negocios que contratan el servicio</h3>
+  <ul>
+    <li>Nombre del negocio y datos de contacto de la persona responsable (nombre, email y teléfono).</li>
+    <li>
+      Identificadores técnicos de su cuenta de WhatsApp Business (por ejemplo, el ID de la cuenta y del número) y las
+      credenciales de acceso necesarias para enviar mensajes en su nombre.
+    </li>
+  </ul>
+  <h3>De quienes visitan este sitio</h3>
+  <p>
+    Este sitio no tiene formularios, no usa cookies y no tiene herramientas de analítica ni publicidad. El proveedor
+    de hosting registra datos técnicos de cada visita (como la dirección IP y el navegador) para operar y proteger el
+    sitio.
+  </p>
+
+  <h2 id="finalidad">4. Para qué usamos los datos</h2>
+  <p>Usamos los datos <strong>solo</strong> para:</p>
+  <ul>
+    <li>Enviar recordatorios de turnos por WhatsApp en nombre del negocio.</li>
+    <li>
+      Registrar la respuesta del cliente (confirmación, cancelación o pedido de reprogramación) y comunicársela al
+      negocio para que gestione su agenda.
+    </li>
+    <li>Controlar que los mensajes se entreguen y detectar errores de envío.</li>
+    <li>Dar soporte a los negocios y mantener la seguridad del servicio.</li>
+  </ul>
+  <p>
+    No vendemos ni cedemos los datos a terceros, no los usamos para enviar publicidad y no los usamos para fines
+    propios distintos de prestar el servicio.
+  </p>
+
+  <h2 id="consentimiento">5. Consentimiento</h2>
+  <p>
+    Cada negocio es responsable de obtener el consentimiento de sus clientes para recibir mensajes por WhatsApp y de
+    informarles cómo se van a usar sus datos, como exigen el artículo 5 de la Ley 25.326 y las políticas de WhatsApp
+    Business. {BUSINESS_NAME} solo envía mensajes a clientes cargados por el negocio, con esa autorización.
+  </p>
+
+  <h2 id="meta">6. Uso de la WhatsApp Business Platform de Meta</h2>
+  <p>
+    Los mensajes se envían a través de la <strong>WhatsApp Business Platform (Cloud API)</strong> de Meta Platforms,
+    Inc. Para entregar cada mensaje, Meta recibe el número de teléfono del destinatario y el contenido del mensaje, y
+    los trata según sus propias condiciones y su política de privacidad. Meta informa a {BUSINESS_NAME} los estados de
+    entrega de cada mensaje.
+  </p>
+
+  <h2 id="proveedores">7. Proveedores que intervienen</h2>
+  <p>Para prestar el servicio trabajamos con estos proveedores:</p>
+  <ul>
+    <li><strong>Meta Platforms, Inc.</strong>: envío y entrega de los mensajes de WhatsApp.</li>
+    <li><strong>Supabase, Inc.</strong>: base de datos donde se guardan los turnos, los mensajes y sus estados.</li>
+    <li><strong>Vercel, Inc.</strong>: hosting de este sitio web.</li>
+  </ul>
+  <p>
+    Si cambiamos de proveedor de infraestructura, actualizamos esta lista y la fecha de esta política.
+  </p>
+
+  <h2 id="transferencia">8. Transferencia internacional</h2>
+  <p>
+    Estos proveedores pueden guardar y procesar los datos en servidores ubicados fuera de la Argentina, por ejemplo en
+    los Estados Unidos. Esas transferencias se hacen con proveedores que asumen obligaciones contractuales de
+    confidencialidad y seguridad, en los términos del artículo 12 de la Ley 25.326 y de la normativa de la Agencia de
+    Acceso a la Información Pública.
+  </p>
+
+  <h2 id="conservacion">9. Cuánto tiempo guardamos los datos</h2>
+  <ul>
+    <li>
+      Los datos de cada turno, los mensajes y sus estados de entrega se guardan durante <strong
+        >{RETENTION.appointmentDataMonths} meses</strong
+      > desde la fecha del turno. Después se borran.
+    </li>
+    <li>
+      Si un negocio deja de usar {BUSINESS_NAME}, borramos todos los datos de sus clientes dentro de los <strong
+        >{RETENTION.afterTerminationDays} días</strong
+      > siguientes a la baja.
+    </li>
+    <li>
+      Si alguien pide el borrado de sus datos, los eliminamos en los plazos de la sección siguiente, aunque no se haya
+      cumplido el plazo general.
+    </li>
+  </ul>
+  <p>
+    Podemos conservar por más tiempo solo la información que una ley nos obligue a guardar, y únicamente para ese fin.
+  </p>
+
+  <h2 id="seguridad">10. Seguridad</h2>
+  <p>
+    Las comunicaciones con el servicio viajan cifradas (HTTPS/TLS), el acceso a los datos está restringido a quien
+    presta el servicio y las credenciales de acceso de cada negocio se guardan protegidas. Ningún sistema es
+    completamente invulnerable, pero tomamos las medidas razonables para proteger los datos, como exige el artículo 9
+    de la Ley 25.326.
+  </p>
+
+  <h2 id="derechos">11. Tus derechos</h2>
+  <p>Como titular de los datos, podés pedir en cualquier momento:</p>
+  <ul>
+    <li>
+      <strong>Acceso</strong> a los datos que tenemos sobre vos. Respondemos dentro de los {
+        RESPONSE_DEADLINES.accessCalendarDays
+      } días corridos.
+    </li>
+    <li>
+      <strong>Rectificación, actualización o supresión</strong> de tus datos. Respondemos dentro de los {
+        RESPONSE_DEADLINES.deletionBusinessDays
+      } días hábiles.
+    </li>
+    <li><strong>Dejar de recibir recordatorios</strong> de un negocio.</li>
+  </ul>
+  <p>
+    Para pedir el borrado de tus datos seguí los pasos de la página <a href={ROUTES.dataDeletion}>Eliminar mis
+    datos</a>. Para cualquier otro pedido escribinos a <a href={mailtoUrl(CONTACT_EMAIL)}>{CONTACT_EMAIL}</a>. Como
+    tratamos los datos por cuenta de cada negocio, también podés hacer el pedido directamente al negocio que te dio el
+    turno; en ese caso lo ayudamos a cumplirlo.
+  </p>
+  <div class="callout">
+    <p>
+      El titular de los datos personales tiene la facultad de ejercer el derecho de acceso a los mismos en forma
+      gratuita a intervalos no inferiores a seis meses, salvo que se acredite un interés legítimo al efecto conforme lo
+      establecido en el artículo 14, inciso 3 de la Ley Nº 25.326.
+    </p>
+    <p>
+      La Agencia de Acceso a la Información Pública, en su carácter de Órgano de Control de la Ley Nº 25.326, tiene la
+      atribución de atender las denuncias y reclamos que interpongan quienes resulten afectados en sus derechos por
+      incumplimiento de las normas vigentes en materia de protección de datos personales.
+    </p>
+  </div>
+
+  <h2 id="menores">12. Menores de edad</h2>
+  <p>
+    {BUSINESS_NAME} no está dirigido a menores de edad. Si un negocio carga los datos de un menor para recordarle un
+    turno, es responsabilidad del negocio contar con la autorización de sus padres o representantes.
+  </p>
+
+  <h2 id="cambios">13. Cambios en esta política</h2>
+  <p>
+    Si cambiamos esta política, publicamos la nueva versión en esta misma página con la fecha de actualización. Si el
+    cambio es importante, se lo avisamos a los negocios que usan el servicio.
+  </p>
+
+  <h2 id="contacto">14. Contacto</h2>
+  <p>
+    {OWNER_NAME} · {LOCATION} · <a href={mailtoUrl(CONTACT_EMAIL)}>{CONTACT_EMAIL}</a>
+  </p>
+</LegalLayout>
