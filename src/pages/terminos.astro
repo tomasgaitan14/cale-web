@@ -1,0 +1,154 @@
+---
+import LegalLayout from '../layouts/LegalLayout.astro';
+import { BUSINESS_NAME, CONTACT_EMAIL, JURISDICTION, LOCATION, OWNER_NAME, ROUTES } from '../config';
+import { mailtoUrl } from '../lib/url';
+---
+
+<LegalLayout
+  heading="Términos de servicio"
+  description={`Condiciones para usar ${BUSINESS_NAME}: qué incluye el servicio, el consentimiento de los clientes, los costos de Meta y la limitación de responsabilidad.`}
+  path={ROUTES.terms}
+>
+  <p>
+    Estos términos regulan el uso de {BUSINESS_NAME} por parte de los negocios que lo contratan. Al usar el servicio, el
+    negocio acepta estos términos y la <a href={ROUTES.privacy}>política de privacidad</a>.
+  </p>
+
+  <h2 id="prestador">1. Quién presta el servicio</h2>
+  <p>
+    {BUSINESS_NAME} es un servicio prestado por <strong>{OWNER_NAME}</strong>, con domicilio en {LOCATION}. Contacto:
+    <a href={mailtoUrl(CONTACT_EMAIL)}>{CONTACT_EMAIL}</a>.
+  </p>
+
+  <h2 id="servicio">2. Qué incluye el servicio</h2>
+  <p>{BUSINESS_NAME} permite a negocios que trabajan con turnos:</p>
+  <ul>
+    <li>Conectar su número de WhatsApp a través de la WhatsApp Business Platform (Cloud API) de Meta.</li>
+    <li>Enviar recordatorios de turnos a sus clientes por WhatsApp, usando plantillas de mensaje aprobadas por Meta.</li>
+    <li>
+      Recibir la respuesta de cada cliente (confirmar, cancelar o pedir reprogramar el turno) y registrarla en el turno.
+    </li>
+  </ul>
+  <p>
+    {BUSINESS_NAME} actúa como proveedor de tecnología: los mensajes salen del número y de la cuenta de WhatsApp Business
+    del propio negocio.
+  </p>
+
+  <h2 id="requisitos">3. Requisitos para usarlo</h2>
+  <p>El negocio se compromete a:</p>
+  <ul>
+    <li>
+      Tener una cuenta de WhatsApp Business habilitada y aceptar y cumplir las condiciones y políticas de WhatsApp
+      Business y de Meta, incluida la política de mensajería comercial.
+    </li>
+    <li>Dar información verdadera sobre su negocio y mantenerla actualizada.</li>
+    <li>Cargar correctamente los datos de sus turnos y de sus clientes.</li>
+    <li>Cuidar los accesos a su cuenta y avisarnos si detecta un uso no autorizado.</li>
+  </ul>
+
+  <h2 id="consentimiento">4. Consentimiento de los clientes (opt-in)</h2>
+  <p>
+    <strong>Cada negocio es el único responsable de tener el consentimiento de sus clientes</strong> para enviarles
+    mensajes por WhatsApp antes de cargarlos en {BUSINESS_NAME}. En particular, el negocio debe:
+  </p>
+  <ul>
+    <li>
+      Obtener de cada cliente una aceptación previa y clara para recibir recordatorios de turnos por WhatsApp, y poder
+      demostrarla si Meta o una autoridad lo piden.
+    </li>
+    <li>Informar a sus clientes cómo se usan sus datos, según la Ley 25.326.</li>
+    <li>Respetar de inmediato los pedidos de clientes que no quieran recibir más mensajes.</li>
+  </ul>
+  <p>
+    El negocio responde ante sus clientes, ante Meta y ante cualquier autoridad por los mensajes enviados a personas
+    que no dieron su consentimiento, y mantiene indemne a {BUSINESS_NAME} frente a los reclamos que surjan por ese
+    motivo.
+  </p>
+
+  <h2 id="uso-permitido">5. Uso permitido</h2>
+  <p>
+    {BUSINESS_NAME} es para recordatorios y gestión de turnos. No se puede usar para enviar publicidad no solicitada,
+    mensajes masivos ajenos a los turnos, contenido ilegal o engañoso, ni para hacerse pasar por otra persona o negocio.
+  </p>
+
+  <h2 id="costos-meta">6. Costos de Meta</h2>
+  <p>
+    Meta cobra los mensajes de WhatsApp según sus propias tarifas. <strong>Cada negocio paga esos mensajes directamente
+    a Meta</strong>, con el medio de pago cargado en su propia cuenta de WhatsApp Business. Ese costo es independiente
+    del precio de {BUSINESS_NAME} y {BUSINESS_NAME} no lo cobra ni lo administra.
+  </p>
+  <p>
+    Las tarifas, las categorías de mensajes y las reglas de facturación las define Meta y pueden cambiar sin que
+    {BUSINESS_NAME} intervenga.
+  </p>
+
+  <h2 id="precio">7. Precio del servicio</h2>
+  <p>
+    El precio de {BUSINESS_NAME}, la forma de pago y el período de facturación se acuerdan con cada negocio en una
+    propuesta comercial antes de empezar. Para consultarlo, escribinos a <a href={mailtoUrl(CONTACT_EMAIL)}
+      >{CONTACT_EMAIL}</a
+    >.
+  </p>
+
+  <h2 id="datos">8. Datos personales</h2>
+  <p>
+    El negocio es el responsable de los datos de sus clientes y {BUSINESS_NAME} los trata por su cuenta y orden, solo
+    para prestar el servicio. El detalle está en la <a href={ROUTES.privacy}>política de privacidad</a>.
+  </p>
+
+  <h2 id="disponibilidad">9. Disponibilidad del servicio</h2>
+  <p>
+    Hacemos lo razonable para que {BUSINESS_NAME} funcione de forma continua, pero el servicio depende de terceros
+    (Meta, proveedores de infraestructura y redes de telecomunicaciones). Por eso no garantizamos que funcione sin
+    interrupciones ni que cada mensaje se entregue, se lea o se responda.
+  </p>
+  <p>
+    Meta puede rechazar o pausar plantillas de mensaje, limitar la cantidad de envíos o suspender una cuenta o un
+    número según sus políticas. Esas decisiones son de Meta y no de {BUSINESS_NAME}.
+  </p>
+
+  <h2 id="responsabilidad">10. Limitación de responsabilidad</h2>
+  <p>En la medida en que lo permita la ley aplicable, {BUSINESS_NAME} no responde por:</p>
+  <ul>
+    <li>Turnos perdidos, ausencias de clientes o ganancias que el negocio deje de percibir.</li>
+    <li>Mensajes que no se entreguen o se demoren por causas ajenas a {BUSINESS_NAME}.</li>
+    <li>
+      Interrupciones, cambios o decisiones de Meta o de otros proveedores, incluidas la suspensión de cuentas, números o
+      plantillas.
+    </li>
+    <li>Errores en los datos que carga el negocio.</li>
+    <li>El incumplimiento, por parte del negocio, de las políticas de Meta o de la obligación de tener el consentimiento de sus clientes.</li>
+  </ul>
+  <p>
+    Si igualmente corresponde una responsabilidad de {BUSINESS_NAME}, se limita al monto que el negocio haya pagado por
+    el servicio en los tres meses anteriores al hecho que la origina. Esta limitación no se aplica en casos de dolo o
+    culpa grave.
+  </p>
+  <p>
+    Los recordatorios son una ayuda: no reemplazan la agenda del negocio ni su comunicación directa con los clientes.
+  </p>
+
+  <h2 id="baja">11. Suspensión y baja</h2>
+  <p>
+    El negocio puede dejar de usar {BUSINESS_NAME} cuando quiera, avisando por mail. {BUSINESS_NAME} puede suspender o
+    dar de baja el servicio si el negocio incumple estos términos o las políticas de Meta, o si Meta lo exige. Después
+    de la baja, los datos se borran según la <a href={ROUTES.privacy}>política de privacidad</a>.
+  </p>
+
+  <h2 id="cambios">12. Cambios en los términos</h2>
+  <p>
+    Podemos actualizar estos términos. Publicamos la nueva versión en esta página con su fecha y avisamos por mail a los
+    negocios que usan el servicio. Si el negocio sigue usando {BUSINESS_NAME} después del aviso, acepta la nueva versión.
+  </p>
+
+  <h2 id="ley">13. Ley aplicable y jurisdicción</h2>
+  <p>
+    Estos términos se rigen por las leyes de la República Argentina. Ante cualquier conflicto, las partes se someten a
+    los tribunales ordinarios de {JURISDICTION}.
+  </p>
+
+  <h2 id="contacto">14. Contacto</h2>
+  <p>
+    {OWNER_NAME} · {LOCATION} · <a href={mailtoUrl(CONTACT_EMAIL)}>{CONTACT_EMAIL}</a>
+  </p>
+</LegalLayout>
