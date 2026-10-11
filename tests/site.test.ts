@@ -18,6 +18,8 @@ const DIST_DIR = join(import.meta.dirname, '..', 'dist');
 const NOT_FOUND_FILE = '404.html';
 const DESCRIPTION_LENGTH = { min: 50, max: 160 };
 const TEXT_NODE = NodeType.TEXT_NODE;
+// Palabras con mayúscula interna que no son texto pegado
+const WORDS_WITH_INNER_CAPITALS = ['WhatsApp'];
 const PLACEHOLDER_PATTERN = /en construcci[oó]n|pr[oó]ximamente|lorem ipsum|coming soon|\bTODO\b|\bTBD\b/i;
 
 const INDEXABLE_ROUTES = Object.values(ROUTES);
@@ -118,12 +120,15 @@ describe.each(INDEXABLE_ROUTES)('página %s', (route) => {
   it('no pega palabras entre sí ni con números', () => {
     const glued: string[] = [];
     for (const node of textNodes(page().querySelector('body')!)) {
-      for (const match of node.text.matchAll(/\S*\p{Ll}\d\S*/gu)) glued.push(match[0]);
+      // "los5" (letra+número), "queCale" (minúscula+mayúscula) o "Contacto,Cale" (puntuación+letra)
+      for (const match of node.text.matchAll(/\S*(?:\p{Ll}\d|\p{Ll}\p{Lu}|[,;:]\p{L})\S*/gu)) {
+        if (!WORDS_WITH_INNER_CAPITALS.some((word) => match[0].includes(word))) glued.push(match[0]);
+      }
     }
     for (const element of page().querySelectorAll('body a, body strong, body em, body time')) {
       const previous = element.previousSibling;
       const next = element.nextSibling;
-      if (previous?.nodeType === TEXT_NODE && /\p{L}$/u.test(previous.text) && /^[\p{L}\d]/u.test(element.text)) {
+      if (previous?.nodeType === TEXT_NODE && /[\p{L},;:]$/u.test(previous.text) && /^[\p{L}\d]/u.test(element.text)) {
         glued.push(`${previous.text.trim().split(' ').at(-1)}|${element.text}`);
       }
       if (next?.nodeType === TEXT_NODE && /[\p{L}\d]$/u.test(element.text) && /^\p{L}/u.test(next.text)) {
@@ -217,9 +222,17 @@ describe('contenido requerido', () => {
       'Cada negocio paga esos mensajes directamente a Meta',
       'Limitación de responsabilidad',
       'Ley aplicable y jurisdicción',
+      // Modelo sin Tech Provider: la cuenta es del negocio y el acceso de Cale es revocable
+      'crea y mantiene su propia app y su cuenta de WhatsApp Business',
+      'puede revocarle el acceso',
     ]) {
       expect(text, `falta "${required}"`).toContain(required);
     }
+  });
+
+  // Decisión de Titular (2026-10-11): el sitio no habla del precio del servicio.
+  it.each(INDEXABLE_ROUTES)('%s no menciona el precio del servicio', (route) => {
+    expect(bodyText(pages.get(route)!)).not.toMatch(/precio|cu[aá]nto cuesta|propuesta comercial|lo que cobra/i);
   });
 
   it('la página de eliminación explica cómo pedirlo y en qué plazo', () => {
