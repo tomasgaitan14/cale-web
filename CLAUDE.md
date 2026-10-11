@@ -23,7 +23,7 @@ Personal. Producto propio. **Sin relación** con Sinfalta / `whatsapp-bot` (deci
 | Íconos | `@phosphor-icons/core` (Bold), inline vía `src/components/Icon.astro` |
 | Tests | Vitest sobre el HTML de `dist/` + `node-html-parser` |
 | Node | 24 (`.nvmrc` y `engines`; Astro 7 pide ≥ 22.12 y el `node` por defecto de nvm es 22.11) |
-| Deploy | Vercel, proyecto `cale-turnos` → `cale-turnos.vercel.app` (pendiente) |
+| Deploy | Vercel, proyecto `cale-turnos` (equipo `tomasg-projects`) → `cale-turnos.vercel.app`, deploy automático desde `main` |
 
 ## Proyectos relacionados
 
@@ -31,7 +31,8 @@ Ninguno por ahora.
 
 ## Estado actual
 
-Sitio completo, 75 tests en verde. Repo público en `github.com/tomasgaitan14/cale-web`. **Falta importarlo en Vercel.**
+En producción en https://cale-turnos.vercel.app desde el 2026-10-11. 75 tests en verde. Repo público en
+`github.com/tomasgaitan14/cale-web`.
 
 ## Decisiones tomadas
 
@@ -57,10 +58,9 @@ Sitio completo, 75 tests en verde. Repo público en `github.com/tomasgaitan14/ca
 
 ## Próximos pasos
 
-1. Importar el repo en Vercel (`tomasg-projects`) con el nombre `cale-turnos` y verificar las 4 rutas.
-2. Comprar el `.com.ar`, cambiar `SITE_URL` y crear un email en ese dominio antes de pedir la verificación de Meta.
-3. Cuando la base pase de Supabase a AWS: actualizar la sección 7 de `/privacidad` y `LEGAL_LAST_UPDATED`.
-4. Que un abogado revise los textos legales.
+1. Comprar el `.com.ar`, cambiar `SITE_URL` y crear un email en ese dominio antes de pedir la verificación de Meta.
+2. Cuando la base pase de Supabase a AWS: actualizar la sección 7 de `/privacidad` y `LEGAL_LAST_UPDATED`.
+3. Que un abogado revise los textos legales.
 
 ## Archivos clave
 
@@ -76,4 +76,8 @@ Sitio completo, 75 tests en verde. Repo público en `github.com/tomasgaitan14/ca
 - **Espacios en Astro:** un salto de línea entre texto y `{expresión}` o una etiqueta inline se pierde
   ("dentro de los5"). El test "no pega palabras" lo detecta; dejá el espacio en la misma línea.
 - `astro preview` en Astro 7 corre como daemon: se baja con `npx astro preview stop`.
+- **Cómo se creó el proyecto de Vercel:** la importación desde el dashboard no llegó a crearlo, y la API
+  (`POST /v11/projects` con `gitRepository`) lo rechaza con "install the GitHub integration". Funcionó
+  `vercel project add` + `vercel link` + `vercel git connect`. `vercel link` agrega `.vercel` al `.gitignore`
+  aunque ya esté: descartar ese cambio.
 - Al cambiar cualquier texto legal, actualizar `LEGAL_LAST_UPDATED`.
