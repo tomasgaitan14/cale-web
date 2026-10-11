@@ -16,14 +16,17 @@ import { mailtoUrl } from '../lib/url';
 
   <h2 id="prestador">1. Quién presta el servicio</h2>
   <p>
-    {BUSINESS_NAME} es un servicio prestado por <strong>{OWNER_NAME}</strong>, con domicilio en {LOCATION}. Contacto:
-    <a href={mailtoUrl(CONTACT_EMAIL)}>{CONTACT_EMAIL}</a>.
+    {BUSINESS_NAME} es un servicio prestado por <strong>{OWNER_NAME}</strong>, con domicilio en {LOCATION}. Contacto: <a
+      href={mailtoUrl(CONTACT_EMAIL)}>{CONTACT_EMAIL}</a
+    >.
   </p>
 
   <h2 id="servicio">2. Qué incluye el servicio</h2>
   <p>{BUSINESS_NAME} permite a negocios que trabajan con turnos:</p>
   <ul>
-    <li>Conectar su número de WhatsApp a través de la WhatsApp Business Platform (Cloud API) de Meta.</li>
+    <li>
+      Dar acceso a {BUSINESS_NAME} a su cuenta de WhatsApp Business en la WhatsApp Business Platform (Cloud API) de Meta.
+    </li>
     <li>Enviar recordatorios de turnos a sus clientes por WhatsApp, usando plantillas de mensaje aprobadas por Meta.</li>
     <li>
       Recibir la respuesta de cada cliente (confirmar, cancelar o pedir reprogramar el turno) y registrarla en el turno.
@@ -41,10 +44,19 @@ import { mailtoUrl } from '../lib/url';
       Tener una cuenta de WhatsApp Business habilitada y aceptar y cumplir las condiciones y políticas de WhatsApp
       Business y de Meta, incluida la política de mensajería comercial.
     </li>
+    <li>
+      Crear y mantener, en su propio portfolio de Meta, la app y la cuenta de WhatsApp Business desde las que se envían
+      sus mensajes, y darle a {BUSINESS_NAME} el acceso necesario para enviarlos en su nombre.
+    </li>
     <li>Dar información verdadera sobre su negocio y mantenerla actualizada.</li>
     <li>Cargar correctamente los datos de sus turnos y de sus clientes.</li>
     <li>Cuidar los accesos a su cuenta y avisarnos si detecta un uso no autorizado.</li>
   </ul>
+  <p>
+    Como el negocio crea y mantiene su propia app y su cuenta de WhatsApp Business, también puede revocarle el acceso a {
+      BUSINESS_NAME
+    } en cualquier momento desde Meta. Sin ese acceso, {BUSINESS_NAME} no puede seguir enviando recordatorios.
+  </p>
 
   <h2 id="consentimiento">4. Consentimiento de los clientes (opt-in)</h2>
   <p>
@@ -74,29 +86,22 @@ import { mailtoUrl } from '../lib/url';
   <h2 id="costos-meta">6. Costos de Meta</h2>
   <p>
     Meta cobra los mensajes de WhatsApp según sus propias tarifas. <strong>Cada negocio paga esos mensajes directamente
-    a Meta</strong>, con el medio de pago cargado en su propia cuenta de WhatsApp Business. Ese costo es independiente
-    del precio de {BUSINESS_NAME} y {BUSINESS_NAME} no lo cobra ni lo administra.
+    a Meta</strong>, con el medio de pago cargado en su propia cuenta de WhatsApp Business. {BUSINESS_NAME} no
+    intermedia en esos pagos.
   </p>
   <p>
-    Las tarifas, las categorías de mensajes y las reglas de facturación las define Meta y pueden cambiar sin que
-    {BUSINESS_NAME} intervenga.
+    Las tarifas, las categorías de mensajes y las reglas de facturación las define Meta y pueden cambiar sin que {
+      BUSINESS_NAME
+    } intervenga.
   </p>
 
-  <h2 id="precio">7. Precio del servicio</h2>
-  <p>
-    El precio de {BUSINESS_NAME}, la forma de pago y el período de facturación se acuerdan con cada negocio en una
-    propuesta comercial antes de empezar. Para consultarlo, escribinos a <a href={mailtoUrl(CONTACT_EMAIL)}
-      >{CONTACT_EMAIL}</a
-    >.
-  </p>
-
-  <h2 id="datos">8. Datos personales</h2>
+  <h2 id="datos">7. Datos personales</h2>
   <p>
     El negocio es el responsable de los datos de sus clientes y {BUSINESS_NAME} los trata por su cuenta y orden, solo
     para prestar el servicio. El detalle está en la <a href={ROUTES.privacy}>política de privacidad</a>.
   </p>
 
-  <h2 id="disponibilidad">9. Disponibilidad del servicio</h2>
+  <h2 id="disponibilidad">8. Disponibilidad del servicio</h2>
   <p>
     Hacemos lo razonable para que {BUSINESS_NAME} funcione de forma continua, pero el servicio depende de terceros
     (Meta, proveedores de infraestructura y redes de telecomunicaciones). Por eso no garantizamos que funcione sin
@@ -107,7 +112,7 @@ import { mailtoUrl } from '../lib/url';
     número según sus políticas. Esas decisiones son de Meta y no de {BUSINESS_NAME}.
   </p>
 
-  <h2 id="responsabilidad">10. Limitación de responsabilidad</h2>
+  <h2 id="responsabilidad">9. Limitación de responsabilidad</h2>
   <p>En la medida en que lo permita la ley aplicable, {BUSINESS_NAME} no responde por:</p>
   <ul>
     <li>Turnos perdidos, ausencias de clientes o ganancias que el negocio deje de percibir.</li>
@@ -128,26 +133,26 @@ import { mailtoUrl } from '../lib/url';
     Los recordatorios son una ayuda: no reemplazan la agenda del negocio ni su comunicación directa con los clientes.
   </p>
 
-  <h2 id="baja">11. Suspensión y baja</h2>
+  <h2 id="baja">10. Suspensión y baja</h2>
   <p>
     El negocio puede dejar de usar {BUSINESS_NAME} cuando quiera, avisando por mail. {BUSINESS_NAME} puede suspender o
     dar de baja el servicio si el negocio incumple estos términos o las políticas de Meta, o si Meta lo exige. Después
     de la baja, los datos se borran según la <a href={ROUTES.privacy}>política de privacidad</a>.
   </p>
 
-  <h2 id="cambios">12. Cambios en los términos</h2>
+  <h2 id="cambios">11. Cambios en los términos</h2>
   <p>
     Podemos actualizar estos términos. Publicamos la nueva versión en esta página con su fecha y avisamos por mail a los
     negocios que usan el servicio. Si el negocio sigue usando {BUSINESS_NAME} después del aviso, acepta la nueva versión.
   </p>
 
-  <h2 id="ley">13. Ley aplicable y jurisdicción</h2>
+  <h2 id="ley">12. Ley aplicable y jurisdicción</h2>
   <p>
     Estos términos se rigen por las leyes de la República Argentina. Ante cualquier conflicto, las partes se someten a
     los tribunales ordinarios de {JURISDICTION}.
   </p>
 
-  <h2 id="contacto">14. Contacto</h2>
+  <h2 id="contacto">13. Contacto</h2>
   <p>
     {OWNER_NAME} · {LOCATION} · <a href={mailtoUrl(CONTACT_EMAIL)}>{CONTACT_EMAIL}</a>
   </p>
