@@ -18,7 +18,7 @@ export const ROUTES = {
 } as const;
 
 // Fecha de vigencia de los textos legales (ISO, se formatea al renderizar).
-export const LEGAL_LAST_UPDATED = '2026-10-10';
+export const LEGAL_LAST_UPDATED = '2026-10-11';
 
 // Plazos de conservación declarados en la política de privacidad.
 export const RETENTION = {
