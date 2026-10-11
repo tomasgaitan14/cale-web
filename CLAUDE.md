@@ -5,9 +5,19 @@
 Sitio público de **Cale**, servicio de recordatorios de turnos por WhatsApp (WhatsApp Cloud API de Meta)
 para peluquerías y negocios con turnos. El cliente final confirma, cancela o reprograma con un botón.
 
-El sitio existe para la **verificación del negocio en Meta** y el **App Review como Tech Provider**:
-nombre del negocio y titular visibles, email de contacto, y política de privacidad, términos y
-eliminación de datos en URLs propias.
+El sitio es la cara pública de Cale y da las URLs legales (privacidad, términos, eliminación de datos) que
+piden las apps de Meta, por ejemplo para pasar a modo Live.
+
+**Modelo de operación: sin Tech Provider** (decisión del 2026-10-11). Tom no tiene un negocio registrado y no
+hay documento contra el cual Meta pueda verificarlo, así que Cale no conecta números con Embedded Signup. Cada
+negocio crea en su propio portfolio de Meta su app, su cuenta de WhatsApp Business y su número, y le da acceso
+a Cale con un token de usuario de sistema (`whatsapp_business_messaging` y `whatsapp_business_management`).
+El webhook se configura en la app del negocio y apunta al endpoint de Cale. Sin verificar, cada negocio tiene
+el límite de mensajes de cuentas no verificadas; si necesita más, se verifica con sus propios papeles.
+
+Si más adelante Cale pasa a ser Tech Provider, hacen falta: un documento a nombre de quien presta el servicio
+(por ejemplo, la constancia de monotributo), que el nombre legal del sitio y del portfolio coincida con ese
+documento letra por letra, un dominio propio con email en ese dominio, y el App Review.
 
 ## Contexto
 
@@ -50,7 +60,10 @@ En producción en https://cale-turnos.vercel.app desde el 2026-10-11. 75 tests e
 - **Rol legal:** Cale trata datos por cuenta del negocio (art. 25, Ley 25.326); el negocio es responsable y
   tiene que tener el opt-in de sus clientes.
 - **Identidad pública:** el sitio muestra **CRM Solutions**, **Argentina** y `crmsolutionsgchu@gmail.com`, no
-  datos personales. Para la verificación de Meta, "CRM Solutions" tiene que coincidir con la documentación legal.
+  datos personales. "CRM Solutions" no es un negocio registrado: sirve mientras no se pida la verificación de
+  Meta, pero no pasaría esa verificación (ver Descripción).
+- **Sin precio en el sitio** (2026-10-11): ni la landing ni los términos hablan del precio del servicio. Hay
+  un test que lo controla.
 - **Plazos de conservación** (`RETENTION` en `config.ts`): 12 meses desde el turno; 30 días después de la baja
   de un negocio. Confirmados el 2026-10-10.
 - **Repo público:** en Hobby, Vercel no deploya repos privados cuando el autor del commit (`tomasgaitan14`) no es
@@ -58,9 +71,10 @@ En producción en https://cale-turnos.vercel.app desde el 2026-10-11. 75 tests e
 
 ## Próximos pasos
 
-1. Comprar el `.com.ar`, cambiar `SITE_URL` y crear un email en ese dominio antes de pedir la verificación de Meta.
+1. Comprar el `.com.ar` y cambiar `SITE_URL` (no bloquea nada mientras no haya verificación de Meta).
 2. Cuando la base pase de Supabase a AWS: actualizar la sección 7 de `/privacidad` y `LEGAL_LAST_UPDATED`.
-3. Que un abogado revise los textos legales.
+3. Que un abogado revise los textos legales. En particular: el tope de responsabilidad de los términos se calcula
+   sobre "lo pagado por el servicio" y la jurisdicción no nombra una ciudad.
 
 ## Archivos clave
 
@@ -74,7 +88,8 @@ En producción en https://cale-turnos.vercel.app desde el 2026-10-11. 75 tests e
 ## Notas / contexto extra
 
 - **Espacios en Astro:** un salto de línea entre texto y `{expresión}` o una etiqueta inline se pierde
-  ("dentro de los5"). El test "no pega palabras" lo detecta; dejá el espacio en la misma línea.
+  ("dentro de los5", "sin queCale", "Contacto:email"). El test "no pega palabras" lo detecta; dejá el espacio en
+  la misma línea.
 - `astro preview` en Astro 7 corre como daemon: se baja con `npx astro preview stop`.
 - **Cómo se creó el proyecto de Vercel:** la importación desde el dashboard no llegó a crearlo, y la API
   (`POST /v11/projects` con `gitRepository`) lo rechaza con "install the GitHub integration". Funcionó
