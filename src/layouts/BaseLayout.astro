@@ -1,6 +1,6 @@
 ---
 import '../styles/global.css';
-import { BUSINESS_NAME, CONTACT_EMAIL, LOCATION, OWNER_NAME, ROUTES } from '../config';
+import { BUSINESS_NAME, CONTACT_EMAIL, FACEBOOK_DOMAIN_VERIFICATION, LOCATION, OWNER_NAME, ROUTES } from '../config';
 import { canonicalUrl, mailtoUrl } from '../lib/url';
 
 interface Props {
@@ -38,6 +38,7 @@ const LEGAL_LINKS = [
     <meta name="robots" content={canonical ? 'index, follow' : 'noindex'} />
     <meta name="author" content={OWNER_NAME} />
     <meta name="theme-color" content="#fbfbfa" />
+    <meta name="facebook-domain-verification" content={FACEBOOK_DOMAIN_VERIFICATION} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
     <meta property="og:type" content="website" />
