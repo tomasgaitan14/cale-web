@@ -6,6 +6,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import {
   BUSINESS_NAME,
   CONTACT_EMAIL,
+  FACEBOOK_DOMAIN_VERIFICATION,
   LOCATION,
   OWNER_NAME,
   RESPONSE_DEADLINES,
@@ -182,6 +183,13 @@ describe('links internos', () => {
 });
 
 describe('contenido requerido', () => {
+  // Meta busca la etiqueta en el <head> del HTML de la home, sin JS
+  it('la home tiene la etiqueta de verificación de dominio de Meta en el head', () => {
+    expect(FACEBOOK_DOMAIN_VERIFICATION).toMatch(/^[a-z0-9]{20,}$/);
+    const tag = pages.get(ROUTES.home)!.querySelector('head meta[name="facebook-domain-verification"]');
+    expect(tag?.getAttribute('content')).toBe(FACEBOOK_DOMAIN_VERIFICATION);
+  });
+
   it('la landing explica cómo funciona, para quién es y tiene contacto', () => {
     const page = pages.get(ROUTES.home)!;
     for (const id of ['como-funciona', 'para-quien', 'contacto']) {

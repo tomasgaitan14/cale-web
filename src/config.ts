@@ -10,6 +10,9 @@ export const CONTACT_EMAIL = 'crmsolutionsgchu@gmail.com';
 // Tribunales competentes que fijan los términos de servicio.
 export const JURISDICTION = 'la República Argentina';
 
+// Verificación del dominio en el portfolio de Meta (no es secreta: va en el HTML público).
+export const FACEBOOK_DOMAIN_VERIFICATION = '55hdqyv5hd3d0eyext8ptkxa76baig';
+
 export const ROUTES = {
   home: '/',
   privacy: '/privacidad',
