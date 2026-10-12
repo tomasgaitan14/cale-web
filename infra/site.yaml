@@ -1,0 +1,405 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  Sitio público de Cale: S3 privado + CloudFront con el plan flat-rate Free (WAF y Route 53 incluidos),
+  alarmas por email y rol de deploy para GitHub Actions. Se despliega en us-east-1.
+
+Parameters:
+  DomainName:
+    Type: String
+    Default: cale.com.ar
+    Description: Dominio apex del sitio (zona de Route 53).
+  AlertEmail:
+    Type: String
+    AllowedPattern: '^[^@\s]+@[^@\s]+\.[^@\s]+$'
+    Description: Email que recibe las alarmas (hay que confirmar la suscripción de SNS).
+  GitHubRepository:
+    Type: String
+    Default: tomasgaitan14/cale-web
+    Description: Repo (owner/nombre) que puede deployar desde la rama main.
+  RequestSpikeThreshold:
+    Type: Number
+    Default: 5000
+    MinValue: 1
+    Description: Requests por hora a partir de los cuales avisa la alarma de pico de tráfico.
+
+Resources:
+  # --- Contenido ---
+
+  SiteBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: RetainExceptOnCreate
+    UpdateReplacePolicy: Retain
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      # Versiones anteriores para poder volver atrás un deploy; se borran a los 30 días
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: expire-old-versions
+            Status: Enabled
+            NoncurrentVersionExpiration:
+              NoncurrentDays: 30
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 1
+
+  SiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref SiteBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowCloudFrontRead
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub '${SiteBucket.Arn}/*'
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub 'arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${Distribution}'
+          - Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource:
+              - !GetAtt SiteBucket.Arn
+              - !Sub '${SiteBucket.Arn}/*'
+            Condition:
+              Bool:
+                aws:SecureTransport: 'false'
+
+  # --- CDN ---
+
+  OriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub '${AWS::StackName}-oac'
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  # URLs limpias como en Vercel: /privacidad sirve privacidad.html; /x.html y /x/ redirigen a /x
+  UrlRewriteFunction:
+    Type: AWS::CloudFront::Function
+    Properties:
+      Name: !Sub '${AWS::StackName}-url-rewrite'
+      AutoPublish: true
+      FunctionConfig:
+        Comment: URLs limpias y redirecciones de .html y barra final
+        Runtime: cloudfront-js-2.0
+      FunctionCode: |
+        var HTML_EXTENSION = '.html';
+        var INDEX_PATH = '/index.html';
+
+        function handler(event) {
+          var request = event.request;
+          var uri = request.uri;
+
+          if (uri === INDEX_PATH) {
+            return redirect('/', request.querystring);
+          }
+          if (uri.length > 1 && uri.charAt(uri.length - 1) === '/') {
+            return redirect(uri.replace(/\/+$/, '') || '/', request.querystring);
+          }
+          if (uri.slice(-HTML_EXTENSION.length) === HTML_EXTENSION) {
+            return redirect(uri.slice(0, -HTML_EXTENSION.length), request.querystring);
+          }
+
+          if (uri === '/') {
+            request.uri = INDEX_PATH;
+          } else if (uri.lastIndexOf('.') < uri.lastIndexOf('/')) {
+            // Sin extensión en el último segmento: es una página
+            request.uri = uri + HTML_EXTENSION;
+          }
+          return request;
+        }
+
+        function redirect(location, querystring) {
+          var query = serializeQuery(querystring);
+          return {
+            statusCode: 301,
+            statusDescription: 'Moved Permanently',
+            headers: { location: { value: query ? location + '?' + query : location } },
+          };
+        }
+
+        function serializeQuery(querystring) {
+          var parts = [];
+          for (var key in querystring) {
+            var entry = querystring[key];
+            var values = entry.multiValue ? entry.multiValue : [entry];
+            for (var i = 0; i < values.length; i++) {
+              parts.push(values[i].value === '' ? key : key + '=' + values[i].value);
+            }
+          }
+          return parts.join('&');
+        }
+
+  # Headers de seguridad con una función: el plan Free no admite response headers policies propias.
+  # Son los mismos de vercel.json (un test controla que coincidan mientras convivan).
+  SecurityHeadersFunction:
+    Type: AWS::CloudFront::Function
+    Properties:
+      Name: !Sub '${AWS::StackName}-security-headers'
+      AutoPublish: true
+      FunctionConfig:
+        Comment: Headers de seguridad (CSP, HSTS, nosniff, DENY, referrer y permisos)
+        Runtime: cloudfront-js-2.0
+      FunctionCode: |
+        var SECURITY_HEADERS = {
+          'content-security-policy': "default-src 'self'; script-src 'none'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'",
+          'strict-transport-security': 'max-age=63072000; includeSubDomains',
+          'x-content-type-options': 'nosniff',
+          'x-frame-options': 'DENY',
+          'referrer-policy': 'strict-origin-when-cross-origin',
+          'permissions-policy': 'camera=(), microphone=(), geolocation=()',
+        };
+
+        function handler(event) {
+          var response = event.response;
+          for (var name in SECURITY_HEADERS) {
+            response.headers[name] = { value: SECURITY_HEADERS[name] };
+          }
+          return response;
+        }
+
+  # El plan Free exige un web ACL; usa 4 de las 5 reglas incluidas
+  WebAcl:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: !Sub '${AWS::StackName}-web-acl'
+      Scope: CLOUDFRONT
+      DefaultAction:
+        Allow: {}
+      VisibilityConfig:
+        SampledRequestsEnabled: true
+        CloudWatchMetricsEnabled: true
+        MetricName: caleWebAcl
+      Rules:
+        - Name: rate-limit-per-ip
+          Priority: 0
+          Action:
+            Block: {}
+          Statement:
+            RateBasedStatement:
+              Limit: 500
+              EvaluationWindowSec: 300
+              AggregateKeyType: IP
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: rateLimitPerIp
+        - Name: aws-ip-reputation
+          Priority: 1
+          OverrideAction:
+            None: {}
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesAmazonIpReputationList
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: awsIpReputation
+        - Name: aws-common
+          Priority: 2
+          OverrideAction:
+            None: {}
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesCommonRuleSet
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: awsCommon
+        - Name: aws-known-bad-inputs
+          Priority: 3
+          OverrideAction:
+            None: {}
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesKnownBadInputsRuleSet
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: awsKnownBadInputs
+
+  Distribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Comment: Sitio público de Cale
+        Enabled: true
+        HttpVersion: http2and3
+        IPV6Enabled: true
+        WebACLId: !GetAtt WebAcl.Arn
+        Origins:
+          - Id: site-bucket
+            DomainName: !GetAtt SiteBucket.RegionalDomainName
+            OriginAccessControlId: !GetAtt OriginAccessControl.Id
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+        DefaultCacheBehavior:
+          TargetOriginId: site-bucket
+          ViewerProtocolPolicy: redirect-to-https
+          Compress: true
+          AllowedMethods: [GET, HEAD]
+          CachedMethods: [GET, HEAD]
+          # Política administrada CachingOptimized (el plan Free no admite cache policies propias)
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+          FunctionAssociations:
+            - EventType: viewer-request
+              FunctionARN: !GetAtt UrlRewriteFunction.FunctionMetadata.FunctionARN
+            - EventType: viewer-response
+              FunctionARN: !GetAtt SecurityHeadersFunction.FunctionMetadata.FunctionARN
+        # Con OAC y sin s3:ListBucket, S3 responde 403 a lo que no existe: ambos van a la 404 del sitio
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponseCode: 404
+            ResponsePagePath: /404.html
+            ErrorCachingMinTTL: 60
+          - ErrorCode: 404
+            ResponseCode: 404
+            ResponsePagePath: /404.html
+            ErrorCachingMinTTL: 60
+
+  HostedZone:
+    Type: AWS::Route53::HostedZone
+    DeletionPolicy: RetainExceptOnCreate
+    UpdateReplacePolicy: Retain
+    Properties:
+      Name: !Ref DomainName
+
+  # Plan Free: cubre la distribución, el web ACL y la zona (sin cargo mensual de la zona)
+  PricingPlan:
+    Type: AWS::PricingPlanManager::Subscription
+    Properties:
+      PlanFamily: CloudFront
+      PlanTier: FREE
+      UsageLevel: DEFAULT
+      ResourceArns:
+        - !Sub 'arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${Distribution}'
+        - !GetAtt WebAcl.Arn
+        - !Sub 'arn:${AWS::Partition}:route53:::hostedzone/${HostedZone}'
+
+  # --- Alarmas ---
+
+  AlertsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub '${AWS::StackName}-alerts'
+      Subscription:
+        - Protocol: email
+          Endpoint: !Ref AlertEmail
+
+  ServerErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-5xx-error-rate'
+      AlarmDescription: CloudFront responde errores 5xx en más del 5 % de los requests.
+      Namespace: AWS/CloudFront
+      MetricName: 5xxErrorRate
+      Dimensions:
+        - Name: DistributionId
+          Value: !Ref Distribution
+        - Name: Region
+          Value: Global
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 5
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlertsTopic]
+      OKActions: [!Ref AlertsTopic]
+
+  RequestSpikeAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-request-spike'
+      AlarmDescription: Pico de tráfico fuera de lo normal (el plan Free incluye 1 M de requests por mes).
+      Namespace: AWS/CloudFront
+      MetricName: Requests
+      Dimensions:
+        - Name: DistributionId
+          Value: !Ref Distribution
+        - Name: Region
+          Value: Global
+      Statistic: Sum
+      Period: 3600
+      EvaluationPeriods: 1
+      Threshold: !Ref RequestSpikeThreshold
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlertsTopic]
+      OKActions: [!Ref AlertsTopic]
+
+  # --- Deploy desde GitHub Actions (OIDC, sin claves guardadas) ---
+
+  GitHubOidcProvider:
+    Type: AWS::IAM::OIDCProvider
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList: [sts.amazonaws.com]
+
+  DeployRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${AWS::StackName}-github-deploy'
+      MaxSessionDuration: 3600
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Ref GitHubOidcProvider
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+                token.actions.githubusercontent.com:sub: !Sub 'repo:${GitHubRepository}:ref:refs/heads/main'
+      Policies:
+        - PolicyName: deploy-site
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: s3:ListBucket
+                Resource: !GetAtt SiteBucket.Arn
+              - Effect: Allow
+                Action: [s3:PutObject, s3:DeleteObject]
+                Resource: !Sub '${SiteBucket.Arn}/*'
+              - Effect: Allow
+                Action: cloudfront:CreateInvalidation
+                Resource: !Sub 'arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${Distribution}'
+
+Outputs:
+  BucketName:
+    Value: !Ref SiteBucket
+  DistributionId:
+    Value: !Ref Distribution
+  DistributionDomainName:
+    Value: !GetAtt Distribution.DomainName
+  HostedZoneNameServers:
+    Description: Nameservers para cargar como delegaciones en DonWeb.
+    Value: !Join [', ', !GetAtt HostedZone.NameServers]
+  DeployRoleArn:
+    Value: !GetAtt DeployRole.Arn
+  PricingPlanStatus:
+    Value: !GetAtt PricingPlan.Status
