@@ -19,7 +19,8 @@ Personal. Producto propio. **Sin relación** con Sinfalta / `whatsapp-bot` (deci
 
 **Datos privados:** la identidad legal del titular, los IDs de las cuentas (Meta, AWS, DonWeb) y la bitácora
 completa están **fuera del repo**, en `~/projects-claude/personal/cale-privado/`. Este repo es público: no
-agregar acá nombre legal, dirección, CUIT, teléfonos ni IDs de cuentas.
+agregar acá nombre legal, dirección, CUIT ni IDs de cuentas. El único teléfono es el WhatsApp de contacto
+(`WHATSAPP_NUMBER`), que es público a propósito.
 
 ## Stack usado en este proyecto
 
@@ -27,8 +28,8 @@ agregar acá nombre legal, dirección, CUIT, teléfonos ni IDs de cuentas.
 |------|----------|
 | Build | Astro 7, salida 100 % estática, **sin JS en el cliente** |
 | Estilos | CSS plano con tokens en `src/styles/global.css` (sin Tailwind) |
-| Tipografía | Newsreader (títulos, self-hosted con `@fontsource-variable`) + fuentes del sistema |
-| Íconos | `@phosphor-icons/core` (Bold), inline vía `src/components/Icon.astro` |
+| Tipografía | Atkinson Hyperlegible Next (self-hosted con `@fontsource-variable`), pensada para baja visión |
+| Íconos | `@phosphor-icons/core` (Bold), inline vía `src/components/Icon.astro` (solo WhatsApp y doble check) |
 | Tests | Vitest sobre el HTML de `dist/` + `node-html-parser`; la plantilla de AWS y el workflow, con `yaml` |
 | Node | 24 (`.nvmrc` y `engines`; Astro 7 pide ≥ 22.12 y el `node` por defecto de nvm es 22.11) |
 | Hosting | **AWS**: S3 + CloudFront con el plan flat-rate Free, WAF, Route 53, alarmas por email. Ver [`docs/infra-aws.md`](docs/infra-aws.md) |
@@ -46,7 +47,7 @@ Al 2026-10-12:
 - Sitio en AWS en `d3bl9yoji79fah.cloudfront.net`, con deploy automático. También sigue en `cale-turnos.vercel.app`.
 - Dominio `cale.com.ar` comprado en DonWeb, esperando que NIC Argentina lo active (24 a 48 horas).
 - Verificación del negocio en Meta iniciada y pausada hasta tener el dominio propio.
-- 123 tests en verde.
+- Rediseño para público mayor publicado (`d596699`). 140 tests en verde.
 
 ## Decisiones tomadas
 
@@ -58,8 +59,15 @@ Al 2026-10-12:
   Vercel, `cleanUrls` y `trailingSlash: false` en `vercel.json`.
 - **CSP estricta** (`script-src 'none'`, sin `unsafe-inline`): por eso `inlineStylesheets: 'never'`, y nada de
   `style=""` ni `<script>`. Hay un test que lo controla.
-- **Animaciones solo CSS** (`animation-timeline: view()` con `@supports`): el contenido se ve igual sin soporte.
-- **Gris secundario `#6B6A66`** en lugar del `#787774` de la skill minimalist-ui: el original no pasa AA (4.3:1).
+- **Rediseño para público mayor** (2026-10-12, skills `redesign-existing-projects` + `frontend-design`): textos cortos
+  sin términos técnicos (un test lo controla), voz "Cale te ayuda a…", letra de 20 px, contraste AAA (tinta
+  `#1F2328`, grafito `#4B5563` sobre blanco), un solo acento (resaltador `#FFE566`, solo en el dibujo), sin
+  etiquetas en mayúsculas, tarjetas, preguntas frecuentes ni animaciones de scroll. Una sola animación: el dibujo de
+  la portada (renglón de agenda → WhatsApp), desactivada con `prefers-reduced-motion`. Sin fotos por ahora.
+- **Contacto principal por WhatsApp** (`WHATSAPP_NUMBER` en `config.ts`, componente `WhatsAppButton.astro`): arriba,
+  en la portada y al cierre, con un mensaje ya escrito. El email queda como segunda opción.
+- **La portada da por hecha la coexistencia** ("el mismo número que ya usás"), por decisión del titular, aunque
+  depende de que Meta apruebe a Cale como Tech Provider.
 - **Sin cookies, analítica ni formularios.** Si se agrega GTM/GA4, hay que actualizar la política de privacidad
   y la CSP.
 - **Rol legal:** Cale trata datos por cuenta del negocio (art. 25, Ley 25.326); el negocio es responsable y
@@ -80,12 +88,14 @@ Al 2026-10-12:
 
 1. **Etapa 2 de AWS** cuando NIC active `cale.com.ar`: delegaciones en DonWeb → certificado y alias en CloudFront →
    `SITE_URL` → verificar el dominio en Meta → retomar la verificación del negocio.
-2. **Actualizar los textos del sitio al modelo Tech Provider:** el paso 1 de la landing y las secciones 2 y 3 de
-   los términos todavía describen el modelo descartado ("el negocio crea y mantiene su propia app…").
-3. **Dar de baja Vercel** y borrar `vercel.json`, `tests/vercel-config.test.ts` y la comparación de headers en
+2. **Actualizar los textos legales al modelo Tech Provider:** las secciones 2 y 3 de los términos todavía
+   describen el modelo descartado ("el negocio crea y mantiene su propia app…"). La landing ya está actualizada.
+3. **Sección "Instalación"** (para abrir desde el celular: crear el calendario, darle acceso a un correo, conectar
+   WhatsApp): primero definirla, después sumar a la privacidad que Cale lee el calendario del negocio.
+4. **Dar de baja Vercel** y borrar `vercel.json`, `tests/vercel-config.test.ts` y la comparación de headers en
    `tests/infra.test.ts`.
-4. Cuando la base pase de Supabase a AWS: actualizar la sección 7 de `/privacidad` y `LEGAL_LAST_UPDATED`.
-5. Que un abogado revise los textos legales: el tope de responsabilidad se calcula sobre "lo pagado por el
+5. Cuando la base pase de Supabase a AWS: actualizar la sección 7 de `/privacidad` y `LEGAL_LAST_UPDATED`.
+6. Que un abogado revise los textos legales: el tope de responsabilidad se calcula sobre "lo pagado por el
    servicio", la jurisdicción no nombra una ciudad y la Ley 25.326 (art. 6) pide identificar al responsable de los
    datos.
 

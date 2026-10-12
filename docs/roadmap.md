@@ -25,7 +25,7 @@ coexistencia, el número conectado deja de funcionar en la app WhatsApp Business
 | 5 | Hosting en AWS (S3 + CloudFront, plan Free) con deploy automático y alarmas | Hecho (ver [infra-aws.md](infra-aws.md)) |
 | 6 | Etapa 2 de AWS: dominio en Route 53, certificado y alias | Pendiente (depende del 4) |
 | 7 | Verificación del negocio en Meta | Iniciada y pausada: Meta no acepta dominios compartidos como `vercel.app` |
-| 8 | Actualizar los textos del sitio al modelo Tech Provider | Pendiente |
+| 8 | Actualizar los textos del sitio al modelo Tech Provider | Landing hecha (rediseño del 12/10); faltan los términos |
 | 9 | Backend de Cale funcionando (enviar mensajes y crear plantillas) | Pendiente: hace falta para los videos del App Review |
 | 10 | App Review y acceso avanzado | Pendiente |
 | 11 | Embedded Signup v4 con coexistencia (`featureType: whatsapp_business_app_onboarding`) | Pendiente. La v2 deja de funcionar el 15/10/2026: usar la v4 directamente |
