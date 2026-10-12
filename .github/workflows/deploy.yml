@@ -1,0 +1,59 @@
+# Deploy del sitio a AWS (S3 + CloudFront) en cada push a main.
+# Las variables AWS_DEPLOY_ROLE_ARN, SITE_BUCKET y CLOUDFRONT_DISTRIBUTION_ID se cargan en
+# GitHub → Settings → Secrets and variables → Actions → Variables (salen de los outputs del stack cale-site).
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  id-token: write # OIDC para asumir el rol de AWS, sin claves guardadas
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-east-1
+  # Assets con hash en el nombre: se cachean un año. El resto: CloudFront 1 día (se invalida en cada deploy) y el navegador revalida.
+  HASHED_ASSETS_CACHE_CONTROL: public, max-age=31536000, immutable
+  PAGES_CACHE_CONTROL: public, max-age=0, s-maxage=86400, must-revalidate
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      # Buildea y corre todos los tests: si algo falla, no se sube nada
+      - run: npm test
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Subir assets con hash
+        run: >-
+          aws s3 sync dist/_astro "s3://${{ vars.SITE_BUCKET }}/_astro" --delete
+          --cache-control "$HASHED_ASSETS_CACHE_CONTROL"
+
+      - name: Subir páginas y archivos públicos
+        run: >-
+          aws s3 sync dist/ "s3://${{ vars.SITE_BUCKET }}/" --delete --exclude "_astro/*"
+          --cache-control "$PAGES_CACHE_CONTROL"
+
+      - name: Invalidar la caché de CloudFront
+        run: >-
+          aws cloudfront create-invalidation --distribution-id "${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}"
+          --paths "/*"

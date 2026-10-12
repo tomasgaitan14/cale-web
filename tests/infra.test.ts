@@ -217,6 +217,41 @@ describe('alarmas', () => {
   });
 });
 
+describe('workflow de deploy', () => {
+  const workflow = parse(readFileSync(join(ROOT_DIR, '.github', 'workflows', 'deploy.yml'), 'utf8'));
+  const steps: { uses?: string; run?: string; with?: Record<string, string> }[] = workflow.jobs.deploy.steps;
+  const indexOf = (predicate: (step: (typeof steps)[number]) => boolean) => steps.findIndex(predicate);
+
+  const testsStep = indexOf((step) => step.run === 'npm test');
+  const credentialsStep = indexOf((step) => step.uses?.startsWith('aws-actions/configure-aws-credentials') ?? false);
+  const uploadSteps = steps.flatMap((step, index) => (step.run?.includes('aws s3 sync') ? [index] : []));
+  const invalidationStep = indexOf((step) => step.run?.includes('create-invalidation') ?? false);
+
+  it('deploya solo desde main', () => {
+    expect(workflow.on.push.branches).toEqual(['main']);
+  });
+
+  it('entra a AWS con OIDC, sin claves guardadas', () => {
+    expect(workflow.permissions).toEqual({ 'id-token': 'write', contents: 'read' });
+    expect(steps[credentialsStep].with?.['role-to-assume']).toBe('${{ vars.AWS_DEPLOY_ROLE_ARN }}');
+    expect(JSON.stringify(workflow)).not.toMatch(/secrets\.|aws-access-key-id|aws-secret-access-key/i);
+  });
+
+  it('corre los tests antes de tocar AWS, y sube antes de invalidar', () => {
+    expect(testsStep).toBeGreaterThanOrEqual(0);
+    expect(credentialsStep).toBeGreaterThan(testsStep);
+    expect(uploadSteps).toHaveLength(2);
+    expect(Math.min(...uploadSteps)).toBeGreaterThan(credentialsStep);
+    expect(invalidationStep).toBeGreaterThan(Math.max(...uploadSteps));
+  });
+
+  it('las páginas no pisan los assets con hash al borrar lo que sobra', () => {
+    const pagesUpload = steps[uploadSteps.find((index) => !steps[index].run!.includes('dist/_astro'))!].run!;
+    expect(pagesUpload).toContain('--delete');
+    expect(pagesUpload).toContain('--exclude "_astro/*"');
+  });
+});
+
 describe('rol de deploy de GitHub Actions', () => {
   const role = propertiesOf('DeployRole');
 
