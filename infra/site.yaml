@@ -12,10 +12,13 @@ Parameters:
     Type: String
     AllowedPattern: '^[^@\s]+@[^@\s]+\.[^@\s]+$'
     Description: Email que recibe las alarmas (hay que confirmar la suscripción de SNS).
-  GitHubRepository:
+  GitHubSubjectPrefix:
     Type: String
-    Default: tomasgaitan14/cale-web
-    Description: Repo (owner/nombre) que puede deployar desde la rama main.
+    Default: repo:tomasgaitan14@54362598/cale-web@1413753619
+    AllowedPattern: '^repo:[^@/]+@[0-9]+/[^@/]+@[0-9]+$'
+    Description: >-
+      Prefijo inmutable del sub del token OIDC del repo que puede deployar (incluye los IDs del dueño y del repo).
+      Sale de `gh api repos/OWNER/REPO/actions/oidc/customization/sub` (campo sub_claim_prefix).
   RequestSpikeThreshold:
     Type: Number
     Default: 5000
@@ -373,7 +376,7 @@ Resources:
             Condition:
               StringEquals:
                 token.actions.githubusercontent.com:aud: sts.amazonaws.com
-                token.actions.githubusercontent.com:sub: !Sub 'repo:${GitHubRepository}:ref:refs/heads/main'
+                token.actions.githubusercontent.com:sub: !Sub '${GitHubSubjectPrefix}:ref:refs/heads/main'
       Policies:
         - PolicyName: deploy-site
           PolicyDocument:

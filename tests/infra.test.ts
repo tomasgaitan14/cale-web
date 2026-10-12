@@ -260,8 +260,16 @@ describe('rol de deploy de GitHub Actions', () => {
     expect(trust.Principal).toEqual({ Federated: { Ref: 'GitHubOidcProvider' } });
     expect(trust.Condition.StringEquals['token.actions.githubusercontent.com:aud']).toBe('sts.amazonaws.com');
     expect(trust.Condition.StringEquals['token.actions.githubusercontent.com:sub']).toEqual({
-      Sub: 'repo:${GitHubRepository}:ref:refs/heads/main',
+      Sub: '${GitHubSubjectPrefix}:ref:refs/heads/main',
     });
+  });
+
+  // El repo usa el sub inmutable de GitHub: "repo:owner@ownerId/repo@repoId" (no se puede suplantar renombrando)
+  it('el prefijo por defecto tiene el formato inmutable con los IDs', () => {
+    const parameter = (template as unknown as { Parameters: Record<string, { Default: string; AllowedPattern: string }> })
+      .Parameters.GitHubSubjectPrefix;
+    expect(parameter.Default).toMatch(new RegExp(parameter.AllowedPattern));
+    expect(parameter.Default).toMatch(/^repo:tomasgaitan14@\d+\/cale-web@\d+$/);
   });
 
   it('solo puede escribir en el bucket del sitio e invalidar esta distribución', () => {
