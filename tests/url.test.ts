@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { canonicalUrl, mailtoUrl } from '../src/lib/url';
+import { WHATSAPP_NUMBER } from '../src/config';
+import { canonicalUrl, mailtoUrl, whatsappUrl } from '../src/lib/url';
 
 const SITE = 'https://cale.example';
 
@@ -32,6 +33,35 @@ describe('canonicalUrl', () => {
 
   it.each(['/privacidad?ref=meta', '/privacidad#eliminacion'])('rechaza query o hash en "%s"', (path) => {
     expect(() => canonicalUrl(path, SITE)).toThrow('query ni hash');
+  });
+});
+
+describe('whatsappUrl', () => {
+  it('arma el link de wa.me con el número', () => {
+    expect(whatsappUrl('5493446000000')).toBe('https://wa.me/5493446000000');
+  });
+
+  it('codifica el mensaje con espacios y acentos', () => {
+    expect(whatsappUrl('5493446000000', 'Hola, quiero saber más')).toBe(
+      'https://wa.me/5493446000000?text=Hola%2C%20quiero%20saber%20m%C3%A1s',
+    );
+  });
+
+  it('el mensaje no puede agregar parámetros extra', () => {
+    const url = new URL(whatsappUrl('5493446000000', 'Hola&phone=1111'));
+    expect(url.searchParams.get('text')).toBe('Hola&phone=1111');
+    expect(url.searchParams.has('phone')).toBe(false);
+  });
+
+  it.each(['', '+5493446000000', '54 9 3446 000000', '549-3446-000000', '1234567', '1234567890123456', 'abc'])(
+    'rechaza el número "%s"',
+    (number) => {
+      expect(() => whatsappUrl(number)).toThrow('Número de WhatsApp inválido');
+    },
+  );
+
+  it('usa el número configurado del negocio', () => {
+    expect(whatsappUrl(WHATSAPP_NUMBER)).toBe(`https://wa.me/${WHATSAPP_NUMBER}`);
   });
 });
 
