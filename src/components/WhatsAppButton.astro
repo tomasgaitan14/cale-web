@@ -1,0 +1,36 @@
+---
+import Icon from './Icon.astro';
+import { WHATSAPP_GREETING, WHATSAPP_NUMBER } from '../config';
+import { whatsappUrl } from '../lib/url';
+
+interface Props {
+  // En el header: en pantallas angostas muestra solo "Escribinos"
+  compact?: boolean;
+}
+
+const { compact = false } = Astro.props;
+---
+
+<a class:list={['button', { 'button-compact': compact }]} href={whatsappUrl(WHATSAPP_NUMBER, WHATSAPP_GREETING)}>
+  <Icon name="whatsapp-logo" />
+  <span>Escribinos <span class="button-detail">por WhatsApp</span></span>
+</a>
+
+<style>
+  .button-compact {
+    min-height: 3rem;
+    padding: 0.625rem 1rem;
+    font-size: 1rem;
+  }
+
+  @media (max-width: 30rem) {
+    .button-compact .button-detail {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+  }
+</style>

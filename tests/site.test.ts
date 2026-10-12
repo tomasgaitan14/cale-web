@@ -12,6 +12,7 @@ import {
   RESPONSE_DEADLINES,
   RETENTION,
   ROUTES,
+  WHATSAPP_NUMBER,
 } from '../src/config';
 import { canonicalUrl } from '../src/lib/url';
 
@@ -19,6 +20,7 @@ const DIST_DIR = join(import.meta.dirname, '..', 'dist');
 const NOT_FOUND_FILE = '404.html';
 const DESCRIPTION_LENGTH = { min: 50, max: 160 };
 const TEXT_NODE = NodeType.TEXT_NODE;
+const TECHNICAL_JARGON = /\bAPI\b|Cloud API|plantilla|opt-in|webhook|token|Business Platform/i;
 // Palabras con mayúscula interna que no son texto pegado
 const WORDS_WITH_INNER_CAPITALS = ['WhatsApp'];
 const PLACEHOLDER_PATTERN = /en construcci[oó]n|pr[oó]ximamente|lorem ipsum|coming soon|\bTODO\b|\bTBD\b/i;
@@ -190,15 +192,37 @@ describe('contenido requerido', () => {
     expect(tag?.getAttribute('content')).toBe(FACEBOOK_DOMAIN_VERIFICATION);
   });
 
-  it('la landing explica cómo funciona, para quién es y tiene contacto', () => {
+  it('la landing explica cómo funciona, el mismo número, para quién es y tiene contacto', () => {
     const page = pages.get(ROUTES.home)!;
-    for (const id of ['como-funciona', 'para-quien', 'contacto']) {
+    for (const id of ['como-funciona', 'mismo-numero', 'para-quien', 'contacto']) {
       expect(page.querySelector(`#${id}`)).not.toBeNull();
     }
     const text = bodyText(page);
-    for (const action of ['Confirmar', 'Cancelar', 'Reprogramar']) {
-      expect(text).toContain(action);
+    for (const reply of ['Confirmo', 'Cancelo', 'Cambiar horario']) {
+      expect(text).toContain(reply);
     }
+    expect(text).toContain('mismo número');
+  });
+
+  // Público mayor: la portada habla en criollo, sin términos técnicos
+  it('la landing no usa términos técnicos', () => {
+    expect(bodyText(pages.get(ROUTES.home)!)).not.toMatch(TECHNICAL_JARGON);
+  });
+
+  it.each(INDEXABLE_ROUTES)('%s tiene el botón de WhatsApp con el número del negocio', (route) => {
+    const whatsappLinks = pages
+      .get(route)!
+      .querySelectorAll('a')
+      .filter((link) => link.getAttribute('href')?.startsWith(`https://wa.me/${WHATSAPP_NUMBER}?text=`));
+    expect(whatsappLinks.length).toBeGreaterThan(0);
+  });
+
+  it('la landing ofrece WhatsApp arriba, en la portada y al cierre', () => {
+    const whatsappLinks = pages
+      .get(ROUTES.home)!
+      .querySelectorAll('a')
+      .filter((link) => link.getAttribute('href')?.startsWith(`https://wa.me/${WHATSAPP_NUMBER}`));
+    expect(whatsappLinks).toHaveLength(3);
   });
 
   it('la política de privacidad cubre datos, Meta, proveedores, plazos y Ley 25.326', () => {
