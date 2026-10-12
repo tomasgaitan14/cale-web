@@ -20,8 +20,7 @@ const lastUpdatedLabel = new Intl.DateTimeFormat('es-AR', {
 
 <BaseLayout title={`${heading} · ${BUSINESS_NAME}`} description={description} path={path}>
   <article class="container legal">
-    <header class="legal-header enter">
-      <p class="eyebrow">Legal</p>
+    <header class="legal-header">
       <h1>{heading}</h1>
       <p class="legal-updated">
         Última actualización: <time datetime={LEGAL_LAST_UPDATED}>{lastUpdatedLabel}</time>
@@ -42,7 +41,7 @@ const lastUpdatedLabel = new Intl.DateTimeFormat('es-AR', {
   .legal-header {
     padding-bottom: 2rem;
     margin-bottom: 2.5rem;
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-rule);
   }
 
   h1 {
@@ -51,9 +50,8 @@ const lastUpdatedLabel = new Intl.DateTimeFormat('es-AR', {
 
   .legal-updated {
     margin-top: 1rem;
-    color: var(--color-muted);
-    font-family: var(--font-mono);
-    font-size: 0.8125rem;
+    color: var(--color-graphite);
+    font-size: 1rem;
   }
 
   /* Estilos del contenido del slot: necesitan :global porque vienen de la página */
@@ -84,23 +82,23 @@ const lastUpdatedLabel = new Intl.DateTimeFormat('es-AR', {
   }
 
   .prose :global(li::marker) {
-    color: var(--color-muted);
+    color: var(--color-graphite);
   }
 
   .prose :global(a) {
-    text-decoration-color: var(--color-muted);
+    text-decoration-color: var(--color-graphite);
   }
 
   .prose :global(strong) {
     color: var(--color-ink);
-    font-weight: 600;
+    font-weight: 700;
   }
 
   .prose :global(.callout) {
     margin-block: 1.5rem;
     padding: 1.25rem 1.5rem;
-    background: var(--color-surface-alt);
-    border: 1px solid var(--color-border);
+    background: var(--color-paper-alt);
+    border: 1px solid var(--color-rule);
     border-radius: var(--radius-md);
   }
 
