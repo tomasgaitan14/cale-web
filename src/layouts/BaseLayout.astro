@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import WhatsAppButton from '../components/WhatsAppButton.astro';
 import { BUSINESS_NAME, CONTACT_EMAIL, FACEBOOK_DOMAIN_VERIFICATION, LOCATION, OWNER_NAME, ROUTES } from '../config';
 import { canonicalUrl, mailtoUrl } from '../lib/url';
 
@@ -13,12 +14,6 @@ interface Props {
 const { title, description, path } = Astro.props;
 const canonical = path ? canonicalUrl(path) : undefined;
 const year = new Date().getFullYear();
-
-const NAV_LINKS = [
-  { href: `${ROUTES.home}#como-funciona`, label: 'Cómo funciona' },
-  { href: `${ROUTES.home}#para-quien`, label: 'Para quién' },
-  { href: `${ROUTES.home}#contacto`, label: 'Contacto' },
-];
 
 const LEGAL_LINKS = [
   { href: ROUTES.privacy, label: 'Política de privacidad' },
@@ -37,7 +32,7 @@ const LEGAL_LINKS = [
     {canonical && <link rel="canonical" href={canonical} />}
     <meta name="robots" content={canonical ? 'index, follow' : 'noindex'} />
     <meta name="author" content={OWNER_NAME} />
-    <meta name="theme-color" content="#fbfbfa" />
+    <meta name="theme-color" content="#ffffff" />
     <meta name="facebook-domain-verification" content={FACEBOOK_DOMAIN_VERIFICATION} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
@@ -55,20 +50,10 @@ const LEGAL_LINKS = [
     <header class="site-header">
       <div class="container header-inner">
         <a class="wordmark" href={ROUTES.home} aria-label={`${BUSINESS_NAME}, inicio`}>
-          <img src="/favicon.svg" alt="" width="24" height="24" />
+          <img src="/favicon.svg" alt="" width="32" height="32" />
           <span>{BUSINESS_NAME}</span>
         </a>
-        <nav aria-label="Principal">
-          <ul class="nav-list">
-            {
-              NAV_LINKS.map((link) => (
-                <li>
-                  <a href={link.href}>{link.label}</a>
-                </li>
-              ))
-            }
-          </ul>
-        </nav>
+        <WhatsAppButton compact />
       </div>
     </header>
 
@@ -77,15 +62,13 @@ const LEGAL_LINKS = [
     </main>
 
     <footer class="site-footer">
-      <div class="container footer-grid">
-        <div class="footer-identity">
-          <p class="footer-name">{BUSINESS_NAME}</p>
-          <p>Recordatorios de turnos por WhatsApp.</p>
-          <p>Un servicio de {OWNER_NAME} · {LOCATION}</p>
-          <p>
-            <a href={mailtoUrl(CONTACT_EMAIL)}>{CONTACT_EMAIL}</a>
-          </p>
-        </div>
+      <div class="container footer-inner">
+        <p>
+          {BUSINESS_NAME} es un servicio de {OWNER_NAME}, {LOCATION}.
+        </p>
+        <p>
+          <a href={mailtoUrl(CONTACT_EMAIL)}>{CONTACT_EMAIL}</a>
+        </p>
         <nav aria-label="Legal">
           <ul class="footer-links">
             {
@@ -97,12 +80,8 @@ const LEGAL_LINKS = [
             }
           </ul>
         </nav>
-      </div>
-      <div class="container footer-meta">
-        <p>© {year} {BUSINESS_NAME} · {OWNER_NAME}</p>
-        <p>
-          WhatsApp y Meta son marcas de Meta Platforms, Inc. {BUSINESS_NAME} es un servicio independiente que usa la
-          WhatsApp Business Platform.
+        <p class="footer-fine-print">
+          © {year} {BUSINESS_NAME}. WhatsApp y Meta son marcas de Meta Platforms, Inc.
         </p>
       </div>
     </footer>
@@ -114,10 +93,8 @@ const LEGAL_LINKS = [
     position: sticky;
     top: 0;
     z-index: 10;
-    background: rgb(251 251 250 / 0.85);
-    border-bottom: 1px solid var(--color-border);
-    backdrop-filter: saturate(180%) blur(12px);
-    -webkit-backdrop-filter: saturate(180%) blur(12px);
+    background: var(--color-paper);
+    border-bottom: 1px solid var(--color-rule);
   }
 
   .header-inner {
@@ -125,93 +102,43 @@ const LEGAL_LINKS = [
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    height: 4rem;
+    min-height: 4.5rem;
   }
 
   .wordmark {
     display: inline-flex;
     align-items: center;
     gap: 0.625rem;
-    color: var(--color-ink);
-    font-family: var(--font-serif);
-    font-size: 1.5rem;
-    font-weight: 500;
-    letter-spacing: -0.03em;
+    font-size: 1.625rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
     text-decoration: none;
-  }
-
-  .nav-list {
-    display: flex;
-    gap: 1.75rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    font-size: 0.9375rem;
-  }
-
-  .nav-list a {
-    color: var(--color-muted);
-    text-decoration: none;
-    transition: color 200ms ease;
-  }
-
-  .nav-list a:hover {
-    color: var(--color-ink);
-  }
-
-  /* En mobile queda solo "Contacto": el resto se alcanza scrolleando */
-  @media (max-width: 40rem) {
-    .nav-list li:not(:last-child) {
-      display: none;
-    }
   }
 
   .site-footer {
-    padding-block: 3.5rem 2.5rem;
-    background: var(--color-surface-alt);
-    border-top: 1px solid var(--color-border);
-    font-size: 0.9375rem;
+    padding-block: 3rem 3.5rem;
+    background: var(--color-paper-alt);
+    border-top: 1px solid var(--color-rule);
+    color: var(--color-graphite);
+    font-size: 1.0625rem;
   }
 
-  .footer-grid {
+  .footer-inner {
     display: grid;
-    gap: 2rem;
-  }
-
-  @media (min-width: 48rem) {
-    .footer-grid {
-      grid-template-columns: 1fr auto;
-    }
-  }
-
-  .footer-identity {
-    display: grid;
-    gap: 0.25rem;
-    color: var(--color-muted);
-  }
-
-  .footer-name {
-    color: var(--color-ink);
-    font-family: var(--font-serif);
-    font-size: 1.375rem;
-    letter-spacing: -0.02em;
+    gap: 0.75rem;
   }
 
   .footer-links {
-    display: grid;
-    gap: 0.5rem;
-    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.75rem;
+    margin: 0.5rem 0 0;
     padding: 0;
     list-style: none;
   }
 
-  .footer-meta {
-    display: grid;
-    gap: 0.375rem;
-    margin-top: 2.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--color-border);
-    color: var(--color-muted);
-    font-size: 0.8125rem;
+  .footer-fine-print {
+    margin-top: 1rem;
+    font-size: 0.9375rem;
   }
 </style>

@@ -8,10 +8,9 @@ import { BUSINESS_NAME, ROUTES } from '../config';
   description={`La página que buscás no existe en el sitio de ${BUSINESS_NAME}.`}
 >
   <section class="container not-found">
-    <p class="eyebrow">Error 404</p>
-    <h1>Esta página no existe.</h1>
-    <p class="lede">Puede que el link esté mal escrito o que la página se haya movido.</p>
-    <a class="button button-primary" href={ROUTES.home}>Volver al inicio</a>
+    <h1>Esta página no existe</h1>
+    <p class="not-found-text">Puede que el link esté mal escrito o que la página se haya movido.</p>
+    <a class="button" href={ROUTES.home}>Volver al inicio</a>
   </section>
 </BaseLayout>
 
@@ -21,6 +20,10 @@ import { BUSINESS_NAME, ROUTES } from '../config';
     justify-items: start;
     gap: 1.25rem;
     padding-block: var(--section-space);
+  }
+
+  .not-found-text {
+    color: var(--color-graphite);
   }
 
   h1 {
