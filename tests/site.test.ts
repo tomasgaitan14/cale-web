@@ -313,16 +313,25 @@ describe('contenido requerido', () => {
     }
   });
 
-  it('los términos cubren opt-in, pago a Meta y limitación de responsabilidad', () => {
+  it('los términos cubren el servicio real, la prueba gratis, opt-in, pago a Meta y responsabilidad', () => {
     const text = bodyText(pages.get(ROUTES.terms)!);
     for (const required of [
       'Consentimiento de los clientes (opt-in)',
       'Cada negocio paga esos mensajes directamente a Meta',
       'Limitación de responsabilidad',
       'Ley aplicable y jurisdicción',
-      // Modelo sin Tech Provider: la cuenta es del negocio y el acceso de Cale es revocable
-      'crea y mantiene su propia app y su cuenta de WhatsApp Business',
-      'puede revocarle el acceso',
+      // Coexistencia: mismo número y misma app, y el acceso de Cale es revocable
+      'sigue usando la misma app y el mismo número',
+      'puede quitarle el acceso',
+      // Calendario de turnos en la cuenta de Cale, y Cale no reprograma solo
+      'calendario de turnos',
+      'no cambia el horario por su cuenta',
+      // Prueba gratis: plazo, sin cobro automático y qué pasa al terminar
+      `gratis durante ${TRIAL_DAYS} días`,
+      'no cobra nada de forma automática',
+      'el servicio se pausa',
+      // Al dar de baja, el negocio puede pedir sus turnos
+      'sus turnos en un archivo',
     ]) {
       expect(text, `falta "${required}"`).toContain(required);
     }
