@@ -1,6 +1,15 @@
 ---
 import LegalLayout from '../layouts/LegalLayout.astro';
-import { BUSINESS_NAME, CONTACT_EMAIL, LOCATION, OWNER_NAME, RESPONSE_DEADLINES, RETENTION, ROUTES } from '../config';
+import {
+  APP_SESSION,
+  BUSINESS_NAME,
+  CONTACT_EMAIL,
+  LOCATION,
+  OWNER_NAME,
+  RESPONSE_DEADLINES,
+  RETENTION,
+  ROUTES,
+} from '../config';
 import { mailtoUrl } from '../lib/url';
 ---
 
@@ -49,11 +58,12 @@ import { mailtoUrl } from '../lib/url';
     <li>Nombre.</li>
     <li>Número de teléfono de WhatsApp.</li>
     <li>
-      Datos del turno: fecha, hora, servicio y, si el negocio los carga, el profesional o la sucursal que atiende.
+      Datos del turno que el negocio anota en su calendario de turnos: fecha, hora y lo que escriba en el evento (por
+      ejemplo, nombre, teléfono y servicio).
     </li>
     <li>
       Contenido de los mensajes que se envían y de las respuestas que da el cliente, incluidas las respuestas con
-      botones (confirmar, cancelar o reprogramar).
+      botones (confirmar, cancelar o pedir otro horario).
     </li>
     <li>
       Estados de entrega de cada mensaje que informa Meta (enviado, entregado, leído o fallido), con su fecha y hora.
@@ -61,12 +71,24 @@ import { mailtoUrl } from '../lib/url';
   </ul>
   <h3>De los negocios que contratan el servicio</h3>
   <ul>
-    <li>Nombre del negocio y datos de contacto de la persona responsable (nombre, email y teléfono).</li>
     <li>
-      Identificadores técnicos de su cuenta de WhatsApp Business (por ejemplo, el ID de la cuenta y del número) y las
-      credenciales de acceso necesarias para enviar mensajes en su nombre.
+      Los datos que cargan en el asistente de alta: nombre del negocio, nombre de la persona responsable, número de
+      WhatsApp y correo.
+    </li>
+    <li>El correo de su cuenta de Google, con el que se comparte el calendario de turnos.</li>
+    <li>
+      Identificadores técnicos de su cuenta de WhatsApp Business (por ejemplo, el ID de la cuenta y del número) y los
+      permisos necesarios para enviar mensajes en su nombre.
     </li>
   </ul>
+
+  <h3>De quienes usan el asistente de alta</h3>
+  <p>
+    El asistente usa una única cookie, necesaria para entrar: guarda la sesión durante {APP_SESSION.sessionDays} días.
+    En el navegador también guarda el avance del formulario, hasta entrar con el link del correo, y después una marca de
+    que ya entraste. No usa cookies de analítica ni de publicidad.
+  </p>
+
   <h3>De quienes visitan este sitio</h3>
   <p>
     Este sitio no tiene formularios, no usa cookies y no tiene herramientas de analítica ni publicidad. El proveedor
@@ -77,10 +99,14 @@ import { mailtoUrl } from '../lib/url';
   <h2 id="finalidad">4. Para qué usamos los datos</h2>
   <p>Usamos los datos <strong>solo</strong> para:</p>
   <ul>
-    <li>Enviar recordatorios de turnos por WhatsApp en nombre del negocio.</li>
     <li>
-      Registrar la respuesta del cliente (confirmación, cancelación o pedido de reprogramación) y comunicársela al
-      negocio para que gestione su agenda.
+      Crear el calendario de turnos del negocio, compartírselo y leerlo para saber a quién recordarle cada turno.
+    </li>
+    <li>Enviar recordatorios de turnos por WhatsApp en nombre del negocio.</li>
+    <li>Mandar por correo el link para entrar al asistente de alta.</li>
+    <li>
+      Registrar la respuesta del cliente (confirmación, cancelación o pedido de otro horario) y comunicársela al negocio
+      para que gestione su agenda.
     </li>
     <li>Controlar que los mensajes se entreguen y detectar errores de envío.</li>
     <li>Dar soporte a los negocios y mantener la seguridad del servicio.</li>
@@ -109,8 +135,11 @@ import { mailtoUrl } from '../lib/url';
   <p>Para prestar el servicio trabajamos con estos proveedores:</p>
   <ul>
     <li><strong>Meta Platforms, Inc.</strong>: envío y entrega de los mensajes de WhatsApp.</li>
-    <li><strong>Supabase, Inc.</strong>: base de datos donde se guardan los turnos, los mensajes y sus estados.</li>
-    <li><strong>Vercel, Inc.</strong>: hosting de este sitio web.</li>
+    <li>
+      <strong>Amazon Web Services, Inc.</strong>: hosting de este sitio y del asistente de alta, base de datos y envío
+      de correos.
+    </li>
+    <li><strong>Google LLC</strong>: el calendario de turnos de cada negocio (Google Calendar).</li>
   </ul>
   <p>
     Si cambiamos de proveedor de infraestructura, actualizamos esta lista y la fecha de esta política.
@@ -132,9 +161,14 @@ import { mailtoUrl } from '../lib/url';
       > desde la fecha del turno. Después se borran.
     </li>
     <li>
-      Si un negocio deja de usar {BUSINESS_NAME}, borramos todos los datos de sus clientes dentro de los <strong
-        >{RETENTION.afterTerminationDays} días</strong
-      > siguientes a la baja.
+      Si un negocio deja de usar {BUSINESS_NAME}, borramos su calendario de turnos y todos los datos de sus clientes
+      dentro de los <strong>{RETENTION.afterTerminationDays} días</strong> siguientes a la baja. Si el negocio lo pide
+      antes, le enviamos sus turnos en un archivo.
+    </li>
+    <li>
+      Los links para entrar al asistente vencen a los {APP_SESSION.loginLinkMinutes} minutos y las sesiones, a los {
+        APP_SESSION.sessionDays
+      } días.
     </li>
     <li>
       Si alguien pide el borrado de sus datos, los eliminamos en los plazos de la sección siguiente, aunque no se haya
@@ -148,7 +182,7 @@ import { mailtoUrl } from '../lib/url';
   <h2 id="seguridad">10. Seguridad</h2>
   <p>
     Las comunicaciones con el servicio viajan cifradas (HTTPS/TLS), el acceso a los datos está restringido a quien
-    presta el servicio y las credenciales de acceso de cada negocio se guardan protegidas. Ningún sistema es
+    presta el servicio y las credenciales de acceso se guardan cifradas. Ningún sistema es
     completamente invulnerable, pero tomamos las medidas razonables para proteger los datos, como exige el artículo 9
     de la Ley 25.326.
   </p>

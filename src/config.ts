@@ -43,6 +43,12 @@ export const RETENTION = {
   afterTerminationDays: 30,
 } as const;
 
+// Plazos del asistente de alta (los mismos que cale-app: shared/src/session.ts y api/src/domain/auth.ts)
+export const APP_SESSION = {
+  loginLinkMinutes: 15,
+  sessionDays: 30,
+} as const;
+
 // Plazos de respuesta de la Ley 25.326 (art. 14 inc. 2 y art. 16 inc. 2).
 export const RESPONSE_DEADLINES = {
   accessCalendarDays: 10,
