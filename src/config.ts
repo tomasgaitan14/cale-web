@@ -1,7 +1,7 @@
 // Fuente única de los datos del negocio: la usan las páginas, los layouts y los tests.
 // Al conectar el dominio propio (.com.ar) solo cambia SITE_URL.
 
-export const SITE_URL = 'https://cale-turnos.vercel.app';
+export const SITE_URL = 'https://cale.com.ar';
 
 export const BUSINESS_NAME = 'Cale';
 export const OWNER_NAME = 'CRM Solutions';
