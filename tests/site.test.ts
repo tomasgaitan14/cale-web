@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { HTMLElement, NodeType, parse, type Node } from 'node-html-parser';
 import { beforeAll, describe, expect, it } from 'vitest';
 import {
+  APP_URL,
   BUSINESS_NAME,
   CONTACT_EMAIL,
   FACEBOOK_DOMAIN_VERIFICATION,
@@ -12,6 +13,8 @@ import {
   RESPONSE_DEADLINES,
   RETENTION,
   ROUTES,
+  TRIAL_DAYS,
+  WHATSAPP_HELP_GREETING,
   WHATSAPP_NUMBER,
 } from '../src/config';
 import { canonicalUrl } from '../src/lib/url';
@@ -192,9 +195,9 @@ describe('contenido requerido', () => {
     expect(tag?.getAttribute('content')).toBe(FACEBOOK_DOMAIN_VERIFICATION);
   });
 
-  it('la landing explica cómo funciona, el mismo número, para quién es y tiene contacto', () => {
+  it('la landing explica cómo funciona, el mismo número, la instalación, para quién es y tiene contacto', () => {
     const page = pages.get(ROUTES.home)!;
-    for (const id of ['como-funciona', 'mismo-numero', 'para-quien', 'contacto']) {
+    for (const id of ['comparacion', 'mismo-numero', 'instalacion', 'para-quien', 'contacto']) {
       expect(page.querySelector(`#${id}`)).not.toBeNull();
     }
     const text = bodyText(page);
@@ -202,6 +205,24 @@ describe('contenido requerido', () => {
       expect(text).toContain(reply);
     }
     expect(text).toContain('mismo número');
+  });
+
+  // Cada fila compara el mismo momento: "sin" en gris con una X y "con" con un check, con encabezados de columna
+  it('la comparación tiene 4 filas con su par "sin" y "con", y el link de la portada lleva ahí', () => {
+    const page = pages.get(ROUTES.home)!;
+    const table = page.querySelector('#comparacion table')!;
+    expect(table.querySelectorAll('thead th').map((header) => header.text.trim())).toEqual(['Sin Cale', 'Con Cale']);
+    const rows = table.querySelectorAll('tbody tr');
+    expect(rows).toHaveLength(4);
+    for (const row of rows) {
+      const [without, withCale] = row.querySelectorAll('td');
+      expect(without?.classList.contains('compare-without')).toBe(true);
+      expect(without?.querySelector('.compare-icon svg')).not.toBeNull();
+      expect(withCale?.classList.contains('compare-with')).toBe(true);
+      expect(withCale?.querySelector('.compare-icon svg')).not.toBeNull();
+      expect(without?.querySelector('.compare-icon')?.innerHTML).not.toBe(withCale?.querySelector('.compare-icon')?.innerHTML);
+    }
+    expect(page.querySelector('.hero a[href="#comparacion"]')?.text).toBe('Ver cómo funciona');
   });
 
   // Público mayor: la portada habla en criollo, sin términos técnicos
@@ -217,12 +238,57 @@ describe('contenido requerido', () => {
     expect(whatsappLinks.length).toBeGreaterThan(0);
   });
 
-  it('la landing ofrece WhatsApp arriba, en la portada y al cierre', () => {
+  it('la landing ofrece WhatsApp en la instalación, al cierre y en el pie', () => {
     const whatsappLinks = pages
       .get(ROUTES.home)!
       .querySelectorAll('a')
       .filter((link) => link.getAttribute('href')?.startsWith(`https://wa.me/${WHATSAPP_NUMBER}`));
     expect(whatsappLinks).toHaveLength(3);
+  });
+
+  // La acción principal es instalar: los botones de arriba llevan a la sección de instalación (con los pasos y el costo
+  // de WhatsApp) y recién el de esa sección abre el asistente
+  it.each(INDEXABLE_ROUTES)('%s tiene "Probalo GRATIS" arriba, que lleva a la sección de instalación', (route) => {
+    const install = pages.get(route)!.querySelector('header.site-header a.button');
+    expect(install?.text.trim()).toBe('Probalo GRATIS');
+    expect(install?.getAttribute('href')).toBe('/#instalacion');
+  });
+
+  // Objetivo del sitio: todo lleva a "Probalo GRATIS". Antes de la instalación, a la sección (pasos y costo de
+  // WhatsApp); desde la sección y el cierre, al asistente.
+  it('en la landing cada sección clave tiene "Probalo GRATIS" y lleva al lugar que corresponde', () => {
+    const page = pages.get(ROUTES.home)!;
+    const trialIn = (selector: string) =>
+      page.querySelector(selector)!.querySelectorAll('a').find((link) => link.text.trim() === 'Probalo GRATIS');
+    expect(trialIn('.hero')?.getAttribute('href')).toBe('/#instalacion');
+    expect(trialIn('#comparacion')?.getAttribute('href')).toBe('/#instalacion');
+    expect(trialIn('#instalacion')?.getAttribute('href')).toBe(APP_URL);
+    expect(trialIn('#contacto')?.getAttribute('href')).toBe(APP_URL);
+  });
+
+  // El argumento en orden: el dolor, la diferencia, la objeción del número, cómo empezar y la prueba gratis
+  it('la landing va del dolor a la prueba gratis', () => {
+    const page = pages.get(ROUTES.home)!;
+    const order = page.querySelectorAll('main > section[id]').map((section) => section.id);
+    expect(order).toEqual(['para-quien', 'comparacion', 'mismo-numero', 'instalacion', 'contacto']);
+    expect(page.querySelector('#para-quien h2')?.text).toBe('Cada turno que se olvidan es plata que perdés');
+    expect(page.querySelector('#contacto h2')?.text).toBe(`Probalo gratis ${TRIAL_DAYS} días en tu negocio`);
+  });
+
+  // Resumen corto en 4 pasos (el detalle lo da el asistente), la prueba gratis y, desde el principio, que WhatsApp
+  // cobra los mensajes aparte. Ayuda por WhatsApp con un mensaje propio.
+  it('la instalación resume los pasos, la prueba gratis, el costo de WhatsApp y ofrece ayuda', () => {
+    const section = pages.get(ROUTES.home)!.querySelector('#instalacion')!;
+    expect(section.querySelector('h2')?.text).toBe(`Hacé la instalación por tu cuenta y probalo gratis por ${TRIAL_DAYS} días`);
+    expect(section.querySelectorAll('ol li').map((step) => step.text)).toEqual([
+      'Ingresá los datos de tu negocio.',
+      'Te creamos un calendario de turnos automáticamente.',
+      'Conectás tu WhatsApp.',
+      'Ya podés usarlo.',
+    ]);
+    expect(section.text).toContain('WhatsApp cobra los mensajes aparte');
+    const help = section.querySelector(`a[href^="https://wa.me/${WHATSAPP_NUMBER}"]`);
+    expect(help?.getAttribute('href')).toBe(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_HELP_GREETING)}`);
   });
 
   it('la política de privacidad cubre datos, Meta, proveedores, plazos y Ley 25.326', () => {
