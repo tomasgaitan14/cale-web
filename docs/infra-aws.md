@@ -155,13 +155,17 @@ npm run build && aws s3 sync dist/ "s3://<bucket>/" --delete && aws cloudfront c
   `SecurityHeadersFunction`. Un test controla que coincidan. Al dar de baja Vercel, borrar `vercel.json`,
   `tests/vercel-config.test.ts` y la comparación en `tests/infra.test.ts`.
 
-## Etapa 2: dominio propio (pendiente)
+## Etapa 2: dominio propio (13/10/2026)
 
-Cuando NIC Argentina active el dominio:
+1. ✅ Delegaciones en DonWeb (Mis Dominios → Nameservers y Zona DNS) a los 4 nameservers de la zona. NIC tardó unas
+   horas en publicarlas.
+2. ✅ En la plantilla: certificado de ACM para el dominio y `www` (validación por DNS en la zona del stack, sin pasos
+   manuales), alias de los dos en la distribución (`sni-only`, TLS 1.2 o más) y registros A/AAAA alias en Route 53.
+   La función de URLs redirige `www` y la dirección de CloudFront a `https://cale.com.ar` con la misma ruta (el
+   dominio canónico sale del parámetro `DomainName` con `!Sub`). El change set tardó unos 7 minutos.
+3. ✅ `SITE_URL` = `https://cale.com.ar`.
+4. Pendiente: verificar el dominio nuevo en Meta y actualizar el sitio cargado ahí.
+5. Pendiente: dar de baja Vercel (ver "Limitaciones conocidas").
 
-1. En DonWeb, cambiar las delegaciones por los 4 nameservers de la zona (output `HostedZoneNameServers`).
-2. Agregar a la plantilla el certificado de ACM (validación por DNS en la zona), los alias del dominio y `www` en la
-   distribución y los registros ALIAS en Route 53.
-3. Cambiar `SITE_URL` en `src/config.ts`.
-4. Verificar el dominio nuevo en Meta y actualizar el sitio cargado ahí.
-5. Dar de baja Vercel (ver "Limitaciones conocidas").
+Si después del cambio la Mac no encuentra `cale.com.ar` (pero `www` sí), es la caché de DNS local que guardó la
+respuesta de antes del registro: se va sola o con `sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder`.
