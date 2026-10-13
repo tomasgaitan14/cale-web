@@ -266,6 +266,20 @@ describe('contenido requerido', () => {
     expect(trialIn('#contacto')?.getAttribute('href')).toBe(APP_URL);
   });
 
+  // Video de la instalación (cale-video): sin sonido, arranca solo en bucle sin pantalla completa en el iPhone, con controles
+  // para pausarlo, imagen de espera y una descripción para lectores de pantalla. Los archivos tienen que existir.
+  it('la instalación muestra el video al lado de los pasos', () => {
+    const video = pages.get(ROUTES.home)!.querySelector('#instalacion video')!;
+    for (const attribute of ['autoplay', 'muted', 'loop', 'playsinline', 'controls']) {
+      expect(video.hasAttribute(attribute), attribute).toBe(true);
+    }
+    expect(video.getAttribute('aria-label')).toMatch(/^Video: cómo se instala Cale/);
+    for (const attribute of ['src', 'poster']) {
+      const path = video.getAttribute(attribute)!;
+      expect(existsSync(join(DIST_DIR, path)), `${attribute}: ${path}`).toBe(true);
+    }
+  });
+
   // El argumento en orden: el dolor, la diferencia, la objeción del número, cómo empezar y la prueba gratis
   it('la landing va del dolor a la prueba gratis', () => {
     const page = pages.get(ROUTES.home)!;

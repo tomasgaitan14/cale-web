@@ -44,6 +44,15 @@ const AGENDA_ROWS = [
 
 const QUICK_REPLIES = ['Confirmo', 'Cancelo', 'Cambiar horario'];
 
+// Video de la instalación (proyecto cale-video, Remotion): vertical 9:16, sin sonido; los textos en pantalla cuentan todo
+const INSTALL_VIDEO = {
+  src: '/video/cale-instalacion.mp4',
+  poster: '/video/cale-instalacion.jpg',
+  width: 1080,
+  height: 1920,
+  label: `Video: cómo se instala ${BUSINESS_NAME} en 4 pasos y cómo le llega el recordatorio a tu cliente por WhatsApp`,
+};
+
 // Resumen del asistente de alta (cale-app): el detalle de cada paso lo explica el asistente
 const INSTALL_STEPS = [
   'Ingresá los datos de tu negocio.',
@@ -168,21 +177,37 @@ const INSTALL_STEPS = [
   </section>
 
   <section class="section" id={INSTALL_SECTION_ID} aria-labelledby="instalacion-titulo">
-    <div class="container narrow">
-      <h2 id="instalacion-titulo">Hacé la instalación por tu cuenta y probalo gratis por {TRIAL_DAYS} días</h2>
-      <ol class="steps install-steps">
-        {INSTALL_STEPS.map((step) => <li>{step}</li>)}
-      </ol>
-      <div class="install-action">
-        <TrialButton href={APP_URL} />
+    <div class="container narrow install-layout">
+      <h2 id="instalacion-titulo" class="install-title">Hacé la instalación por tu cuenta y probalo gratis por {TRIAL_DAYS} días</h2>
+      <figure class="install-video">
+        <video
+          src={INSTALL_VIDEO.src}
+          poster={INSTALL_VIDEO.poster}
+          width={INSTALL_VIDEO.width}
+          height={INSTALL_VIDEO.height}
+          autoplay
+          muted
+          loop
+          playsinline
+          controls
+          preload="metadata"
+          aria-label={INSTALL_VIDEO.label}></video>
+      </figure>
+      <div class="install-body">
+        <ol class="steps install-steps">
+          {INSTALL_STEPS.map((step) => <li>{step}</li>)}
+        </ol>
+        <div class="install-action">
+          <TrialButton href={APP_URL} />
+        </div>
+        <p class="install-cost">
+          {BUSINESS_NAME} es gratis los primeros {TRIAL_DAYS} días. WhatsApp cobra los mensajes aparte: son centavos.
+        </p>
+        <p class="install-help">
+          ¿Te trabás en algún paso? <a href={whatsappUrl(WHATSAPP_NUMBER, WHATSAPP_HELP_GREETING)}>Escribinos por WhatsApp</a> y
+          lo hacemos juntos.
+        </p>
       </div>
-      <p class="install-cost">
-        {BUSINESS_NAME} es gratis los primeros {TRIAL_DAYS} días. WhatsApp cobra los mensajes aparte: son centavos.
-      </p>
-      <p class="install-help">
-        ¿Te trabás en algún paso? <a href={whatsappUrl(WHATSAPP_NUMBER, WHATSAPP_HELP_GREETING)}>Escribinos por WhatsApp</a> y
-        lo hacemos juntos.
-      </p>
     </div>
   </section>
 
@@ -565,6 +590,49 @@ const INSTALL_STEPS = [
     color: var(--color-paper);
     font-size: 1.375rem;
     font-weight: 800;
+  }
+
+  /* Instalación: en el celular, título, video y pasos uno abajo del otro; en la PC, los pasos y el video lado a lado */
+  .install-layout {
+    display: grid;
+    grid-template-areas:
+      'title'
+      'video'
+      'body';
+    row-gap: 2rem;
+  }
+
+  .install-title {
+    grid-area: title;
+  }
+
+  .install-video {
+    grid-area: video;
+    max-width: 16rem;
+    margin: 0;
+  }
+
+  .install-video video {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 9 / 16;
+    border-radius: var(--radius-md);
+    background: var(--color-paper-alt);
+  }
+
+  .install-body {
+    grid-area: body;
+  }
+
+  @media (min-width: 52rem) {
+    .install-layout {
+      grid-template-columns: minmax(0, 1fr) 16rem;
+      grid-template-areas:
+        'title title'
+        'body video';
+      column-gap: 3rem;
+    }
   }
 
   .install-action,
