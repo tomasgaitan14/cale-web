@@ -11,6 +11,12 @@
   --color-graphite: #4b5563;
   --color-rule: #e3e5e8;
   --color-bubble: #eef0f2;
+  /* Comparación de la portada (sin Cale / con Cale). Texto sobre su fondo: rojo 7,6:1 y verde 7,4:1 (AAA). El color
+     nunca va solo: cada fila también tiene una X o un check. */
+  --color-without: #8f2a28;
+  --color-without-bg: #fdf2f1;
+  --color-with: #155c33;
+  --color-with-bg: #eef8f1;
   /* Resaltador: solo en el dibujo de la agenda, nunca como color de texto */
   --color-highlight: #ffe566;
 
