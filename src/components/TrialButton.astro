@@ -1,0 +1,22 @@
+---
+import { INSTALL_SECTION_URL } from '../config';
+
+interface Props {
+  // Por defecto lleva a la sección de instalación; el botón de esa sección lleva al asistente
+  href?: string;
+  // En el encabezado: más bajo
+  compact?: boolean;
+}
+
+const { href = INSTALL_SECTION_URL, compact = false } = Astro.props;
+---
+
+<a class:list={['button', { 'button-compact': compact }]} href={href}>Probalo GRATIS</a>
+
+<style>
+  .button-compact {
+    min-height: 3rem;
+    padding: 0.625rem 1rem;
+    font-size: 1rem;
+  }
+</style>

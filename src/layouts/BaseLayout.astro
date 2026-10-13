@@ -1,8 +1,17 @@
 ---
 import '../styles/global.css';
-import WhatsAppButton from '../components/WhatsAppButton.astro';
-import { BUSINESS_NAME, CONTACT_EMAIL, FACEBOOK_DOMAIN_VERIFICATION, LOCATION, OWNER_NAME, ROUTES } from '../config';
-import { canonicalUrl, mailtoUrl } from '../lib/url';
+import TrialButton from '../components/TrialButton.astro';
+import {
+  BUSINESS_NAME,
+  CONTACT_EMAIL,
+  FACEBOOK_DOMAIN_VERIFICATION,
+  LOCATION,
+  OWNER_NAME,
+  ROUTES,
+  WHATSAPP_GREETING,
+  WHATSAPP_NUMBER,
+} from '../config';
+import { canonicalUrl, mailtoUrl, whatsappUrl } from '../lib/url';
 
 interface Props {
   title: string;
@@ -53,7 +62,7 @@ const LEGAL_LINKS = [
           <img src="/favicon.svg" alt="" width="32" height="32" />
           <span>{BUSINESS_NAME}</span>
         </a>
-        <WhatsAppButton compact />
+        <TrialButton compact />
       </div>
     </header>
 
@@ -67,7 +76,7 @@ const LEGAL_LINKS = [
           {BUSINESS_NAME} es un servicio de {OWNER_NAME}, {LOCATION}.
         </p>
         <p>
-          <a href={mailtoUrl(CONTACT_EMAIL)}>{CONTACT_EMAIL}</a>
+          Escribinos por <a href={whatsappUrl(WHATSAPP_NUMBER, WHATSAPP_GREETING)}>WhatsApp</a> o a <a href={mailtoUrl(CONTACT_EMAIL)}>{CONTACT_EMAIL}</a>.
         </p>
         <nav aria-label="Legal">
           <ul class="footer-links">
