@@ -22,8 +22,12 @@ interface Resource {
 }
 
 const template = parse(readFileSync(join(ROOT_DIR, 'infra', 'site.yaml'), 'utf8'), { customTags: CFN_TAGS }) as {
+  Parameters: Record<string, { Default?: string }>;
   Resources: Record<string, Resource>;
 };
+const DOMAIN = template.Parameters.DomainName?.Default ?? '';
+// Zona fija de Route 53 que usa CloudFront para los registros alias
+const CLOUDFRONT_HOSTED_ZONE_ID = 'Z2FDTNDATAQYW2';
 const resources = template.Resources;
 
 function propertiesOf(logicalId: string): Record<string, any> {
@@ -37,6 +41,7 @@ function propertiesOf(logicalId: string): Record<string, any> {
 interface CloudFrontRequest {
   uri: string;
   querystring: Record<string, { value: string; multiValue?: { value: string }[] }>;
+  headers?: Record<string, { value: string }>;
 }
 
 interface CloudFrontRedirect {
@@ -44,12 +49,14 @@ interface CloudFrontRedirect {
   headers: { location: { value: string } };
 }
 
-const handler = new Function(`${propertiesOf('UrlRewriteFunction').FunctionCode}; return handler;`)() as (event: {
+// El código va con !Sub: se reemplaza ${DomainName} como lo hace CloudFormation
+const urlRewriteCode = (propertiesOf('UrlRewriteFunction').FunctionCode as { Sub: string }).Sub.replaceAll('${DomainName}', DOMAIN);
+const handler = new Function(`${urlRewriteCode}; return handler;`)() as (event: {
   request: CloudFrontRequest;
 }) => CloudFrontRequest | CloudFrontRedirect;
 
-function viewerRequest(uri: string, querystring: CloudFrontRequest['querystring'] = {}) {
-  return handler({ request: { uri, querystring } });
+function viewerRequest(uri: string, querystring: CloudFrontRequest['querystring'] = {}, host = DOMAIN) {
+  return handler({ request: { uri, querystring, headers: { host: { value: host } } } });
 }
 
 function rewrittenUri(uri: string): string {
@@ -92,6 +99,20 @@ describe('función de URLs limpias', () => {
     }) as CloudFrontRedirect;
     expect(result.headers.location.value).toBe('/privacidad?fbclid=abc&tag=a&tag=b&flag');
   });
+
+  it('el dominio canónico es el del parámetro DomainName', () => {
+    expect(DOMAIN).toBe('cale.com.ar');
+    expect(rewrittenUri('/privacidad')).toBe('/privacidad.html');
+  });
+
+  it.each([`www.${DOMAIN}`, 'd3bl9yoji79fah.cloudfront.net'])('%s redirige al dominio canónico con la ruta y la query', (host) => {
+    expect(viewerRequest('/privacidad', { fbclid: { value: 'abc' } }, host)).toEqual({
+      statusCode: 301,
+      statusDescription: 'Moved Permanently',
+      headers: { location: { value: `https://${DOMAIN}/privacidad?fbclid=abc` } },
+    });
+  });
+
 
   it('manda los 403 y 404 de S3 a la página 404 del sitio', () => {
     expect(existsSync(join(DIST_DIR, NOT_FOUND_FILE))).toBe(true);
@@ -277,5 +298,44 @@ describe('rol de deploy de GitHub Actions', () => {
     const actions = statements.flatMap((statement: any) => [statement.Action].flat());
     expect(actions.sort()).toEqual(['cloudfront:CreateInvalidation', 's3:DeleteObject', 's3:ListBucket', 's3:PutObject']);
     expect(JSON.stringify(statements)).not.toMatch(/"\*"|:\*"/);
+  });
+});
+
+describe('dominio propio', () => {
+  it('el certificado de ACM cubre el dominio y www y se valida con DNS en la zona del stack', () => {
+    expect(propertiesOf('Certificate')).toEqual({
+      DomainName: { Ref: 'DomainName' },
+      SubjectAlternativeNames: [{ Sub: 'www.${DomainName}' }],
+      ValidationMethod: 'DNS',
+      DomainValidationOptions: [
+        { DomainName: { Ref: 'DomainName' }, HostedZoneId: { Ref: 'HostedZone' } },
+        { DomainName: { Sub: 'www.${DomainName}' }, HostedZoneId: { Ref: 'HostedZone' } },
+      ],
+    });
+  });
+
+  it('CloudFront responde en el dominio y www con ese certificado, solo con TLS 1.2 o más', () => {
+    const config = propertiesOf('Distribution').DistributionConfig;
+    expect(config.Aliases).toEqual([{ Ref: 'DomainName' }, { Sub: 'www.${DomainName}' }]);
+    expect(config.ViewerCertificate).toEqual({
+      AcmCertificateArn: { Ref: 'Certificate' },
+      SslSupportMethod: 'sni-only',
+      MinimumProtocolVersion: 'TLSv1.2_2021',
+    });
+  });
+
+  it('el dominio y www apuntan a CloudFront en IPv4 e IPv6', () => {
+    const records = propertiesOf('SiteRecords');
+    expect(records.HostedZoneId).toEqual({ Ref: 'HostedZone' });
+    const names = records.RecordSets.map((record: any) => [JSON.stringify(record.Name), record.Type]);
+    expect(names).toEqual([
+      [JSON.stringify({ Ref: 'DomainName' }), 'A'],
+      [JSON.stringify({ Ref: 'DomainName' }), 'AAAA'],
+      [JSON.stringify({ Sub: 'www.${DomainName}' }), 'A'],
+      [JSON.stringify({ Sub: 'www.${DomainName}' }), 'AAAA'],
+    ]);
+    for (const record of records.RecordSets) {
+      expect(record.AliasTarget).toEqual({ DNSName: { GetAtt: 'Distribution.DomainName' }, HostedZoneId: CLOUDFRONT_HOSTED_ZONE_ID });
+    }
   });
 });
