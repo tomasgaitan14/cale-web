@@ -73,7 +73,7 @@ Al 2026-10-12:
 - **Rol legal:** Cale trata datos por cuenta del negocio (art. 25, Ley 25.326); el negocio es responsable y
   tiene que tener el opt-in de sus clientes.
 - **Identidad pública sin datos personales:** el sitio muestra **CRM Solutions**, **Argentina** y
-  `cale.turnos@gmail.com`. "CRM Solutions" no es un negocio registrado. Riesgo aceptado: Meta podría rechazar
+  `cale.turnos@gmail.com` (desde el 13/10/2026; antes `cale.turnos@gmail.com`). "CRM Solutions" no es un negocio registrado. Riesgo aceptado: Meta podría rechazar
   la verificación por no ver el nombre legal (plan B en `docs/roadmap.md`).
 - **Sin precio en el sitio** (2026-10-11): ni la landing ni los términos hablan del precio del servicio. Hay
   un test que lo controla.
