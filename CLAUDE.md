@@ -42,11 +42,13 @@ Ninguno por ahora. El backend de Cale (envío de mensajes, webhooks, plantillas)
 
 ## Estado actual
 
-Al 2026-10-12:
+Al 2026-10-13:
 
-- Sitio en AWS en `d3bl9yoji79fah.cloudfront.net`, con deploy automático. También sigue en `cale-turnos.vercel.app`.
-- Dominio `cale.com.ar` comprado en DonWeb, esperando que NIC Argentina lo active (24 a 48 horas).
-- Verificación del negocio en Meta iniciada y pausada hasta tener el dominio propio.
+- Sitio en **`https://cale.com.ar`** (AWS, deploy automático); `www` y `d3bl9yoji79fah.cloudfront.net` redirigen ahí.
+  También sigue en `cale-turnos.vercel.app` hasta darlo de baja.
+- Verificación del negocio en Meta pausada: el próximo paso es verificar el dominio nuevo.
+- Portada nueva, legales actualizados y video de instalación en la rama `feat/install-section` (se publican con la
+  etapa 6 del asistente).
 - Rediseño para público mayor publicado (`d596699`). 140 tests en verde.
 
 ## Decisiones tomadas
@@ -86,8 +88,7 @@ Al 2026-10-12:
 
 ## Próximos pasos
 
-1. **Etapa 2 de AWS** cuando NIC active `cale.com.ar`: delegaciones en DonWeb → certificado y alias en CloudFront →
-   `SITE_URL` → verificar el dominio en Meta → retomar la verificación del negocio.
+1. **Meta:** verificar el dominio `cale.com.ar` y retomar la verificación del negocio.
 2. **Actualizar los textos legales al modelo Tech Provider:** las secciones 2 y 3 de los términos todavía
    describen el modelo descartado ("el negocio crea y mantiene su propia app…"). La landing ya está actualizada.
 3. **Sección "Instalación"** (para abrir desde el celular: crear el calendario, darle acceso a un correo, conectar
