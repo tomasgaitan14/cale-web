@@ -6,7 +6,7 @@ export const SITE_URL = 'https://cale-turnos.vercel.app';
 export const BUSINESS_NAME = 'Cale';
 export const OWNER_NAME = 'CRM Solutions';
 export const LOCATION = 'Argentina';
-export const CONTACT_EMAIL = 'crmsolutionsgchu@gmail.com';
+export const CONTACT_EMAIL = 'cale.turnos@gmail.com';
 // WhatsApp de contacto: formato internacional sin "+" (54 + 9 de celular + característica + número).
 export const WHATSAPP_NUMBER = '5493446628536';
 export const WHATSAPP_GREETING = 'Hola, quiero saber más sobre Cale para mi negocio.';
