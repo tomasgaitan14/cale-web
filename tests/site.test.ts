@@ -304,7 +304,14 @@ describe('contenido requerido', () => {
       'Datos del turno',
       'Contenido de los mensajes',
       'Estados de entrega',
-      'Supabase',
+      // Proveedores actuales: AWS (sitio, asistente, base y correos), Google (calendario) y Meta (WhatsApp)
+      'Amazon Web Services',
+      'Google LLC',
+      'Meta Platforms',
+      // El asistente de alta: una sola cookie necesaria y sin analítica
+      'una única cookie, necesaria para entrar',
+      'No usa cookies de analítica ni de publicidad',
+      'calendario de turnos',
       `${RETENTION.appointmentDataMonths} meses`,
       `${RETENTION.afterTerminationDays} días`,
       `${RESPONSE_DEADLINES.deletionBusinessDays} días hábiles`,
@@ -349,5 +356,11 @@ describe('contenido requerido', () => {
       .find((link) => link.getAttribute('href')?.startsWith(`mailto:${CONTACT_EMAIL}?subject=`));
     expect(deletionLink).toBeDefined();
     expect(bodyText(page)).toContain(`${RESPONSE_DEADLINES.deletionBusinessDays} días hábiles`);
+    expect(bodyText(page)).toContain('Le pasamos tu pedido al negocio');
+  });
+
+  // Supabase y Vercel ya no intervienen: nombrarlos sería informar mal a quién se entregan los datos
+  it.each(INDEXABLE_ROUTES)('%s no nombra proveedores que ya no se usan', (route) => {
+    expect(bodyText(pages.get(route)!)).not.toMatch(/Supabase|Vercel/);
   });
 });
