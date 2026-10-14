@@ -77,6 +77,10 @@ import { mailtoUrl } from '../lib/url';
     </li>
     <li>El correo de su cuenta de Google, con el que se comparte el calendario de turnos.</li>
     <li>
+      Las fechas de su prueba gratis, lo que responde a nuestros mensajes de WhatsApp sobre la prueba (si quiere seguir,
+      si acepta días de más o si no quiere seguir) y si el servicio está activo.
+    </li>
+    <li>
       Identificadores técnicos de su cuenta de WhatsApp Business (por ejemplo, el ID de la cuenta y del número) y los
       permisos necesarios para enviar mensajes en su nombre.
     </li>
@@ -105,6 +109,11 @@ import { mailtoUrl } from '../lib/url';
     <li>Enviar recordatorios de turnos por WhatsApp en nombre del negocio.</li>
     <li>Mandar por correo el link para entrar al asistente de alta.</li>
     <li>
+      Escribirle por WhatsApp al negocio, desde el número de {BUSINESS_NAME}, sobre su cuenta: el aviso de que termina
+      la prueba gratis, la oferta de días de más y la confirmación de lo que elija. También le avisamos al equipo
+      de {BUSINESS_NAME} lo que respondió, para seguir en contacto.
+    </li>
+    <li>
       Registrar la respuesta del cliente (confirmación, cancelación o pedido de otro horario) y comunicársela al negocio
       para que gestione su agenda.
     </li>
@@ -122,13 +131,18 @@ import { mailtoUrl } from '../lib/url';
     informarles cómo se van a usar sus datos, como exigen el artículo 5 de la Ley 25.326 y las políticas de WhatsApp
     Business. {BUSINESS_NAME} solo envía mensajes a clientes cargados por el negocio, con esa autorización.
   </p>
+  <p>
+    El negocio acepta que {BUSINESS_NAME} le escriba por WhatsApp sobre su cuenta al cargar su número en el asistente,
+    donde se lo avisamos. Si no quiere recibir esos mensajes, puede pedirlo por los medios de la sección “Contacto”.
+  </p>
 
   <h2 id="meta">6. Uso de la WhatsApp Business Platform de Meta</h2>
   <p>
     Los mensajes se envían a través de la <strong>WhatsApp Business Platform (Cloud API)</strong> de Meta Platforms,
     Inc. Para entregar cada mensaje, Meta recibe el número de teléfono del destinatario y el contenido del mensaje, y
     los trata según sus propias condiciones y su política de privacidad. Meta informa a {BUSINESS_NAME} los estados de
-    entrega de cada mensaje.
+    entrega de cada mensaje. Por la misma vía viajan los mensajes de {BUSINESS_NAME} al negocio y las respuestas que
+    el negocio da con los botones.
   </p>
 
   <h2 id="proveedores">7. Proveedores que intervienen</h2>
@@ -169,6 +183,10 @@ import { mailtoUrl } from '../lib/url';
       Los links para entrar al asistente vencen a los {APP_SESSION.loginLinkMinutes} minutos y las sesiones, a los {
         APP_SESSION.sessionDays
       } días.
+    </li>
+    <li>
+      Los avisos de fin de prueba se borran a los {RETENTION.trialNoticeDays} días del día en que salen, y el registro de
+      las respuestas a los botones de WhatsApp, a los {RETENTION.buttonReplyDays} días.
     </li>
     <li>
       Si alguien pide el borrado de sus datos, los eliminamos en los plazos de la sección siguiente, aunque no se haya

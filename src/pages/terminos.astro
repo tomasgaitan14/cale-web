@@ -1,6 +1,17 @@
 ---
 import LegalLayout from '../layouts/LegalLayout.astro';
-import { BUSINESS_NAME, CONTACT_EMAIL, JURISDICTION, LOCATION, OWNER_NAME, RETENTION, ROUTES, TRIAL_DAYS } from '../config';
+import {
+  BUSINESS_NAME,
+  CONTACT_EMAIL,
+  JURISDICTION,
+  LOCATION,
+  OWNER_NAME,
+  RETENTION,
+  ROUTES,
+  TRIAL_DAYS,
+  TRIAL_EXTENSION_DAYS,
+  TRIAL_NOTICE_DAYS_BEFORE,
+} from '../config';
 import { mailtoUrl } from '../lib/url';
 ---
 
@@ -68,11 +79,16 @@ import { mailtoUrl } from '../lib/url';
     </li>
     <li>Los mensajes de WhatsApp los cobra Meta también durante la prueba (ver “Costos de Meta”).</li>
     <li>
-      Antes de que termine la prueba, avisamos al negocio cómo seguir. {BUSINESS_NAME} no cobra nada de forma automática:
-      no pide ni guarda medios de pago.
+      {TRIAL_NOTICE_DAYS_BEFORE} días antes de que termine la prueba, le escribimos al negocio por WhatsApp, al número que
+      cargó en el asistente, para preguntarle si quiere seguir. Si quiere, lo contactamos para acordar cómo continuar.
     </li>
     <li>
-      Si el negocio no sigue, el servicio se pausa y no se envían más recordatorios. Sus datos se borran como en una baja.
+      Si responde que no, le ofrecemos <strong>{TRIAL_EXTENSION_DAYS} días más</strong> de prueba gratis, una sola vez.
+    </li>
+    <li>{BUSINESS_NAME} no cobra nada de forma automática: no pide ni guarda medios de pago.</li>
+    <li>
+      Si al terminar la prueba no acordamos cómo seguir, el servicio se pausa y no se envían más recordatorios. Sus datos
+      se borran como en una baja.
     </li>
   </ul>
 
