@@ -14,7 +14,7 @@ export const WHATSAPP_GREETING = 'Hola, quiero saber más sobre Cale para mi neg
 export const JURISDICTION = 'la República Argentina';
 
 // Verificación del dominio en el portfolio de Meta (no es secreta: va en el HTML público).
-export const FACEBOOK_DOMAIN_VERIFICATION = '55hdqyv5hd3d0eyext8ptkxa76baig';
+export const FACEBOOK_DOMAIN_VERIFICATION = 'myontabf6taia94eztrrd8p475ancg';
 
 export const ROUTES = {
   home: '/',
