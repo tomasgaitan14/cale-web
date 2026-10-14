@@ -14,6 +14,8 @@ import {
   RETENTION,
   ROUTES,
   TRIAL_DAYS,
+  TRIAL_EXTENSION_DAYS,
+  TRIAL_NOTICE_DAYS_BEFORE,
   WHATSAPP_HELP_GREETING,
   WHATSAPP_NUMBER,
 } from '../src/config';
@@ -329,6 +331,12 @@ describe('contenido requerido', () => {
       `${RETENTION.appointmentDataMonths} meses`,
       `${RETENTION.afterTerminationDays} días`,
       `${RESPONSE_DEADLINES.deletionBusinessDays} días hábiles`,
+      // Cale le escribe al negocio por WhatsApp sobre su cuenta, con su consentimiento, y guarda lo que responde
+      'Escribirle por WhatsApp al negocio',
+      'al cargar su número en el asistente, donde se lo avisamos',
+      'lo que responde a nuestros mensajes de WhatsApp sobre la prueba',
+      `${RETENTION.trialNoticeDays} días del día en que salen`,
+      `a los ${RETENTION.buttonReplyDays} días`,
     ]) {
       expect(text, `falta "${required}"`).toContain(required);
     }
@@ -347,8 +355,10 @@ describe('contenido requerido', () => {
       // Calendario de turnos en la cuenta de Cale, y Cale no reprograma solo
       'calendario de turnos',
       'no cambia el horario por su cuenta',
-      // Prueba gratis: plazo, sin cobro automático y qué pasa al terminar
+      // Prueba gratis: plazo, aviso por WhatsApp, días de más una vez, sin cobro automático y qué pasa al terminar
       `gratis durante ${TRIAL_DAYS} días`,
+      `${TRIAL_NOTICE_DAYS_BEFORE} días antes de que termine la prueba, le escribimos al negocio por WhatsApp`,
+      `${TRIAL_EXTENSION_DAYS} días más de prueba gratis, una sola vez`,
       'no cobra nada de forma automática',
       'el servicio se pausa',
       // Al dar de baja, el negocio puede pedir sus turnos
