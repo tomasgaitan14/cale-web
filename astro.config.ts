@@ -6,7 +6,7 @@ export default defineConfig({
   // URLs sin barra final: /privacidad, no /privacidad/
   trailingSlash: 'never',
   build: {
-    // privacidad.html en vez de privacidad/index.html; Vercel la sirve en /privacidad con cleanUrls
+    // privacidad.html en vez de privacidad/index.html; la función de URLs de CloudFront la sirve en /privacidad
     format: 'file',
     // CSS siempre en archivos externos, para poder usar una CSP sin 'unsafe-inline'
     inlineStylesheets: 'never',

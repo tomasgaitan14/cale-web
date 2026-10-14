@@ -151,9 +151,6 @@ npm run build && aws s3 sync dist/ "s3://<bucket>/" --delete && aws cloudfront c
 
 - La página 404 sale sin los headers de seguridad: CloudFront no ejecuta la función viewer-response en las respuestas
   de error. No afecta a las páginas reales.
-- Mientras el sitio siga también en Vercel, los headers están duplicados en `vercel.json` y en
-  `SecurityHeadersFunction`. Un test controla que coincidan. Al dar de baja Vercel, borrar `vercel.json`,
-  `tests/vercel-config.test.ts` y la comparación en `tests/infra.test.ts`.
 
 ## Etapa 2: dominio propio (13/10/2026)
 
@@ -164,8 +161,8 @@ npm run build && aws s3 sync dist/ "s3://<bucket>/" --delete && aws cloudfront c
    La función de URLs redirige `www` y la dirección de CloudFront a `https://cale.com.ar` con la misma ruta (el
    dominio canónico sale del parámetro `DomainName` con `!Sub`). El change set tardó unos 7 minutos.
 3. ✅ `SITE_URL` = `https://cale.com.ar`.
-4. Pendiente: verificar el dominio nuevo en Meta y actualizar el sitio cargado ahí.
-5. Pendiente: dar de baja Vercel (ver "Limitaciones conocidas").
+4. ✅ Dominio `cale.com.ar` verificado en Meta (metaetiqueta nueva) y sitio del portfolio actualizado (14/10/2026).
+5. ✅ Vercel dado de baja (14/10/2026): proyecto borrado, `vercel.json` y sus tests también.
 
 Si después del cambio la Mac no encuentra `cale.com.ar` (pero `www` sí), es la caché de DNS local que guardó la
 respuesta de antes del registro: se va sola o con `sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder`.

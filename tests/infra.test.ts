@@ -125,10 +125,29 @@ describe('función de URLs limpias', () => {
   });
 });
 
+// Headers que agrega SecurityHeadersFunction a todas las respuestas
+const CSP = [
+  "default-src 'self'",
+  "script-src 'none'",
+  "style-src 'self'",
+  "img-src 'self' data:",
+  "font-src 'self'",
+  "connect-src 'none'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'none'",
+  "frame-ancestors 'none'",
+].join('; ');
+const SECURITY_HEADERS: Record<string, string> = {
+  'content-security-policy': CSP,
+  'strict-transport-security': 'max-age=63072000; includeSubDomains',
+  'x-content-type-options': 'nosniff',
+  'x-frame-options': 'DENY',
+  'referrer-policy': 'strict-origin-when-cross-origin',
+  'permissions-policy': 'camera=(), microphone=(), geolocation=()',
+};
+
 describe('headers de seguridad', () => {
-  const vercelHeaders: { key: string; value: string }[] = JSON.parse(
-    readFileSync(join(ROOT_DIR, 'vercel.json'), 'utf8'),
-  ).headers[0].headers;
 
   const addSecurityHeaders = new Function(
     `${propertiesOf('SecurityHeadersFunction').FunctionCode}; return handler;`,
@@ -139,8 +158,20 @@ describe('headers de seguridad', () => {
   // Respuesta de S3 con un header que la función tiene que pisar
   const { headers } = addSecurityHeaders({ response: { headers: { 'x-frame-options': { value: 'SAMEORIGIN' } } } });
 
-  it.each(vercelHeaders.map((header) => [header.key, header.value]))('agrega %s igual que vercel.json', (key, value) => {
-    expect(headers[key.toLowerCase()]).toEqual({ value });
+  it.each(Object.entries(SECURITY_HEADERS))('agrega %s', (key, value) => {
+    expect(headers[key]).toEqual({ value });
+  });
+
+  it('no agrega otros headers', () => {
+    expect(Object.keys(headers).sort()).toEqual(Object.keys(SECURITY_HEADERS).sort());
+  });
+
+  it('la CSP bloquea scripts, iframes externos y formularios, sin unsafe-inline', () => {
+    const csp = headers['content-security-policy']?.value ?? '';
+    expect(csp).toContain("script-src 'none'");
+    expect(csp).toContain("frame-ancestors 'none'");
+    expect(csp).toContain("form-action 'none'");
+    expect(csp).not.toContain('unsafe-inline');
   });
 
   it('pisa los headers que vengan del origen', () => {
