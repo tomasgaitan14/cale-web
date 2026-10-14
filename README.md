@@ -1,6 +1,6 @@
 # Cale — sitio público
 
-Sitio estático de [Cale](https://cale-turnos.vercel.app), servicio de recordatorios de turnos por WhatsApp.
+Sitio estático de [Cale](https://cale.com.ar), servicio de recordatorios de turnos por WhatsApp.
 
 | Ruta | Contenido |
 |------|-----------|
@@ -26,9 +26,9 @@ npm run preview   # sirve dist/ en local
 ## Cambiar datos del negocio o el dominio
 
 Todo está en `src/config.ts`: nombre, titular, ubicación, email, `SITE_URL`, plazos de conservación y fecha de
-vigencia de los textos legales. Para usar un dominio propio, cambiá `SITE_URL` y agregá el dominio en Vercel.
+vigencia de los textos legales. Para cambiar el dominio, cambiá `SITE_URL` y el parámetro `DomainName` de `infra/site.yaml`.
 
 ## Deploy
 
-Vercel, desde la rama `main` del repo. `vercel.json` define URLs sin `.html` ni barra final y los headers de
-seguridad (incluida una CSP sin scripts).
+AWS (S3 + CloudFront), con GitHub Actions en cada push a `main`. Dos CloudFront Functions resuelven las URLs sin
+`.html` ni barra final y agregan los headers de seguridad (incluida una CSP sin scripts). Ver `docs/infra-aws.md`.

@@ -34,7 +34,7 @@ agregar acá nombre legal, dirección, CUIT ni IDs de cuentas. El único teléfo
 | Node | 24 (`.nvmrc` y `engines`; Astro 7 pide ≥ 22.12 y el `node` por defecto de nvm es 22.11) |
 | Hosting | **AWS**: S3 + CloudFront con el plan flat-rate Free, WAF, Route 53, alarmas por email. Ver [`docs/infra-aws.md`](docs/infra-aws.md) |
 | Deploy | GitHub Actions en cada push a `main` (OIDC, sin claves) |
-| Hosting anterior | Vercel (`cale-turnos.vercel.app`), que sigue activo hasta que el dominio propio funcione en AWS |
+| Hosting anterior | Vercel (`cale-turnos.vercel.app`), dado de baja el 2026-10-14 |
 
 ## Proyectos relacionados
 
@@ -42,11 +42,12 @@ Ninguno por ahora. El backend de Cale (envío de mensajes, webhooks, plantillas)
 
 ## Estado actual
 
-Al 2026-10-13:
+Al 2026-10-14:
 
 - Sitio en **`https://cale.com.ar`** (AWS, deploy automático); `www` y `d3bl9yoji79fah.cloudfront.net` redirigen ahí.
-  También sigue en `cale-turnos.vercel.app` hasta darlo de baja.
-- Verificación del negocio en Meta pausada: el próximo paso es verificar el dominio nuevo.
+  Vercel dado de baja.
+- Dominio `cale.com.ar` verificado en Meta y sitio del portfolio actualizado. Verificación del negocio pausada, lista
+  para retomar.
 - Portada nueva, legales actualizados y video de instalación en la rama `feat/install-section` (se publican con la
   etapa 6 del asistente).
 - Rediseño para público mayor publicado (`d596699`). 140 tests en verde.
@@ -57,8 +58,8 @@ Al 2026-10-13:
   armado por JS.
 - **`src/config.ts` es la fuente única** de nombre, titular, ubicación, email, rutas, plazos de conservación,
   fecha de vigencia legal y la etiqueta de verificación de dominio de Meta. Cambiar el dominio = cambiar `SITE_URL`.
-- **URLs sin barra final ni `.html`:** `build.format: 'file'`; en AWS lo resuelve una CloudFront Function y en
-  Vercel, `cleanUrls` y `trailingSlash: false` en `vercel.json`.
+- **URLs sin barra final ni `.html`:** `build.format: 'file'`; en AWS lo resuelve una CloudFront Function
+  (`UrlRewriteFunction`).
 - **CSP estricta** (`script-src 'none'`, sin `unsafe-inline`): por eso `inlineStylesheets: 'never'`, y nada de
   `style=""` ni `<script>`. Hay un test que lo controla.
 - **Rediseño para público mayor** (2026-10-12, skills `redesign-existing-projects` + `frontend-design`): textos cortos
@@ -88,15 +89,15 @@ Al 2026-10-13:
 
 ## Próximos pasos
 
-1. **Meta:** verificar el dominio `cale.com.ar` y retomar la verificación del negocio.
+1. **Meta:** retomar la verificación del negocio (el dominio `cale.com.ar` ya está verificado).
 2. **Actualizar los textos legales al modelo Tech Provider:** las secciones 2 y 3 de los términos todavía
    describen el modelo descartado ("el negocio crea y mantiene su propia app…"). La landing ya está actualizada.
 3. **Sección "Instalación"** (para abrir desde el celular: crear el calendario, darle acceso a un correo, conectar
    WhatsApp): primero definirla, después sumar a la privacidad que Cale lee el calendario del negocio.
-4. **Dar de baja Vercel** y borrar `vercel.json`, `tests/vercel-config.test.ts` y la comparación de headers en
-   `tests/infra.test.ts`.
-5. Cuando la base pase de Supabase a AWS: actualizar la sección 7 de `/privacidad` y `LEGAL_LAST_UPDATED`.
-6. Que un abogado revise los textos legales: el tope de responsabilidad se calcula sobre "lo pagado por el
+4. En `main`, la sección 7 de `/privacidad` todavía nombra a Supabase: la rama `feat/install-section` ya la corrige
+   (AWS y Google). Al mergear `main` en la rama, quedarse con el texto de la rama y poner `LEGAL_LAST_UPDATED` en la
+   fecha de publicación.
+5. Que un abogado revise los textos legales: el tope de responsabilidad se calcula sobre "lo pagado por el
    servicio", la jurisdicción no nombra una ciudad y la Ley 25.326 (art. 6) pide identificar al responsable de los
    datos.
 
@@ -108,7 +109,6 @@ Al 2026-10-13:
 - `src/pages/` — `index`, `privacidad`, `terminos`, `eliminar-datos`, `404`.
 - `infra/site.yaml` — plantilla de CloudFormation del stack `cale-site`.
 - `.github/workflows/deploy.yml` — deploy a AWS en cada push a `main`.
-- `vercel.json` — URLs limpias y headers en Vercel (se borra al darlo de baja).
 - `tests/site.test.ts` — controla el HTML generado (identidad, links, meta tags, CSP, contenido legal requerido).
 - `tests/infra.test.ts` — controla la plantilla y el workflow (seguridad, plan Free, alarmas, URLs, headers).
 - `docs/infra-aws.md` — arquitectura, costos, deploy, operación y problemas de AWS.
@@ -122,8 +122,4 @@ Al 2026-10-13:
 - `astro preview` en Astro 7 corre como daemon: se baja con `npx astro preview stop`.
 - **AWS CLI:** solo con el perfil `cale` (`aws login --profile cale`). El perfil `default` de la Mac es de otra
   cuenta: no usarlo. En zsh, `export AWS_PROFILE=cale AWS_REGION=us-east-1`.
-- **Cómo se creó el proyecto de Vercel:** la importación desde el dashboard no llegó a crearlo, y la API
-  (`POST /v11/projects` con `gitRepository`) lo rechaza con "install the GitHub integration". Funcionó
-  `vercel project add` + `vercel link` + `vercel git connect`. `vercel link` agrega `.vercel` al `.gitignore`
-  aunque ya esté: descartar ese cambio.
 - Al cambiar cualquier texto legal, actualizar `LEGAL_LAST_UPDATED`.
