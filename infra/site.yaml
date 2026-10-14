@@ -95,7 +95,7 @@ Resources:
         SigningBehavior: always
         SigningProtocol: sigv4
 
-  # URLs limpias como en Vercel: /privacidad sirve privacidad.html; /x.html y /x/ redirigen a /x
+  # URLs limpias: /privacidad sirve privacidad.html; /x.html y /x/ redirigen a /x
   UrlRewriteFunction:
     Type: AWS::CloudFront::Function
     Properties:
@@ -161,7 +161,6 @@ Resources:
         }
 
   # Headers de seguridad con una función: el plan Free no admite response headers policies propias.
-  # Son los mismos de vercel.json (un test controla que coincidan mientras convivan).
   SecurityHeadersFunction:
     Type: AWS::CloudFront::Function
     Properties:

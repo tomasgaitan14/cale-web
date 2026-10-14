@@ -145,7 +145,7 @@ describe.each(INDEXABLE_ROUTES)('página %s', (route) => {
     expect(bodyText(page())).not.toMatch(PLACEHOLDER_PATTERN);
   });
 
-  // La CSP de vercel.json bloquea scripts y estilos inline: si aparecen, se rompen en producción.
+  // La CSP del sitio (SecurityHeadersFunction en infra/site.yaml) bloquea scripts y estilos inline: si aparecen, se rompen en producción.
   it('no tiene scripts ni estilos inline', () => {
     expect(page().querySelectorAll('script')).toHaveLength(0);
     expect(page().querySelectorAll('style')).toHaveLength(0);
