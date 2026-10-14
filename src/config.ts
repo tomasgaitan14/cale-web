@@ -10,8 +10,8 @@ export const CONTACT_EMAIL = 'cale.turnos@gmail.com';
 // WhatsApp de contacto: formato internacional sin "+" (54 + 9 de celular + característica + número).
 export const WHATSAPP_NUMBER = '5491100000000';
 export const WHATSAPP_GREETING = 'Hola, quiero saber más sobre Cale para mi negocio.';
-// Asistente de alta (cale-app). Pasa a https://app.cale.com.ar cuando el dominio funcione.
-export const APP_URL = 'https://d3u63bozcxuk6k.cloudfront.net/';
+// Asistente de alta (cale-app).
+export const APP_URL = 'https://app.cale.com.ar/';
 // Sección de instalación de la portada: los botones "Probalo GRATIS" de arriba llevan ahí, y desde ahí al asistente
 export const INSTALL_SECTION_ID = 'instalacion';
 export const INSTALL_SECTION_URL = `/#${INSTALL_SECTION_ID}`;
