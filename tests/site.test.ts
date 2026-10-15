@@ -9,6 +9,7 @@ import {
   BUSINESS_NAME,
   CONTACT_EMAIL,
   FACEBOOK_DOMAIN_VERIFICATION,
+  LEGAL_LAST_UPDATED,
   LOCATION,
   OWNER_NAME,
   REMINDER_SEND_TIME,
@@ -402,5 +403,33 @@ describe('contenido requerido', () => {
   // Supabase y Vercel ya no intervienen: nombrarlos sería informar mal a quién se entregan los datos
   it.each(INDEXABLE_ROUTES)('%s no nombra proveedores que ya no se usan', (route) => {
     expect(bodyText(pages.get(route)!)).not.toMatch(/Supabase|Vercel/);
+  });
+});
+
+describe('robots.txt y sitemap.xml', () => {
+  const read = (file: string) => readFileSync(join(DIST_DIR, file), 'utf8');
+
+  it('robots.txt deja rastrear todo el sitio y apunta al sitemap', () => {
+    expect(read('robots.txt')).toBe(`User-agent: *\nAllow: /\n\nSitemap: ${canonicalUrl('/sitemap.xml')}\n`);
+  });
+
+  it('el sitemap tiene exactamente las páginas indexables, con su URL canónica y sin la 404', () => {
+    const sitemap = parse(read('sitemap.xml'));
+    const locations = sitemap.querySelectorAll('url > loc').map((loc) => loc.text);
+    expect(locations).toEqual(INDEXABLE_ROUTES.map((route) => canonicalUrl(route)));
+    // Cada URL es la canónica que declara su página
+    for (const route of INDEXABLE_ROUTES) {
+      expect(loadPage(routeToFile(route)).querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe(canonicalUrl(route));
+    }
+    expect(read('sitemap.xml')).not.toContain('404');
+  });
+
+  it('es un XML de sitemap válido, y los textos legales llevan su fecha de vigencia', () => {
+    const xml = read('sitemap.xml');
+    expect(xml.startsWith('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')).toBe(true);
+    const sitemap = parse(xml);
+    const lastmod = (route: string) =>
+      sitemap.querySelectorAll('url').find((url) => url.querySelector('loc')?.text === canonicalUrl(route))?.querySelector('lastmod')?.text;
+    for (const route of [ROUTES.privacy, ROUTES.terms, ROUTES.dataDeletion]) expect(lastmod(route)).toBe(LEGAL_LAST_UPDATED);
   });
 });
