@@ -22,8 +22,12 @@ interface Resource {
 }
 
 const template = parse(readFileSync(join(ROOT_DIR, 'infra', 'site.yaml'), 'utf8'), { customTags: CFN_TAGS }) as {
+  Parameters: Record<string, { Default?: string }>;
   Resources: Record<string, Resource>;
 };
+const DOMAIN = template.Parameters.DomainName?.Default ?? '';
+// Zona fija de Route 53 que usa CloudFront para los registros alias
+const CLOUDFRONT_HOSTED_ZONE_ID = 'Z2FDTNDATAQYW2';
 const resources = template.Resources;
 
 function propertiesOf(logicalId: string): Record<string, any> {
@@ -37,6 +41,7 @@ function propertiesOf(logicalId: string): Record<string, any> {
 interface CloudFrontRequest {
   uri: string;
   querystring: Record<string, { value: string; multiValue?: { value: string }[] }>;
+  headers?: Record<string, { value: string }>;
 }
 
 interface CloudFrontRedirect {
@@ -44,12 +49,14 @@ interface CloudFrontRedirect {
   headers: { location: { value: string } };
 }
 
-const handler = new Function(`${propertiesOf('UrlRewriteFunction').FunctionCode}; return handler;`)() as (event: {
+// El código va con !Sub: se reemplaza ${DomainName} como lo hace CloudFormation
+const urlRewriteCode = (propertiesOf('UrlRewriteFunction').FunctionCode as { Sub: string }).Sub.replaceAll('${DomainName}', DOMAIN);
+const handler = new Function(`${urlRewriteCode}; return handler;`)() as (event: {
   request: CloudFrontRequest;
 }) => CloudFrontRequest | CloudFrontRedirect;
 
-function viewerRequest(uri: string, querystring: CloudFrontRequest['querystring'] = {}) {
-  return handler({ request: { uri, querystring } });
+function viewerRequest(uri: string, querystring: CloudFrontRequest['querystring'] = {}, host = DOMAIN) {
+  return handler({ request: { uri, querystring, headers: { host: { value: host } } } });
 }
 
 function rewrittenUri(uri: string): string {
@@ -93,6 +100,20 @@ describe('función de URLs limpias', () => {
     expect(result.headers.location.value).toBe('/privacidad?fbclid=abc&tag=a&tag=b&flag');
   });
 
+  it('el dominio canónico es el del parámetro DomainName', () => {
+    expect(DOMAIN).toBe('cale.com.ar');
+    expect(rewrittenUri('/privacidad')).toBe('/privacidad.html');
+  });
+
+  it.each([`www.${DOMAIN}`, 'd3bl9yoji79fah.cloudfront.net'])('%s redirige al dominio canónico con la ruta y la query', (host) => {
+    expect(viewerRequest('/privacidad', { fbclid: { value: 'abc' } }, host)).toEqual({
+      statusCode: 301,
+      statusDescription: 'Moved Permanently',
+      headers: { location: { value: `https://${DOMAIN}/privacidad?fbclid=abc` } },
+    });
+  });
+
+
   it('manda los 403 y 404 de S3 a la página 404 del sitio', () => {
     expect(existsSync(join(DIST_DIR, NOT_FOUND_FILE))).toBe(true);
     const errors = propertiesOf('Distribution').DistributionConfig.CustomErrorResponses;
@@ -104,10 +125,29 @@ describe('función de URLs limpias', () => {
   });
 });
 
+// Headers que agrega SecurityHeadersFunction a todas las respuestas
+const CSP = [
+  "default-src 'self'",
+  "script-src 'none'",
+  "style-src 'self'",
+  "img-src 'self' data:",
+  "font-src 'self'",
+  "connect-src 'none'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'none'",
+  "frame-ancestors 'none'",
+].join('; ');
+const SECURITY_HEADERS: Record<string, string> = {
+  'content-security-policy': CSP,
+  'strict-transport-security': 'max-age=63072000; includeSubDomains',
+  'x-content-type-options': 'nosniff',
+  'x-frame-options': 'DENY',
+  'referrer-policy': 'strict-origin-when-cross-origin',
+  'permissions-policy': 'camera=(), microphone=(), geolocation=()',
+};
+
 describe('headers de seguridad', () => {
-  const vercelHeaders: { key: string; value: string }[] = JSON.parse(
-    readFileSync(join(ROOT_DIR, 'vercel.json'), 'utf8'),
-  ).headers[0].headers;
 
   const addSecurityHeaders = new Function(
     `${propertiesOf('SecurityHeadersFunction').FunctionCode}; return handler;`,
@@ -118,8 +158,20 @@ describe('headers de seguridad', () => {
   // Respuesta de S3 con un header que la función tiene que pisar
   const { headers } = addSecurityHeaders({ response: { headers: { 'x-frame-options': { value: 'SAMEORIGIN' } } } });
 
-  it.each(vercelHeaders.map((header) => [header.key, header.value]))('agrega %s igual que vercel.json', (key, value) => {
-    expect(headers[key.toLowerCase()]).toEqual({ value });
+  it.each(Object.entries(SECURITY_HEADERS))('agrega %s', (key, value) => {
+    expect(headers[key]).toEqual({ value });
+  });
+
+  it('no agrega otros headers', () => {
+    expect(Object.keys(headers).sort()).toEqual(Object.keys(SECURITY_HEADERS).sort());
+  });
+
+  it('la CSP bloquea scripts, iframes externos y formularios, sin unsafe-inline', () => {
+    const csp = headers['content-security-policy']?.value ?? '';
+    expect(csp).toContain("script-src 'none'");
+    expect(csp).toContain("frame-ancestors 'none'");
+    expect(csp).toContain("form-action 'none'");
+    expect(csp).not.toContain('unsafe-inline');
   });
 
   it('pisa los headers que vengan del origen', () => {
@@ -277,5 +329,44 @@ describe('rol de deploy de GitHub Actions', () => {
     const actions = statements.flatMap((statement: any) => [statement.Action].flat());
     expect(actions.sort()).toEqual(['cloudfront:CreateInvalidation', 's3:DeleteObject', 's3:ListBucket', 's3:PutObject']);
     expect(JSON.stringify(statements)).not.toMatch(/"\*"|:\*"/);
+  });
+});
+
+describe('dominio propio', () => {
+  it('el certificado de ACM cubre el dominio y www y se valida con DNS en la zona del stack', () => {
+    expect(propertiesOf('Certificate')).toEqual({
+      DomainName: { Ref: 'DomainName' },
+      SubjectAlternativeNames: [{ Sub: 'www.${DomainName}' }],
+      ValidationMethod: 'DNS',
+      DomainValidationOptions: [
+        { DomainName: { Ref: 'DomainName' }, HostedZoneId: { Ref: 'HostedZone' } },
+        { DomainName: { Sub: 'www.${DomainName}' }, HostedZoneId: { Ref: 'HostedZone' } },
+      ],
+    });
+  });
+
+  it('CloudFront responde en el dominio y www con ese certificado, solo con TLS 1.2 o más', () => {
+    const config = propertiesOf('Distribution').DistributionConfig;
+    expect(config.Aliases).toEqual([{ Ref: 'DomainName' }, { Sub: 'www.${DomainName}' }]);
+    expect(config.ViewerCertificate).toEqual({
+      AcmCertificateArn: { Ref: 'Certificate' },
+      SslSupportMethod: 'sni-only',
+      MinimumProtocolVersion: 'TLSv1.2_2021',
+    });
+  });
+
+  it('el dominio y www apuntan a CloudFront en IPv4 e IPv6', () => {
+    const records = propertiesOf('SiteRecords');
+    expect(records.HostedZoneId).toEqual({ Ref: 'HostedZone' });
+    const names = records.RecordSets.map((record: any) => [JSON.stringify(record.Name), record.Type]);
+    expect(names).toEqual([
+      [JSON.stringify({ Ref: 'DomainName' }), 'A'],
+      [JSON.stringify({ Ref: 'DomainName' }), 'AAAA'],
+      [JSON.stringify({ Sub: 'www.${DomainName}' }), 'A'],
+      [JSON.stringify({ Sub: 'www.${DomainName}' }), 'AAAA'],
+    ]);
+    for (const record of records.RecordSets) {
+      expect(record.AliasTarget).toEqual({ DNSName: { GetAtt: 'Distribution.DomainName' }, HostedZoneId: CLOUDFRONT_HOSTED_ZONE_ID });
+    }
   });
 });
