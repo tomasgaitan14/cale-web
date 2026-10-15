@@ -355,6 +355,16 @@ describe('dominio propio', () => {
     });
   });
 
+  it('el dominio está verificado en Google Search Console con un TXT en la raíz (uno solo: Route 53 no admite dos)', () => {
+    expect(propertiesOf('SiteVerificationRecord')).toEqual({
+      HostedZoneId: { Ref: 'HostedZone' },
+      Name: { Ref: 'DomainName' },
+      Type: 'TXT',
+      TTL: '300',
+      ResourceRecords: ['"google-site-verification=L8Tn5KWOfW533ESn0HDZUL1AHtAZZeAlWne_VNKDkn0"'],
+    });
+  });
+
   it('el dominio y www apuntan a CloudFront en IPv4 e IPv6', () => {
     const records = propertiesOf('SiteRecords');
     expect(records.HostedZoneId).toEqual({ Ref: 'HostedZone' });

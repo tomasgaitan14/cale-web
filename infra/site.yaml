@@ -337,6 +337,18 @@ Resources:
             DNSName: !GetAtt Distribution.DomainName
             HostedZoneId: Z2FDTNDATAQYW2
 
+  # Verificación del dominio en Google Search Console (propiedad "Dominio", cuenta del producto). El valor no es
+  # secreto: cualquiera lo ve en el DNS. Si se agrega otro TXT en la raíz, va en este mismo registro.
+  SiteVerificationRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZone
+      Name: !Ref DomainName
+      Type: TXT
+      TTL: '300'
+      ResourceRecords:
+        - '"google-site-verification=L8Tn5KWOfW533ESn0HDZUL1AHtAZZeAlWne_VNKDkn0"'
+
   HostedZone:
     Type: AWS::Route53::HostedZone
     DeletionPolicy: RetainExceptOnCreate
