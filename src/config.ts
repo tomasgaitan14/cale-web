@@ -52,11 +52,16 @@ export const RETENTION = {
   buttonReplyDays: 7,
 } as const;
 
-// Plazos del asistente de alta (los mismos que cale-app: shared/src/session.ts y api/src/domain/auth.ts)
+// Plazos del asistente de alta (los mismos que cale-app: api/src/domain/auth.ts)
 export const APP_SESSION = {
-  loginLinkMinutes: 15,
+  // Lo que dura un intento de entrar con Google (la cookie que lo acompaña)
+  loginAttemptMinutes: 10,
   sessionDays: 30,
 } as const;
+// Hora (Argentina) en que salen los recordatorios, el día anterior a cada turno (cale-app: REMINDER_SEND_TIME)
+export const REMINDER_SEND_TIME = '7:00';
+// Horarios libres que se ofrecen para reservar o cambiar un turno (cale-app: api/src/domain/availability.ts)
+export const SLOT_OFFER = { maxSlots: 10, daysAhead: 7 } as const;
 
 // Plazos de respuesta de la Ley 25.326 (art. 14 inc. 2 y art. 16 inc. 2).
 export const RESPONSE_DEADLINES = {

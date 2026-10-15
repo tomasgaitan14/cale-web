@@ -55,7 +55,7 @@ import { mailtoUrl } from '../lib/url';
   <h2 id="datos">3. Qué datos tratamos</h2>
   <h3>De los clientes finales de cada negocio</h3>
   <ul>
-    <li>Nombre.</li>
+    <li>Nombre. Si el cliente pide un turno por WhatsApp, el nombre de pila de su perfil de WhatsApp.</li>
     <li>Número de teléfono de WhatsApp.</li>
     <li>
       Datos del turno que el negocio anota en su calendario de turnos: fecha, hora y lo que escriba en el evento (por
@@ -63,8 +63,14 @@ import { mailtoUrl } from '../lib/url';
     </li>
     <li>
       Contenido de los mensajes que se envían y de las respuestas que da el cliente, incluidas las respuestas con
-      botones (confirmar, cancelar o pedir otro horario).
+      botones (confirmar, cancelar o pedir otro horario) y el horario que elige de la lista de horarios libres.
     </li>
+    <li>
+      Los mensajes que el cliente le escribe al WhatsApp del negocio llegan también a {BUSINESS_NAME}, porque el negocio
+      lo conecta a ese número. {BUSINESS_NAME} solo usa los que piden un turno (los que dicen “turno”); los demás los
+      descarta sin guardarlos, y el negocio los sigue viendo en su WhatsApp Business.
+    </li>
+    <li>El último turno que reservó cada número por WhatsApp en cada negocio, para que reserve uno por vez.</li>
     <li>
       Estados de entrega de cada mensaje que informa Meta (enviado, entregado, leído o fallido), con su fecha y hora.
     </li>
@@ -72,10 +78,13 @@ import { mailtoUrl } from '../lib/url';
   <h3>De los negocios que contratan el servicio</h3>
   <ul>
     <li>
-      Los datos que cargan en el asistente de alta: nombre del negocio, nombre de la persona responsable, número de
-      WhatsApp y correo.
+      Los datos que cargan en el asistente de alta y en su perfil: nombre del negocio, nombre de la persona responsable,
+      número de WhatsApp, días y horarios de atención, duración de los turnos y días sin atención.
     </li>
-    <li>El correo de su cuenta de Google, con el que se comparte el calendario de turnos.</li>
+    <li>
+      El nombre y el correo de la cuenta de Google con la que entra (“Entrar con Google”). Con ese correo se comparte el
+      calendario de turnos. {BUSINESS_NAME} no recibe la contraseña ni otros datos de la cuenta.
+    </li>
     <li>
       Las fechas de su prueba gratis, lo que responde a nuestros mensajes de WhatsApp sobre la prueba (si quiere seguir,
       si acepta días de más o si no quiere seguir) y si el servicio está activo.
@@ -88,9 +97,10 @@ import { mailtoUrl } from '../lib/url';
 
   <h3>De quienes usan el asistente de alta</h3>
   <p>
-    El asistente usa una única cookie, necesaria para entrar: guarda la sesión durante {APP_SESSION.sessionDays} días.
-    En el navegador también guarda el avance del formulario, hasta entrar con el link del correo, y después una marca de
-    que ya entraste. No usa cookies de analítica ni de publicidad.
+    El asistente usa dos cookies, necesarias para entrar: una acompaña cada intento de entrar con Google y dura {
+      APP_SESSION.loginAttemptMinutes
+    } minutos, y la otra guarda la sesión durante {APP_SESSION.sessionDays} días. En el navegador también guarda el avance
+    del formulario, hasta que lo mandás, y una marca de que ya entraste. No usa cookies de analítica ni de publicidad.
   </p>
 
   <h3>De quienes visitan este sitio</h3>
@@ -103,19 +113,28 @@ import { mailtoUrl } from '../lib/url';
   <h2 id="finalidad">4. Para qué usamos los datos</h2>
   <p>Usamos los datos <strong>solo</strong> para:</p>
   <ul>
+    <li>Identificar al negocio con su cuenta de Google cuando entra al asistente o a su perfil.</li>
     <li>
-      Crear el calendario de turnos del negocio, compartírselo y leerlo para saber a quién recordarle cada turno.
+      Crear el calendario de turnos del negocio, compartírselo y leerlo para saber a quién recordarle cada turno y qué
+      horarios están libres.
     </li>
     <li>Enviar recordatorios de turnos por WhatsApp en nombre del negocio.</li>
-    <li>Mandar por correo el link para entrar al asistente de alta.</li>
+    <li>
+      Hacer en el calendario lo que pide el cliente: marcar el turno que confirma, borrar el que cancela, moverlo al
+      horario que elige y anotar el que reserva por WhatsApp.
+    </li>
+    <li>
+      Responderle al cliente que pide un turno o un cambio de horario con los horarios libres del negocio, según los días
+      y horarios de atención que cargó.
+    </li>
     <li>
       Escribirle por WhatsApp al negocio, desde el número de {BUSINESS_NAME}, sobre su cuenta: el aviso de que termina
       la prueba gratis, la oferta de días de más y la confirmación de lo que elija. También le avisamos al equipo
       de {BUSINESS_NAME} lo que respondió, para seguir en contacto.
     </li>
     <li>
-      Registrar la respuesta del cliente (confirmación, cancelación o pedido de otro horario) y comunicársela al negocio
-      para que gestione su agenda.
+      Registrar la respuesta del cliente (confirmación, cancelación o pedido de otro horario) y reflejarla en el
+      calendario del negocio, para que vea su agenda al día.
     </li>
     <li>Controlar que los mensajes se entreguen y detectar errores de envío.</li>
     <li>Dar soporte a los negocios y mantener la seguridad del servicio.</li>
@@ -141,8 +160,8 @@ import { mailtoUrl } from '../lib/url';
     Los mensajes se envían a través de la <strong>WhatsApp Business Platform (Cloud API)</strong> de Meta Platforms,
     Inc. Para entregar cada mensaje, Meta recibe el número de teléfono del destinatario y el contenido del mensaje, y
     los trata según sus propias condiciones y su política de privacidad. Meta informa a {BUSINESS_NAME} los estados de
-    entrega de cada mensaje. Por la misma vía viajan los mensajes de {BUSINESS_NAME} al negocio y las respuestas que
-    el negocio da con los botones.
+    entrega de cada mensaje. Por la misma vía viajan los mensajes de {BUSINESS_NAME} al negocio, las respuestas que
+    el negocio y sus clientes dan con los botones y los mensajes que los clientes le escriben al negocio.
   </p>
 
   <h2 id="proveedores">7. Proveedores que intervienen</h2>
@@ -150,10 +169,12 @@ import { mailtoUrl } from '../lib/url';
   <ul>
     <li><strong>Meta Platforms, Inc.</strong>: envío y entrega de los mensajes de WhatsApp.</li>
     <li>
-      <strong>Amazon Web Services, Inc.</strong>: hosting de este sitio y del asistente de alta, base de datos y envío
-      de correos.
+      <strong>Amazon Web Services, Inc.</strong>: hosting de este sitio y del asistente de alta, y base de datos.
     </li>
-    <li><strong>Google LLC</strong>: el calendario de turnos de cada negocio (Google Calendar).</li>
+    <li>
+      <strong>Google LLC</strong>: el calendario de turnos de cada negocio (Google Calendar) y el inicio de sesión con
+      Google.
+    </li>
   </ul>
   <p>
     Si cambiamos de proveedor de infraestructura, actualizamos esta lista y la fecha de esta política.
@@ -170,9 +191,9 @@ import { mailtoUrl } from '../lib/url';
   <h2 id="conservacion">9. Cuánto tiempo guardamos los datos</h2>
   <ul>
     <li>
-      Los datos de cada turno, los mensajes y sus estados de entrega se guardan durante <strong
-        >{RETENTION.appointmentDataMonths} meses</strong
-      > desde la fecha del turno. Después se borran.
+      Los datos de cada turno, los mensajes, sus estados de entrega y el registro de las reservas por WhatsApp se
+      guardan durante <strong>{RETENTION.appointmentDataMonths} meses</strong> desde la fecha del turno. Después se
+      borran.
     </li>
     <li>
       Si un negocio deja de usar {BUSINESS_NAME}, borramos su calendario de turnos y todos los datos de sus clientes
@@ -180,7 +201,7 @@ import { mailtoUrl } from '../lib/url';
       antes, le enviamos sus turnos en un archivo.
     </li>
     <li>
-      Los links para entrar al asistente vencen a los {APP_SESSION.loginLinkMinutes} minutos y las sesiones, a los {
+      Los intentos de entrar con Google vencen a los {APP_SESSION.loginAttemptMinutes} minutos y las sesiones, a los {
         APP_SESSION.sessionDays
       } días.
     </li>

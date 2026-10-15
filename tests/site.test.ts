@@ -4,15 +4,18 @@ import { join } from 'node:path';
 import { HTMLElement, NodeType, parse, type Node } from 'node-html-parser';
 import { beforeAll, describe, expect, it } from 'vitest';
 import {
+  APP_SESSION,
   APP_URL,
   BUSINESS_NAME,
   CONTACT_EMAIL,
   FACEBOOK_DOMAIN_VERIFICATION,
   LOCATION,
   OWNER_NAME,
+  REMINDER_SEND_TIME,
   RESPONSE_DEADLINES,
   RETENTION,
   ROUTES,
+  SLOT_OFFER,
   TRIAL_DAYS,
   TRIAL_EXTENSION_DAYS,
   TRIAL_NOTICE_DAYS_BEFORE,
@@ -320,13 +323,21 @@ describe('contenido requerido', () => {
       'Datos del turno',
       'Contenido de los mensajes',
       'Estados de entrega',
-      // Proveedores actuales: AWS (sitio, asistente, base y correos), Google (calendario) y Meta (WhatsApp)
+      // Proveedores actuales: AWS (sitio, asistente y base), Google (calendario e inicio de sesión) y Meta (WhatsApp)
       'Amazon Web Services',
       'Google LLC',
+      'el inicio de sesión con Google',
       'Meta Platforms',
-      // El asistente de alta: una sola cookie necesaria y sin analítica
-      'una única cookie, necesaria para entrar',
+      // El asistente de alta: entrar con Google (nombre y correo), dos cookies necesarias y sin analítica
+      'El nombre y el correo de la cuenta de Google',
+      `dos cookies, necesarias para entrar: una acompaña cada intento de entrar con Google y dura ${APP_SESSION.loginAttemptMinutes} minutos`,
       'No usa cookies de analítica ni de publicidad',
+      // Etapa 7: Cale cambia el calendario según lo que pide el cliente, toma turnos por WhatsApp y descarta los
+      // mensajes que no piden un turno
+      'borrar el que cancela, moverlo al horario que elige y anotar el que reserva por WhatsApp',
+      'los demás los descarta sin guardarlos',
+      'el nombre de pila de su perfil de WhatsApp',
+      'días y horarios de atención, duración de los turnos y días sin atención',
       'calendario de turnos',
       `${RETENTION.appointmentDataMonths} meses`,
       `${RETENTION.afterTerminationDays} días`,
@@ -352,9 +363,14 @@ describe('contenido requerido', () => {
       // Coexistencia: mismo número y misma app, y el acceso de Cale es revocable
       'sigue usando la misma app y el mismo número',
       'puede quitarle el acceso',
-      // Calendario de turnos en la cuenta de Cale, y Cale no reprograma solo
+      // Calendario de turnos en la cuenta de Cale, que Cale cambia según lo que responde cada cliente
       'calendario de turnos',
-      'no cambia el horario por su cuenta',
+      `a las ${REMINDER_SEND_TIME} del día anterior`,
+      'si cancela, lo borra del calendario',
+      `le ofrece hasta ${SLOT_OFFER.maxSlots} horarios libres de los próximos ${SLOT_OFFER.daysAhead} días y mueve el turno al que elija`,
+      'Tomar turnos por WhatsApp',
+      'uno por vez por cliente',
+      'turnos ofrecidos o tomados según horarios o un calendario desactualizados',
       // Prueba gratis: plazo, aviso por WhatsApp, días de más una vez, sin cobro automático y qué pasa al terminar
       `gratis durante ${TRIAL_DAYS} días`,
       `${TRIAL_NOTICE_DAYS_BEFORE} días antes de que termine la prueba, le escribimos al negocio por WhatsApp`,
