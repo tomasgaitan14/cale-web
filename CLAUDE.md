@@ -55,7 +55,7 @@ Al 2026-10-15:
   instalación con el video y "Probalo GRATIS" hacia `app.cale.com.ar`, y textos legales al 15/10/2026 (entrar con
   Google, perfil, recordatorios a las 7:00, Cale marca, borra, mueve y anota turnos, reservas con "turno").
   162 tests en verde.
-- **Rama `feat/design-system` (Fase 1 del rediseño), sin publicar:** landing nueva con el diseño "Recepción" y los
+- **Publicado `6a8384a` (Fase 1 del rediseño):** landing nueva con el diseño "Recepción" y los
   textos de `PRODUCT_SOURCE_OF_TRUTH.md` (sección 9): portada con el celular y la vista previa real del recordatorio,
   "Cómo funciona" en 3 pasos y banda de cierre. Sin video ni "mismo número"; avisa que WhatsApp todavía no está
   disponible. Las páginas legales toman los tokens sin cambiar sus textos. 189 tests en verde.
@@ -102,7 +102,7 @@ Al 2026-10-15:
 ## Próximos pasos
 
 1. **Meta:** retomar la verificación del negocio el 20/10/2026 (el dominio `cale.com.ar` ya está verificado).
-2. **Publicar la Fase 1** (merge de `feat/design-system` a `main`, que deploya) con el OK del titular.
+2. `terminos.astro` todavía dice "el mismo número": revisarlo con los legales (y `LEGAL_LAST_UPDATED`).
 3. Que un abogado revise los textos legales: el tope de responsabilidad se calcula sobre "lo pagado por el
    servicio", la jurisdicción no nombra una ciudad y la Ley 25.326 (art. 6) pide identificar al responsable de los
    datos.
