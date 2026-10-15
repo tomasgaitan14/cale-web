@@ -27,9 +27,9 @@ agregar acá nombre legal, dirección, CUIT ni IDs de cuentas. El único teléfo
 | Capa | Elección |
 |------|----------|
 | Build | Astro 7, salida 100 % estática, **sin JS en el cliente** |
-| Estilos | CSS plano con tokens en `src/styles/global.css` (sin Tailwind) |
-| Tipografía | Atkinson Hyperlegible Next (self-hosted con `@fontsource-variable`), pensada para baja visión |
-| Íconos | `@phosphor-icons/core` (Bold), inline vía `src/components/Icon.astro` (solo WhatsApp y doble check) |
+| Estilos | CSS plano: tokens del diseño en `src/styles/tokens.css` (copia de `cale-app/docs/DISENO.md`), base en `global.css` (sin Tailwind) |
+| Tipografía | Manrope (títulos) + DM Sans (texto), autoalojadas con `@fontsource-variable` |
+| Íconos | `@phosphor-icons/core` (Bold), inline vía `src/components/Icon.astro` (calendario, reloj, tilde, doble tilde y WhatsApp) |
 | Tests | Vitest sobre el HTML de `dist/` + `node-html-parser`; la plantilla de AWS y el workflow, con `yaml` |
 | Node | 24 (`.nvmrc` y `engines`; Astro 7 pide ≥ 22.12 y el `node` por defecto de nvm es 22.11) |
 | Hosting | **AWS**: S3 + CloudFront con el plan flat-rate Free, WAF, Route 53, alarmas por email. Ver [`docs/infra-aws.md`](docs/infra-aws.md) |
@@ -40,7 +40,8 @@ agregar acá nombre legal, dirección, CUIT ni IDs de cuentas. El único teléfo
 
 - **`cale-app`** (repo privado, `~/projects-claude/personal/cale-app/`): el asistente de alta y el backend de Cale en
   `https://app.cale.com.ar` (entrar con Google, calendario, perfil, recordatorios, reservas por WhatsApp y webhook).
-  Los botones "Probalo GRATIS" de la portada llevan ahí (`APP_URL`). Varios plazos y textos del sitio copian los de
+  Los botones "Empezar gratis" e "Ingresar a mi cuenta" llevan ahí (`APP_URL`; en el celular el encabezado muestra solo el segundo). `tokens.css` es la misma copia que
+  `cale-app/web/src/styles/tokens.css`: si cambia un valor, cambiarlo en `DISENO.md` y en los dos repos. Varios plazos y textos del sitio copian los de
   cale-app y lo dicen en `src/config.ts` (prueba gratis, sesión, hora de los recordatorios, horarios que se ofrecen):
   si cambian allá, cambiarlos acá y en `LEGAL_LAST_UPDATED`.
 
@@ -54,6 +55,10 @@ Al 2026-10-15:
   instalación con el video y "Probalo GRATIS" hacia `app.cale.com.ar`, y textos legales al 15/10/2026 (entrar con
   Google, perfil, recordatorios a las 7:00, Cale marca, borra, mueve y anota turnos, reservas con "turno").
   162 tests en verde.
+- **Rama `feat/design-system` (Fase 1 del rediseño), sin publicar:** landing nueva con el diseño "Recepción" y los
+  textos de `PRODUCT_SOURCE_OF_TRUTH.md` (sección 9): portada con el celular y la vista previa real del recordatorio,
+  "Cómo funciona" en 3 pasos y banda de cierre. Sin video ni "mismo número"; avisa que WhatsApp todavía no está
+  disponible. Las páginas legales toman los tokens sin cambiar sus textos. 189 tests en verde.
 - Decisión del titular: publicar todo aunque el asistente todavía se frena en el paso 3 (WhatsApp, depende de que
   Meta apruebe a Cale como Tech Provider). Por ahora solo entra él.
 - Dominio `cale.com.ar` verificado en Meta. Verificación del negocio se retoma el 20/10/2026.
@@ -68,15 +73,16 @@ Al 2026-10-15:
   (`UrlRewriteFunction`).
 - **CSP estricta** (`script-src 'none'`, sin `unsafe-inline`): por eso `inlineStylesheets: 'never'`, y nada de
   `style=""` ni `<script>`. Hay un test que lo controla.
-- **Rediseño para público mayor** (2026-10-12, skills `redesign-existing-projects` + `frontend-design`): textos cortos
-  sin términos técnicos (un test lo controla), voz "Cale te ayuda a…", letra de 20 px, contraste AAA (tinta
-  `#1F2328`, grafito `#4B5563` sobre blanco), un solo acento (resaltador `#FFE566`, solo en el dibujo), sin
-  etiquetas en mayúsculas, tarjetas, preguntas frecuentes ni animaciones de scroll. Una sola animación: el dibujo de
-  la portada (renglón de agenda → WhatsApp), desactivada con `prefers-reduced-motion`. Sin fotos por ahora.
-- **Contacto principal por WhatsApp** (`WHATSAPP_NUMBER` en `config.ts`, componente `WhatsAppButton.astro`): arriba,
-  en la portada y al cierre, con un mensaje ya escrito. El email queda como segunda opción.
-- **La portada da por hecha la coexistencia** ("el mismo número que ya usás"), por decisión del titular, aunque
-  depende de que Meta apruebe a Cale como Tech Provider.
+- **Diseño "Recepción"** (aprobado el 2026-10-15, implementado en la Fase 1): crema, negro, blanco y verde WhatsApp;
+  Manrope + DM Sans. Fuente: `~/projects-claude/personal/cale-app/docs/DISENO.md` y el prototipo que cita. El verde
+  nunca es color de texto, y AAA en el texto principal y AA en el resto (los dos los controla `tests/contrast.test.ts`).
+  Reemplazó al rediseño para público mayor del 2026-10-12 (Atkinson, resaltador amarillo, comparación y video).
+- **Textos de la landing** (`LANDING_COPY`, `HOW_IT_WORKS`, `REMINDER_PREVIEW` en `config.ts`): los de la fuente de
+  verdad de cale-app. La vista previa usa el texto real de la plantilla `cale_recordatorio_turno`. Sin promesas que
+  todavía no se cumplen: el "mismo número" y la prueba gratis activa vuelven recién con la Fase 5 (Meta). Ojo:
+  `terminos.astro` todavía dice "el mismo número" (texto legal, no se tocó).
+- **Contacto por WhatsApp** (`WHATSAPP_NUMBER` en `config.ts`): al cierre de la landing y en el pie, con un mensaje ya
+  escrito. El email queda como segunda opción.
 - **Sin cookies, analítica ni formularios.** Si se agrega GTM/GA4, hay que actualizar la política de privacidad
   y la CSP.
 - **Rol legal:** Cale trata datos por cuenta del negocio (art. 25, Ley 25.326); el negocio es responsable y
@@ -96,8 +102,7 @@ Al 2026-10-15:
 ## Próximos pasos
 
 1. **Meta:** retomar la verificación del negocio el 20/10/2026 (el dominio `cale.com.ar` ya está verificado).
-2. **Video de instalación** (proyecto cale-video): dice "4 pasos" y el asistente tiene 5. Rehacerlo con la etapa 3 de
-   cale-app, que cambia el paso de WhatsApp.
+2. **Publicar la Fase 1** (merge de `feat/design-system` a `main`, que deploya) con el OK del titular.
 3. Que un abogado revise los textos legales: el tope de responsabilidad se calcula sobre "lo pagado por el
    servicio", la jurisdicción no nombra una ciudad y la Ley 25.326 (art. 6) pide identificar al responsable de los
    datos.
