@@ -1,8 +1,10 @@
 ---
 import '../styles/global.css';
-import TrialButton from '../components/TrialButton.astro';
+import AppButton from '../components/AppButton.astro';
+import Brand from '../components/Brand.astro';
 import {
   BUSINESS_NAME,
+  LANDING_COPY,
   CONTACT_EMAIL,
   FACEBOOK_DOMAIN_VERIFICATION,
   LOCATION,
@@ -41,7 +43,7 @@ const LEGAL_LINKS = [
     {canonical && <link rel="canonical" href={canonical} />}
     <meta name="robots" content={canonical ? 'index, follow' : 'noindex'} />
     <meta name="author" content={OWNER_NAME} />
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="theme-color" content="#f7f4ee" />
     <meta name="facebook-domain-verification" content={FACEBOOK_DOMAIN_VERIFICATION} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
@@ -58,11 +60,11 @@ const LEGAL_LINKS = [
 
     <header class="site-header">
       <div class="container header-inner">
-        <a class="wordmark" href={ROUTES.home} aria-label={`${BUSINESS_NAME}, inicio`}>
-          <img src="/favicon.svg" alt="" width="32" height="32" />
-          <span>{BUSINESS_NAME}</span>
-        </a>
-        <TrialButton compact />
+        <a class="home-link" href={ROUTES.home} aria-label={`${BUSINESS_NAME}, inicio`}><Brand /></a>
+        <div class="header-actions">
+          <AppButton variant="secondary" label={LANDING_COPY.signIn} compact />
+          <AppButton compact class="header-start" />
+        </div>
       </div>
     </header>
 
@@ -102,8 +104,7 @@ const LEGAL_LINKS = [
     position: sticky;
     top: 0;
     z-index: 10;
-    background: var(--color-paper);
-    border-bottom: 1px solid var(--color-rule);
+    background: var(--bg);
   }
 
   .header-inner {
@@ -111,25 +112,36 @@ const LEGAL_LINKS = [
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    min-height: 4.5rem;
+    min-height: 4rem;
   }
 
-  .wordmark {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.625rem;
-    font-size: 1.625rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
+  .home-link {
     text-decoration: none;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  /* En el celular los dos no entran al lado de la marca, y "Empezar gratis" ya está en la portada: arriba queda solo
+     "Ingresar a mi cuenta" */
+  @media (max-width: 39.99rem) {
+    .header-actions :global(.header-start) {
+      display: none;
+    }
+
+    .header-actions :global(.button) {
+      width: auto;
+    }
   }
 
   .site-footer {
     padding-block: 3rem 3.5rem;
-    background: var(--color-paper-alt);
-    border-top: 1px solid var(--color-rule);
-    color: var(--color-graphite);
-    font-size: 1.0625rem;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: var(--fs-small);
   }
 
   .footer-inner {
@@ -148,6 +160,5 @@ const LEGAL_LINKS = [
 
   .footer-fine-print {
     margin-top: 1rem;
-    font-size: 0.9375rem;
   }
 </style>

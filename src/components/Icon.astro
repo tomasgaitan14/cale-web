@@ -1,13 +1,17 @@
 ---
 // Íconos Phosphor (peso Bold) como SVG inline: sin JS ni pedidos extra.
+import calendarCheck from '@phosphor-icons/core/bold/calendar-check-bold.svg?raw';
 import check from '@phosphor-icons/core/bold/check-bold.svg?raw';
 import checks from '@phosphor-icons/core/bold/checks-bold.svg?raw';
-import x from '@phosphor-icons/core/bold/x-bold.svg?raw';
+import clock from '@phosphor-icons/core/bold/clock-bold.svg?raw';
+import whatsapp from '@phosphor-icons/core/bold/whatsapp-logo-bold.svg?raw';
 
 const ICONS = {
+  calendarCheck,
   check,
   checks,
-  x,
+  clock,
+  whatsapp,
 } as const;
 
 export type IconName = keyof typeof ICONS;

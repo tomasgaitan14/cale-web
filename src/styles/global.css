@@ -1,41 +1,20 @@
-@import '@fontsource-variable/atkinson-hyperlegible-next';
+@import '@fontsource-variable/manrope';
+@import '@fontsource-variable/dm-sans';
+@import './tokens.css';
 
-/* Tokens para un público mayor: letra grande y contraste AAA (7:1 o más).
-   Contraste sobre --color-paper: --color-ink 15.8:1, --color-graphite 7.6:1.
-   --color-graphite nunca va como texto sobre --color-bubble (6.6:1). */
+/* Layout del sitio (los colores, la tipografía y las formas vienen de tokens.css) */
 :root {
-  --color-paper: #ffffff;
-  --color-paper-alt: #f6f7f8;
-  --color-ink: #1f2328;
-  --color-ink-hover: #3a4048;
-  --color-graphite: #4b5563;
-  --color-rule: #e3e5e8;
-  --color-bubble: #eef0f2;
-  /* Comparación de la portada (sin Cale / con Cale). Texto sobre su fondo: rojo 7,6:1 y verde 7,4:1 (AAA). El color
-     nunca va solo: cada fila también tiene una X o un check. */
-  --color-without: #8f2a28;
-  --color-without-bg: #fdf2f1;
-  --color-with: #155c33;
-  --color-with-bg: #eef8f1;
-  /* Resaltador: solo en el dibujo de la agenda, nunca como color de texto */
-  --color-highlight: #ffe566;
-
-  --font-sans: 'Atkinson Hyperlegible Next Variable', 'Atkinson Hyperlegible Next', Verdana, sans-serif;
-
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --container: 64rem;
-  --reading-width: 34rem;
+  --container: 72.5rem;
+  --reading-width: 40rem;
   --gutter: 1rem;
-  --section-space: clamp(4rem, 10vw, 7rem);
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --section-space: clamp(3.5rem, 9vw, 6rem);
 
   color-scheme: light;
 }
 
 @media (min-width: 48rem) {
   :root {
-    --gutter: 2rem;
+    --gutter: 2.5rem;
   }
 }
 
@@ -53,12 +32,11 @@ html {
 
 body {
   margin: 0;
-  background: var(--color-paper);
-  color: var(--color-ink);
-  font-family: var(--font-sans);
-  /* 20 px: cómodo para leer sin anteojos en el celular */
-  font-size: 1.25rem;
-  line-height: 1.6;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--fs-base);
+  line-height: var(--lh-base);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
@@ -67,10 +45,11 @@ h1,
 h2,
 h3 {
   margin: 0;
-  color: var(--color-ink);
-  font-weight: 750;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
+  color: inherit;
+  font-family: var(--font-head);
+  font-weight: var(--fw-head);
+  letter-spacing: var(--ls-head);
+  line-height: 1.15;
   text-wrap: balance;
 }
 
@@ -80,17 +59,13 @@ p {
 }
 
 a {
-  color: inherit;
+  color: var(--link);
   text-decoration-thickness: 2px;
   text-underline-offset: 0.2em;
 }
 
-a:hover {
-  text-decoration-color: var(--color-graphite);
-}
-
 :focus-visible {
-  outline: 3px solid var(--color-ink);
+  outline: 3px solid var(--link);
   outline-offset: 3px;
   border-radius: 4px;
 }
@@ -106,10 +81,6 @@ a:hover {
 
 .section {
   padding-block: var(--section-space);
-}
-
-.section + .section {
-  border-top: 1px solid var(--color-rule);
 }
 
 .visually-hidden {
@@ -130,9 +101,9 @@ a:hover {
   left: 0.75rem;
   z-index: 100;
   padding: 0.75rem 1rem;
-  background: var(--color-ink);
-  color: var(--color-paper);
-  border-radius: var(--radius-sm);
+  background: var(--ink);
+  color: var(--on-ink);
+  border-radius: var(--radius-field);
   transform: translateY(-200%);
 }
 
@@ -154,32 +125,54 @@ a:hover {
   height: 100%;
 }
 
-/* Botón grande: fácil de tocar con el dedo (mínimo 56 px de alto) */
+/* Botón principal: verde con texto oscuro, 56 px de alto, ancho completo en el celular */
 .button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.625rem;
-  min-height: 3.5rem;
-  padding: 0.875rem 1.5rem;
-  background: var(--color-ink);
-  border-radius: var(--radius-sm);
-  color: var(--color-paper);
-  font-size: 1.125rem;
+  width: 100%;
+  min-height: var(--btn-h);
+  padding: 0 2rem;
+  background: var(--accent);
+  border: 1px solid transparent;
+  border-radius: var(--radius-btn);
+  box-shadow: var(--shadow-accent);
+  color: var(--on-accent);
+  font-family: var(--font-body);
+  font-size: var(--fs-base);
   font-weight: 700;
   line-height: 1.2;
+  text-align: center;
   text-decoration: none;
-  transition:
-    background-color 200ms ease,
-    transform 120ms ease;
+  transition: transform 120ms ease;
 }
 
-.button:hover {
-  background: var(--color-ink-hover);
+/* Secundario: blanco con borde, sin sombra */
+.button-secondary {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: none;
+  color: var(--text);
+}
+
+/* En el encabezado: 48 px de alto (sigue siendo cómodo para el dedo) */
+.button-compact {
+  min-height: 3rem;
+  padding-inline: 1.125rem;
+  border-radius: var(--radius-field);
+  box-shadow: none;
+  font-size: var(--fs-small);
 }
 
 .button:active {
   transform: scale(0.98);
+}
+
+@media (min-width: 40rem) {
+  .button {
+    width: auto;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

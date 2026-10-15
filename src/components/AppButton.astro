@@ -1,0 +1,16 @@
+---
+// Botón que lleva a la app (cale-app): "Empezar gratis" (principal) o "Ingresar a mi cuenta" (secundario)
+import { APP_URL, LANDING_COPY } from '../config';
+
+interface Props {
+  variant?: 'primary' | 'secondary';
+  label?: string;
+  // En el encabezado: más bajo y angosto
+  compact?: boolean;
+  class?: string;
+}
+
+const { variant = 'primary', label = LANDING_COPY.cta, compact = false, class: className } = Astro.props;
+---
+
+<a class:list={['button', { 'button-secondary': variant === 'secondary', 'button-compact': compact }, className]} href={APP_URL}>{label}</a>
