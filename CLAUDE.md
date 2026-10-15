@@ -68,6 +68,10 @@ Al 2026-10-15:
   (`UrlRewriteFunction`).
 - **CSP estricta** (`script-src 'none'`, sin `unsafe-inline`): por eso `inlineStylesheets: 'never'`, y nada de
   `style=""` ni `<script>`. Hay un test que lo controla.
+- **Diseño nuevo aprobado (2026-10-15), pendiente de implementar en la Fase 1:** reemplaza al rediseño de abajo
+  (Atkinson, resaltador amarillo). Crema, negro, blanco y verde WhatsApp; Manrope + DM Sans autoalojadas. Fuente:
+  `~/projects-claude/personal/cale-app/docs/DISENO.md`. Lo que sigue vigente: CSP estricta, sin precio, textos sin
+  jerga y contraste controlado por tests.
 - **Rediseño para público mayor** (2026-10-12, skills `redesign-existing-projects` + `frontend-design`): textos cortos
   sin términos técnicos (un test lo controla), voz "Cale te ayuda a…", letra de 20 px, contraste AAA (tinta
   `#1F2328`, grafito `#4B5563` sobre blanco), un solo acento (resaltador `#FFE566`, solo en el dibujo), sin
