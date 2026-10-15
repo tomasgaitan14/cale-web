@@ -148,6 +148,23 @@ a {
   transition: transform 120ms ease;
 }
 
+/* Secundario: blanco con borde, sin sombra */
+.button-secondary {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: none;
+  color: var(--text);
+}
+
+/* En el encabezado: 48 px de alto (sigue siendo cómodo para el dedo) */
+.button-compact {
+  min-height: 3rem;
+  padding-inline: 1.125rem;
+  border-radius: var(--radius-field);
+  box-shadow: none;
+  font-size: var(--fs-small);
+}
+
 .button:active {
   transform: scale(0.98);
 }

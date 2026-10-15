@@ -280,7 +280,7 @@ describe('contenido requerido', () => {
     expect(page.querySelector(`#contacto a[href^="https://wa.me/${WHATSAPP_NUMBER}"]`)).not.toBeNull();
   });
 
-  // La acción principal es empezar: los dos botones de la landing y el "Entrar" del encabezado llevan al asistente
+  // La acción principal es empezar: los dos botones de la landing y los del encabezado llevan al asistente
   it('en la landing los botones "Empezar gratis" de la portada y del cierre llevan al asistente', () => {
     const page = pages.get(ROUTES.home)!;
     const starts = page.querySelectorAll('main a.button');
@@ -290,10 +290,12 @@ describe('contenido requerido', () => {
     ]);
   });
 
-  it.each(INDEXABLE_ROUTES)('%s tiene "Entrar" arriba, que lleva al asistente', (route) => {
-    const signIn = pages.get(route)!.querySelector('header.site-header a.sign-in');
-    expect(signIn?.text.trim()).toBe('Entrar');
-    expect(signIn?.getAttribute('href')).toBe(APP_URL);
+  it.each(INDEXABLE_ROUTES)('%s tiene arriba "Ingresar a mi cuenta" (secundario) y "Empezar gratis" (principal)', (route) => {
+    const buttons = pages.get(route)!.querySelectorAll('header.site-header a.button');
+    expect(buttons.map((link) => [link.text.trim(), link.getAttribute('href'), link.classList.contains('button-secondary')])).toEqual([
+      ['Ingresar a mi cuenta', APP_URL, true],
+      ['Empezar gratis', APP_URL, false],
+    ]);
   });
 
   // Decisión del 11/10/2026: ni la landing ni los legales hablan del precio del servicio

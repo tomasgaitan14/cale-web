@@ -40,7 +40,7 @@ agregar acá nombre legal, dirección, CUIT ni IDs de cuentas. El único teléfo
 
 - **`cale-app`** (repo privado, `~/projects-claude/personal/cale-app/`): el asistente de alta y el backend de Cale en
   `https://app.cale.com.ar` (entrar con Google, calendario, perfil, recordatorios, reservas por WhatsApp y webhook).
-  Los botones "Empezar gratis" y "Entrar" llevan ahí (`APP_URL`). `tokens.css` es la misma copia que
+  Los botones "Empezar gratis" e "Ingresar a mi cuenta" llevan ahí (`APP_URL`; en el celular el encabezado muestra solo el segundo). `tokens.css` es la misma copia que
   `cale-app/web/src/styles/tokens.css`: si cambia un valor, cambiarlo en `DISENO.md` y en los dos repos. Varios plazos y textos del sitio copian los de
   cale-app y lo dicen en `src/config.ts` (prueba gratis, sesión, hora de los recordatorios, horarios que se ofrecen):
   si cambian allá, cambiarlos acá y en `LEGAL_LAST_UPDATED`.
