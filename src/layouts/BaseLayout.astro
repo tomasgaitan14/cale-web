@@ -1,9 +1,10 @@
 ---
 import '../styles/global.css';
+import AppButton from '../components/AppButton.astro';
 import Brand from '../components/Brand.astro';
 import {
-  APP_URL,
   BUSINESS_NAME,
+  LANDING_COPY,
   CONTACT_EMAIL,
   FACEBOOK_DOMAIN_VERIFICATION,
   LOCATION,
@@ -60,7 +61,10 @@ const LEGAL_LINKS = [
     <header class="site-header">
       <div class="container header-inner">
         <a class="home-link" href={ROUTES.home} aria-label={`${BUSINESS_NAME}, inicio`}><Brand /></a>
-        <a class="sign-in" href={APP_URL}>Entrar</a>
+        <div class="header-actions">
+          <AppButton variant="secondary" label={LANDING_COPY.signIn} compact />
+          <AppButton compact class="header-start" />
+        </div>
       </div>
     </header>
 
@@ -115,13 +119,21 @@ const LEGAL_LINKS = [
     text-decoration: none;
   }
 
-  /* Área táctil cómoda aunque se vea como un enlace */
-  .sign-in {
-    display: inline-flex;
-    align-items: center;
-    min-height: 3rem;
-    padding-inline: 0.5rem;
-    font-weight: 600;
+  .header-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  /* En el celular los dos no entran al lado de la marca, y "Empezar gratis" ya está en la portada: arriba queda solo
+     "Ingresar a mi cuenta" */
+  @media (max-width: 39.99rem) {
+    .header-actions :global(.header-start) {
+      display: none;
+    }
+
+    .header-actions :global(.button) {
+      width: auto;
+    }
   }
 
   .site-footer {
