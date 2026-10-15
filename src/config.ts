@@ -62,6 +62,7 @@ export const LANDING_COPY = {
   title: 'Tus recordatorios de turnos, en automático.',
   subtitle: 'Conectá tu agenda y dejá que Cale envíe los recordatorios por WhatsApp por vos.',
   cta: 'Empezar gratis',
+  signIn: 'Ingresar a mi cuenta',
   tagline: 'Menos mensajes manuales. Más tiempo para tu negocio.',
   // La conexión de WhatsApp de cada negocio depende de que Meta apruebe a Cale (Fase 5): hasta entonces, se avisa
   whatsappNotice:
