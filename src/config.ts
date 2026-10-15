@@ -1,7 +1,7 @@
 // Fuente única de los datos del negocio: la usan las páginas, los layouts y los tests.
 // Al conectar el dominio propio (.com.ar) solo cambia SITE_URL.
 
-export const SITE_URL = 'https://cale-turnos.vercel.app';
+export const SITE_URL = 'https://cale.com.ar';
 
 export const BUSINESS_NAME = 'Cale';
 export const OWNER_NAME = 'CRM Solutions';
@@ -28,7 +28,7 @@ export const WHATSAPP_HELP_GREETING = 'Hola, me trabé instalando Cale.';
 export const JURISDICTION = 'la República Argentina';
 
 // Verificación del dominio en el portfolio de Meta (no es secreta: va en el HTML público).
-export const FACEBOOK_DOMAIN_VERIFICATION = '55hdqyv5hd3d0eyext8ptkxa76baig';
+export const FACEBOOK_DOMAIN_VERIFICATION = 'myontabf6taia94eztrrd8p475ancg';
 
 export const ROUTES = {
   home: '/',
@@ -38,7 +38,7 @@ export const ROUTES = {
 } as const;
 
 // Fecha de vigencia de los textos legales (ISO, se formatea al renderizar).
-export const LEGAL_LAST_UPDATED = '2026-10-14';
+export const LEGAL_LAST_UPDATED = '2026-10-15';
 
 // Plazos de conservación declarados en la política de privacidad.
 export const RETENTION = {
