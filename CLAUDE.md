@@ -38,19 +38,25 @@ agregar acá nombre legal, dirección, CUIT ni IDs de cuentas. El único teléfo
 
 ## Proyectos relacionados
 
-Ninguno por ahora. El backend de Cale (envío de mensajes, webhooks, plantillas) todavía no existe.
+- **`cale-app`** (repo privado, `~/projects-claude/personal/cale-app/`): el asistente de alta y el backend de Cale en
+  `https://app.cale.com.ar` (entrar con Google, calendario, perfil, recordatorios, reservas por WhatsApp y webhook).
+  Los botones "Probalo GRATIS" de la portada llevan ahí (`APP_URL`). Varios plazos y textos del sitio copian los de
+  cale-app y lo dicen en `src/config.ts` (prueba gratis, sesión, hora de los recordatorios, horarios que se ofrecen):
+  si cambian allá, cambiarlos acá y en `LEGAL_LAST_UPDATED`.
 
 ## Estado actual
 
-Al 2026-10-14:
+Al 2026-10-15:
 
 - Sitio en **`https://cale.com.ar`** (AWS, deploy automático); `www` y `d3bl9yoji79fah.cloudfront.net` redirigen ahí.
   Vercel dado de baja.
-- Dominio `cale.com.ar` verificado en Meta y sitio del portfolio actualizado. Verificación del negocio pausada, lista
-  para retomar.
-- Portada nueva, legales actualizados y video de instalación en la rama `feat/install-section` (se publican con la
-  etapa 6 del asistente).
-- Rediseño para público mayor publicado (`d596699`). 140 tests en verde.
+- **Publicado `a0d6b13`**: portada nueva ("Cale confirma tus turnos y te los reprograma por WhatsApp"), sección de
+  instalación con el video y "Probalo GRATIS" hacia `app.cale.com.ar`, y textos legales al 15/10/2026 (entrar con
+  Google, perfil, recordatorios a las 7:00, Cale marca, borra, mueve y anota turnos, reservas con "turno").
+  162 tests en verde.
+- Decisión del titular: publicar todo aunque el asistente todavía se frena en el paso 3 (WhatsApp, depende de que
+  Meta apruebe a Cale como Tech Provider). Por ahora solo entra él.
+- Dominio `cale.com.ar` verificado en Meta. Verificación del negocio se retoma el 20/10/2026.
 
 ## Decisiones tomadas
 
@@ -89,15 +95,10 @@ Al 2026-10-14:
 
 ## Próximos pasos
 
-1. **Meta:** retomar la verificación del negocio (el dominio `cale.com.ar` ya está verificado).
-2. **Actualizar los textos legales al modelo Tech Provider:** las secciones 2 y 3 de los términos todavía
-   describen el modelo descartado ("el negocio crea y mantiene su propia app…"). La landing ya está actualizada.
-3. **Sección "Instalación"** (para abrir desde el celular: crear el calendario, darle acceso a un correo, conectar
-   WhatsApp): primero definirla, después sumar a la privacidad que Cale lee el calendario del negocio.
-4. En `main`, la sección 7 de `/privacidad` todavía nombra a Supabase: la rama `feat/install-section` ya la corrige
-   (AWS y Google). Al mergear `main` en la rama, quedarse con el texto de la rama y poner `LEGAL_LAST_UPDATED` en la
-   fecha de publicación.
-5. Que un abogado revise los textos legales: el tope de responsabilidad se calcula sobre "lo pagado por el
+1. **Meta:** retomar la verificación del negocio el 20/10/2026 (el dominio `cale.com.ar` ya está verificado).
+2. **Video de instalación** (proyecto cale-video): dice "4 pasos" y el asistente tiene 5. Rehacerlo con la etapa 3 de
+   cale-app, que cambia el paso de WhatsApp.
+3. Que un abogado revise los textos legales: el tope de responsabilidad se calcula sobre "lo pagado por el
    servicio", la jurisdicción no nombra una ciudad y la Ley 25.326 (art. 6) pide identificar al responsable de los
    datos.
 
