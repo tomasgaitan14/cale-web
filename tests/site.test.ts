@@ -1,5 +1,5 @@
 // Tests sobre el HTML que genera `astro build` (dist/): es exactamente lo que ven Meta y los visitantes.
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { HTMLElement, NodeType, parse, type Node } from 'node-html-parser';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -12,6 +12,7 @@ import {
   LEGAL_LAST_UPDATED,
   LOCATION,
   OWNER_NAME,
+  REMINDER_PREVIEW,
   REMINDER_SEND_TIME,
   RESPONSE_DEADLINES,
   RETENTION,
@@ -20,7 +21,6 @@ import {
   TRIAL_DAYS,
   TRIAL_EXTENSION_DAYS,
   TRIAL_NOTICE_DAYS_BEFORE,
-  WHATSAPP_HELP_GREETING,
   WHATSAPP_NUMBER,
 } from '../src/config';
 import { canonicalUrl } from '../src/lib/url';
@@ -32,7 +32,9 @@ const TEXT_NODE = NodeType.TEXT_NODE;
 const TECHNICAL_JARGON = /\bAPI\b|Cloud API|plantilla|opt-in|webhook|token|Business Platform/i;
 // Palabras con mayúscula interna que no son texto pegado
 const WORDS_WITH_INNER_CAPITALS = ['WhatsApp'];
-const PLACEHOLDER_PATTERN = /en construcci[oó]n|pr[oó]ximamente|lorem ipsum|coming soon|\bTODO\b|\bTBD\b/i;
+const PLACEHOLDER_PATTERN = /en construcci[oó]n|pr[oó]ximamente|lorem ipsum|coming soon/i;
+// En mayúsculas: sin distinguir, "TODO" también encuentra la palabra "todo"
+const PENDING_MARKER_PATTERN = /\bTODO\b|\bTBD\b/;
 
 const INDEXABLE_ROUTES = Object.values(ROUTES);
 
@@ -152,6 +154,7 @@ describe.each(INDEXABLE_ROUTES)('página %s', (route) => {
 
   it('no tiene textos de relleno ni de "en construcción"', () => {
     expect(bodyText(page())).not.toMatch(PLACEHOLDER_PATTERN);
+    expect(bodyText(page())).not.toMatch(PENDING_MARKER_PATTERN);
   });
 
   // La CSP del sitio (SecurityHeadersFunction en infra/site.yaml) bloquea scripts y estilos inline: si aparecen, se rompen en producción.
@@ -201,37 +204,61 @@ describe('contenido requerido', () => {
     expect(tag?.getAttribute('content')).toBe(FACEBOOK_DOMAIN_VERIFICATION);
   });
 
-  it('la landing explica cómo funciona, el mismo número, la instalación, para quién es y tiene contacto', () => {
-    const page = pages.get(ROUTES.home)!;
-    for (const id of ['comparacion', 'mismo-numero', 'instalacion', 'para-quien', 'contacto']) {
-      expect(page.querySelector(`#${id}`)).not.toBeNull();
-    }
-    const text = bodyText(page);
-    for (const reply of ['Confirmo', 'Cancelo', 'Cambiar horario']) {
-      expect(text).toContain(reply);
-    }
-    expect(text).toContain('mismo número');
+  // Mensaje de la landing: los textos exactos de la fuente de verdad (cale-app: PRODUCT_SOURCE_OF_TRUTH.md, sección 9)
+  it('la portada tiene el título, el subtítulo, el botón y la tagline de la fuente de verdad', () => {
+    const hero = pages.get(ROUTES.home)!.querySelector('.hero')!;
+    expect(hero.querySelector('h1')?.text).toBe('Tus recordatorios de turnos, en automático.');
+    expect(hero.querySelector('.lead')?.text).toBe(
+      'Conectá tu agenda y dejá que Cale envíe los recordatorios por WhatsApp por vos.',
+    );
+    expect(hero.querySelector('a.button')?.text.trim()).toBe('Empezar gratis');
+    expect(hero.querySelector('.tagline')?.text.trim()).toBe('Menos mensajes manuales. Más tiempo para tu negocio.');
   });
 
-  // Cada fila compara el mismo momento: "sin" en gris con una X y "con" con un check, con encabezados de columna
-  it('la comparación tiene 4 filas con su par "sin" y "con", y el link de la portada lleva ahí', () => {
-    const page = pages.get(ROUTES.home)!;
-    const table = page.querySelector('#comparacion table')!;
-    expect(table.querySelectorAll('thead th').map((header) => header.text.trim())).toEqual(['Sin Cale', 'Con Cale']);
-    const rows = table.querySelectorAll('tbody tr');
-    expect(rows).toHaveLength(4);
-    for (const row of rows) {
-      const [without, withCale] = row.querySelectorAll('td');
-      expect(without?.classList.contains('compare-without')).toBe(true);
-      expect(without?.querySelector('.compare-icon svg')).not.toBeNull();
-      expect(withCale?.classList.contains('compare-with')).toBe(true);
-      expect(withCale?.querySelector('.compare-icon svg')).not.toBeNull();
-      expect(without?.querySelector('.compare-icon')?.innerHTML).not.toBe(withCale?.querySelector('.compare-icon')?.innerHTML);
-    }
-    expect(page.querySelector('.hero a[href="#comparacion"]')?.text).toBe('Ver cómo funciona');
+  // Hasta que Meta apruebe a Cale (Fase 5), ningún negocio puede conectar su WhatsApp: la portada lo avisa
+  it('la portada avisa que la conexión con WhatsApp todavía no está disponible', () => {
+    const notice = pages.get(ROUTES.home)!.querySelector('.hero .notice')?.text ?? '';
+    expect(notice).toContain('La conexión con WhatsApp se está habilitando');
+    expect(notice).toContain('anotarte');
   });
 
-  // Público mayor: la portada habla en criollo, sin términos técnicos
+  // "Desde el mismo número" sale recién cuando exista la conexión (fuente de verdad, sección 8)
+  it('la landing no promete el mismo número ni nada que todavía no se cumple', () => {
+    const text = bodyText(pages.get(ROUTES.home)!);
+    expect(text).not.toMatch(/mismo número|coexistencia|prueba gratis de \d+ días|\d+ días gratis/i);
+  });
+
+  it('la vista previa muestra el recordatorio real con sus tres botones', () => {
+    const preview = pages.get(ROUTES.home)!.querySelector('.hero figure')!;
+    expect(preview.getAttribute('aria-label')).toBe('Vista previa del recordatorio por WhatsApp');
+    expect(preview.querySelector('.bubble p')?.text).toBe(REMINDER_PREVIEW.message);
+    expect(preview.querySelectorAll('.replies li').map((reply) => reply.text)).toEqual([
+      'Confirmo',
+      'Cancelo',
+      'Cambiar horario',
+    ]);
+    expect(preview.text).toContain(`A las ${REMINDER_SEND_TIME}`);
+  });
+
+  it('"Cómo funciona" tiene 3 pasos en orden', () => {
+    const section = pages.get(ROUTES.home)!.querySelector('#como-funciona')!;
+    expect(section.querySelector('h2')?.text).toBe('Cómo funciona');
+    expect(section.querySelectorAll('ol > li h3').map((title) => title.text)).toEqual([
+      'Entrá con tu cuenta de Google',
+      'Anotá cada turno con el nombre y el celular',
+      'Cale le escribe a tu cliente el día anterior',
+    ]);
+    expect(section.text).toContain(`A las ${REMINDER_SEND_TIME}, por WhatsApp`);
+  });
+
+  it('la landing va de la portada a cómo funciona y cierra con la banda', () => {
+    const page = pages.get(ROUTES.home)!;
+    expect(page.querySelectorAll('main > section[id]').map((section) => section.id)).toEqual(['como-funciona', 'empezar']);
+    expect(page.querySelector('#empezar .closing h2')?.text).toBe('Tu tiempo vale más que mandar recordatorios uno por uno.');
+    expect(page.querySelector('#instalacion, video')).toBeNull();
+  });
+
+  // Público sin conocimientos técnicos: la portada habla en criollo
   it('la landing no usa términos técnicos', () => {
     expect(bodyText(pages.get(ROUTES.home)!)).not.toMatch(TECHNICAL_JARGON);
   });
@@ -244,71 +271,57 @@ describe('contenido requerido', () => {
     expect(whatsappLinks.length).toBeGreaterThan(0);
   });
 
-  it('la landing ofrece WhatsApp en la instalación, al cierre y en el pie', () => {
-    const whatsappLinks = pages
-      .get(ROUTES.home)!
+  it('la landing ofrece WhatsApp en el contacto del cierre y en el pie', () => {
+    const page = pages.get(ROUTES.home)!;
+    const whatsappLinks = page
       .querySelectorAll('a')
       .filter((link) => link.getAttribute('href')?.startsWith(`https://wa.me/${WHATSAPP_NUMBER}`));
-    expect(whatsappLinks).toHaveLength(3);
+    expect(whatsappLinks).toHaveLength(2);
+    expect(page.querySelector(`#contacto a[href^="https://wa.me/${WHATSAPP_NUMBER}"]`)).not.toBeNull();
   });
 
-  // La acción principal es instalar: los botones de arriba llevan a la sección de instalación (con los pasos y el costo
-  // de WhatsApp) y recién el de esa sección abre el asistente
-  it.each(INDEXABLE_ROUTES)('%s tiene "Probalo GRATIS" arriba, que lleva a la sección de instalación', (route) => {
-    const install = pages.get(route)!.querySelector('header.site-header a.button');
-    expect(install?.text.trim()).toBe('Probalo GRATIS');
-    expect(install?.getAttribute('href')).toBe('/#instalacion');
-  });
-
-  // Objetivo del sitio: todo lleva a "Probalo GRATIS". Antes de la instalación, a la sección (pasos y costo de
-  // WhatsApp); desde la sección y el cierre, al asistente.
-  it('en la landing cada sección clave tiene "Probalo GRATIS" y lleva al lugar que corresponde', () => {
+  // La acción principal es empezar: los dos botones de la landing y el "Entrar" del encabezado llevan al asistente
+  it('en la landing los botones "Empezar gratis" de la portada y del cierre llevan al asistente', () => {
     const page = pages.get(ROUTES.home)!;
-    const trialIn = (selector: string) =>
-      page.querySelector(selector)!.querySelectorAll('a').find((link) => link.text.trim() === 'Probalo GRATIS');
-    expect(trialIn('.hero')?.getAttribute('href')).toBe('/#instalacion');
-    expect(trialIn('#comparacion')?.getAttribute('href')).toBe('/#instalacion');
-    expect(trialIn('#instalacion')?.getAttribute('href')).toBe(APP_URL);
-    expect(trialIn('#contacto')?.getAttribute('href')).toBe(APP_URL);
-  });
-
-  // Video de la instalación (cale-video): sin sonido, arranca solo en bucle sin pantalla completa en el iPhone, con controles
-  // para pausarlo, imagen de espera y una descripción para lectores de pantalla. Los archivos tienen que existir.
-  it('la instalación muestra el video al lado de los pasos', () => {
-    const video = pages.get(ROUTES.home)!.querySelector('#instalacion video')!;
-    for (const attribute of ['autoplay', 'muted', 'loop', 'playsinline', 'controls']) {
-      expect(video.hasAttribute(attribute), attribute).toBe(true);
-    }
-    expect(video.getAttribute('aria-label')).toMatch(/^Video: cómo se instala Cale/);
-    for (const attribute of ['src', 'poster']) {
-      const path = video.getAttribute(attribute)!;
-      expect(existsSync(join(DIST_DIR, path)), `${attribute}: ${path}`).toBe(true);
-    }
-  });
-
-  // El argumento en orden: el dolor, la diferencia, la objeción del número, cómo empezar y la prueba gratis
-  it('la landing va del dolor a la prueba gratis', () => {
-    const page = pages.get(ROUTES.home)!;
-    const order = page.querySelectorAll('main > section[id]').map((section) => section.id);
-    expect(order).toEqual(['para-quien', 'comparacion', 'mismo-numero', 'instalacion', 'contacto']);
-    expect(page.querySelector('#para-quien h2')?.text).toBe('Cada turno que se olvidan es plata que perdés');
-    expect(page.querySelector('#contacto h2')?.text).toBe(`Probalo gratis ${TRIAL_DAYS} días en tu negocio`);
-  });
-
-  // Resumen corto en 4 pasos (el detalle lo da el asistente), la prueba gratis y, desde el principio, que WhatsApp
-  // cobra los mensajes aparte. Ayuda por WhatsApp con un mensaje propio.
-  it('la instalación resume los pasos, la prueba gratis, el costo de WhatsApp y ofrece ayuda', () => {
-    const section = pages.get(ROUTES.home)!.querySelector('#instalacion')!;
-    expect(section.querySelector('h2')?.text).toBe(`Hacé la instalación por tu cuenta y probalo gratis por ${TRIAL_DAYS} días`);
-    expect(section.querySelectorAll('ol li').map((step) => step.text)).toEqual([
-      'Ingresá los datos de tu negocio.',
-      'Te creamos un calendario de turnos automáticamente.',
-      'Conectás tu WhatsApp.',
-      'Ya podés usarlo.',
+    const starts = page.querySelectorAll('main a.button');
+    expect(starts.map((link) => [link.text.trim(), link.getAttribute('href')])).toEqual([
+      ['Empezar gratis', APP_URL],
+      ['Empezar gratis', APP_URL],
     ]);
-    expect(section.text).toContain('WhatsApp cobra los mensajes aparte');
-    const help = section.querySelector(`a[href^="https://wa.me/${WHATSAPP_NUMBER}"]`);
-    expect(help?.getAttribute('href')).toBe(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_HELP_GREETING)}`);
+  });
+
+  it.each(INDEXABLE_ROUTES)('%s tiene "Entrar" arriba, que lleva al asistente', (route) => {
+    const signIn = pages.get(route)!.querySelector('header.site-header a.sign-in');
+    expect(signIn?.text.trim()).toBe('Entrar');
+    expect(signIn?.getAttribute('href')).toBe(APP_URL);
+  });
+
+  // Decisión del 11/10/2026: ni la landing ni los legales hablan del precio del servicio
+  it.each(INDEXABLE_ROUTES)('%s no muestra precios', (route) => {
+    expect(bodyText(pages.get(route)!)).not.toMatch(/\$\s?\d|\bUSD\b|\bARS\b|\bpesos\b|por mes|\/mes\b/i);
+  });
+
+  // La CSP solo admite el propio dominio: fuentes, estilos, imágenes y videos se sirven desde el sitio
+  it.each([...INDEXABLE_ROUTES, '/404'])('%s no carga recursos de orígenes externos', (route) => {
+    const page = loadPage(route === '/404' ? NOT_FOUND_FILE : routeToFile(route));
+    const sources = page
+      .querySelectorAll('link[href], script[src], img[src], source[src], video[src], iframe[src]')
+      .filter((element) => element.tagName !== 'LINK' || element.getAttribute('rel') !== 'canonical')
+      .map((element) => element.getAttribute('href') ?? element.getAttribute('src') ?? '');
+    expect(sources.filter((source) => /^(https?:)?\/\//.test(source))).toEqual([]);
+  });
+
+  it('los estilos generados no importan nada de afuera y las fuentes son las del diseño', () => {
+    const astroDir = join(DIST_DIR, '_astro');
+    const css = readdirSync(astroDir)
+      .filter((file) => file.endsWith('.css'))
+      .map((file) => readFileSync(join(astroDir, file), 'utf8'))
+      .join('\n');
+    expect(css).not.toMatch(/url\(\s*['"]?(https?:)?\/\//);
+    expect(css).not.toMatch(/@import\s+url\(/);
+    expect(css).toContain('Manrope Variable');
+    expect(css).toContain('DM Sans Variable');
+    expect(css).not.toMatch(/Atkinson/i);
   });
 
   it('la política de privacidad cubre datos, Meta, proveedores, plazos y Ley 25.326', () => {

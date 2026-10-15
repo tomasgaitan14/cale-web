@@ -41,24 +41,24 @@ const lastUpdatedLabel = new Intl.DateTimeFormat('es-AR', {
   .legal-header {
     padding-bottom: 2rem;
     margin-bottom: 2.5rem;
-    border-bottom: 1px solid var(--color-rule);
+    border-bottom: 1px solid var(--border);
   }
 
   h1 {
-    font-size: clamp(2.25rem, 6vw, 3.25rem);
+    font-size: var(--fs-h1-sm);
   }
 
   .legal-updated {
     margin-top: 1rem;
-    color: var(--color-graphite);
-    font-size: 1rem;
+    color: var(--muted);
+    font-size: var(--fs-small);
   }
 
   /* Estilos del contenido del slot: necesitan :global porque vienen de la página */
   .prose :global(h2) {
     margin-top: 3rem;
     margin-bottom: 1rem;
-    font-size: 1.625rem;
+    font-size: var(--fs-h2);
   }
 
   .prose :global(h3) {
@@ -82,24 +82,24 @@ const lastUpdatedLabel = new Intl.DateTimeFormat('es-AR', {
   }
 
   .prose :global(li::marker) {
-    color: var(--color-graphite);
+    color: var(--muted);
   }
 
   .prose :global(a) {
-    text-decoration-color: var(--color-graphite);
+    text-decoration-color: var(--muted);
   }
 
   .prose :global(strong) {
-    color: var(--color-ink);
+    color: var(--text);
     font-weight: 700;
   }
 
   .prose :global(.callout) {
     margin-block: 1.5rem;
     padding: 1.25rem 1.5rem;
-    background: var(--color-paper-alt);
-    border: 1px solid var(--color-rule);
-    border-radius: var(--radius-md);
+    background: var(--callout);
+    border: 1px solid var(--tint-border);
+    border-radius: var(--radius);
   }
 
   .prose :global(.callout p:last-child) {
