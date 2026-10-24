@@ -47,6 +47,19 @@ agregar acá nombre legal, dirección, CUIT ni IDs de cuentas. El único teléfo
 
 ## Estado actual
 
+**Al 2026-10-24: toda la infraestructura de AWS está borrada y el sitio está offline** (decisión de Titular, para no
+tener ningún costo por ahora). Se eliminaron los stacks `cale-site`, `cale-app` y el de SAM, los buckets, la zona de
+Route 53, DynamoDB (sin copia), SSM y SES. `cale.com.ar` sigue siendo de Titular en DonWeb (vence 12/10/2027) pero sin
+DNS. Los workflows `Deploy` (este repo) y `CI` (cale-app) están **desactivados** en GitHub (`gh workflow enable`
+para reactivarlos). Para reconstruir: `infra/site.yaml`, [`docs/infra-aws.md`](docs/infra-aws.md), nameservers
+nuevos en DonWeb, dominio de Meta a verificar de nuevo y `AWS_DEPLOY_ROLE_ARN`, `SITE_BUCKET` y
+`CLOUDFRONT_DISTRIBUTION_ID` a cargar de nuevo. Lo que sigue, abajo, es el estado **antes** del borrado.
+
+**Dirección del producto (24/10/2026):** primero se usa con una amiga de Titular (estética) con **n8n** y la Cloud API,
+sin Tech Provider; Cale como producto multicliente se retoma después. Se descartó Twilio: el camino ISV exige igual
+ser Tech Provider, cobra USD 0,005 por mensaje y no confirma coexistencia. Estilo elegido para un rediseño futuro:
+skill `design-taste-frontend` (la maqueta B se perdió con el scratchpad).
+
 Al 2026-10-15:
 
 - Sitio en **`https://cale.com.ar`** (AWS, deploy automático); `www` y `d3bl9yoji79fah.cloudfront.net` redirigen ahí.
