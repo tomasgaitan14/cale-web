@@ -1,0 +1,283 @@
+---
+// Alta de interesados: tres pasos cortos y, al final, la simulación del recordatorio con los datos del negocio.
+// Sin ruta canónica: no se indexa. El script (scripts/onboarding.ts) arma el recorrido; sin JS se avisa cómo seguir.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SimulationChat from '../components/SimulationChat.astro';
+import TextField from '../components/TextField.astro';
+import { BUSINESS_NAME, ROUTES, WHATSAPP_GREETING, WHATSAPP_NUMBER } from '../config';
+import { BUSINESS_TYPES, CURRENT_METHODS, FORM_STEPS, LEAD_LIMITS, WEEKLY_APPOINTMENTS } from '../lib/lead';
+import { whatsappUrl } from '../lib/url';
+
+const contactUrl = whatsappUrl(WHATSAPP_NUMBER, WHATSAPP_GREETING);
+const stepCount = FORM_STEPS.length;
+---
+
+<BaseLayout
+  title={`Empezar gratis | ${BUSINESS_NAME}`}
+  description={`Contanos de tu negocio en tres pasos cortos y mirá cómo le llegaría el recordatorio de turno a tus clientes por WhatsApp.`}
+>
+  <section class="section onboarding" aria-labelledby="empezar-titulo">
+    <div class="container narrow">
+      <h1 id="empezar-titulo">Armemos {BUSINESS_NAME} para tu negocio</h1>
+      <p class="lead">Son {stepCount} pasos cortos. Al final ves cómo le llegaría el recordatorio a tus clientes.</p>
+
+      <noscript>
+        <p class="notice-box">
+          Para completar el formulario necesitás activar JavaScript en tu navegador. Si no podés, escribinos por <a href={contactUrl}>WhatsApp</a>.
+        </p>
+      </noscript>
+
+      <div class="card" data-wizard hidden>
+        <ol class="progress" aria-label="Pasos del formulario">
+          {FORM_STEPS.map((step) => <li data-progress-step={step}><span class="visually-hidden">Paso </span>{step}</li>)}
+        </ol>
+        <p class="progress-label" data-progress-label aria-live="polite">Paso 1 de {stepCount}</p>
+
+        <form id="lead-form" novalidate>
+          <section data-step="1" aria-labelledby="step-1-title">
+            <h2 id="step-1-title" tabindex="-1">Tu negocio</h2>
+            <p class="help">Con estos datos armamos el mensaje que reciben tus clientes.</p>
+            <div class="fields">
+              <TextField
+                name="businessName"
+                label="Nombre de tu negocio"
+                hint="Como lo conocen tus clientes."
+                autocomplete="organization"
+                maxlength={LEAD_LIMITS.businessName.max}
+              />
+              <div class="field" data-field="businessType">
+                <label for="field-businessType">¿Qué tipo de negocio es?</label>
+                <select id="field-businessType" name="businessType" aria-describedby="error-businessType">
+                  <option value="">Elegí una opción</option>
+                  {BUSINESS_TYPES.map((type) => <option value={type}>{type}</option>)}
+                </select>
+                <p class="field-error" id="error-businessType" data-error-for="businessType"></p>
+              </div>
+              <TextField name="city" label="Ciudad" autocomplete="address-level2" maxlength={LEAD_LIMITS.city.max} />
+            </div>
+          </section>
+
+          <section data-step="2" aria-labelledby="step-2-title">
+            <h2 id="step-2-title" tabindex="-1">Tus turnos</h2>
+            <p class="help">Así sabemos cuánto trabajo te sacamos de encima.</p>
+            <div class="fields">
+              <fieldset class="field" data-field="weeklyAppointments" aria-describedby="error-weeklyAppointments">
+                <legend>¿Cuántos turnos das por semana, más o menos?</legend>
+                {
+                  WEEKLY_APPOINTMENTS.map((option) => (
+                    <label class="choice">
+                      <input type="radio" name="weeklyAppointments" value={option.value} />
+                      {option.label}
+                    </label>
+                  ))
+                }
+                <p class="field-error" id="error-weeklyAppointments" data-error-for="weeklyAppointments"></p>
+              </fieldset>
+              <fieldset class="field" data-field="currentMethod" aria-describedby="error-currentMethod">
+                <legend>¿Cómo les avisás hoy a tus clientes?</legend>
+                {
+                  CURRENT_METHODS.map((option) => (
+                    <label class="choice">
+                      <input type="radio" name="currentMethod" value={option.value} />
+                      {option.label}
+                    </label>
+                  ))
+                }
+                <p class="field-error" id="error-currentMethod" data-error-for="currentMethod"></p>
+              </fieldset>
+            </div>
+          </section>
+
+          <section data-step="3" aria-labelledby="step-3-title">
+            <h2 id="step-3-title" tabindex="-1">Tus datos</h2>
+            <p class="help">Para avisarte apenas tu línea de recordatorios esté lista.</p>
+            <div class="fields">
+              <TextField name="ownerName" label="Tu nombre" autocomplete="name" maxlength={LEAD_LIMITS.ownerName.max} />
+              <TextField
+                name="ownerWhatsapp"
+                label="Tu WhatsApp"
+                hint="Con código de área, sin 0 ni 15. Ejemplo: 11 5555 0142."
+                type="tel"
+                inputmode="tel"
+                autocomplete="tel-national"
+              />
+              <label class="choice">
+                <input type="checkbox" data-same-number />
+                El WhatsApp de mi negocio es el mismo
+              </label>
+              <div data-business-whatsapp>
+                <TextField
+                  name="businessWhatsapp"
+                  label="WhatsApp de tu negocio"
+                  hint="El número donde te escriben tus clientes. Si alguno responde algo que no sea un botón, lo mandamos ahí."
+                  type="tel"
+                  inputmode="tel"
+                />
+              </div>
+              <!-- Trampa para robots: una persona no la ve ni la completa -->
+              <div class="visually-hidden" aria-hidden="true">
+                <label for="field-website">No completar este campo</label>
+                <input id="field-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+              </div>
+              <div class="field" data-field="consent">
+                <label class="choice">
+                  <input type="checkbox" name="consent" aria-describedby="error-consent" />
+                  <span>
+                    Acepto que {BUSINESS_NAME} use estos datos para contactarme. Leí la <a href={ROUTES.privacy} target="_blank" rel="noopener">política de privacidad</a>.
+                  </span>
+                </label>
+                <p class="field-error" id="error-consent" data-error-for="consent"></p>
+              </div>
+            </div>
+          </section>
+
+          <p class="form-error" data-form-error role="alert"></p>
+          <div class="actions">
+            <button type="button" class="button button-secondary" data-action="back" hidden>Volver</button>
+            <button type="submit" class="button" data-action="next">Siguiente</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card" data-result hidden>
+        <h2 id="result-title" tabindex="-1" data-result-title></h2>
+        <p class="help" data-result-lead></p>
+        <SimulationChat />
+        <p class="notice-box" data-duplicate-note hidden>
+          Ese WhatsApp ya estaba anotado: no hace falta que lo vuelvas a completar. Seguimos con los datos que ya teníamos.
+        </p>
+        <p class="closing-text" data-result-closing></p>
+        <div class="actions">
+          <a class="button" href={contactUrl}>Escribinos por WhatsApp</a>
+          <a class="button button-secondary" href={ROUTES.home}>Volver al inicio</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import '../scripts/onboarding';
+</script>
+
+<style>
+  .narrow {
+    max-width: 42rem;
+  }
+
+  .onboarding h1 {
+    font-size: var(--fs-h1-sm);
+  }
+
+  .lead {
+    margin-top: 0.75rem;
+    color: var(--muted);
+    font-size: var(--fs-lead);
+  }
+
+  .card {
+    display: grid;
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+    padding: 1.375rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sheet);
+  }
+
+  .card h2 {
+    font-size: var(--fs-h2);
+  }
+
+  .card h2:focus {
+    outline: none;
+  }
+
+  .help {
+    margin-top: 0.375rem;
+    color: var(--muted);
+  }
+
+  .progress {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .progress li {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 50%;
+    color: var(--muted);
+    font-family: var(--font-head);
+    font-weight: 800;
+  }
+
+  .progress li.is-done {
+    background: var(--tint);
+    border-color: var(--tint-border);
+    color: var(--link);
+  }
+
+  .progress li.is-current {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--on-ink);
+  }
+
+  .progress-label {
+    color: var(--muted);
+    font-size: var(--fs-small);
+    font-weight: 600;
+  }
+
+  .fields {
+    display: grid;
+    gap: 1.25rem;
+    margin-top: 1.25rem;
+  }
+
+  .form-error {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--warn-bg);
+    border-radius: var(--radius-field);
+    color: var(--warn);
+    font-weight: 600;
+  }
+
+  .form-error:empty {
+    display: none;
+  }
+
+  .notice-box {
+    padding: 0.75rem 1rem;
+    background: var(--callout);
+    border: 1px solid var(--tint-border);
+    border-radius: var(--radius-field);
+  }
+
+  .actions {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .closing-text {
+    font-weight: 600;
+  }
+
+  @media (min-width: 40rem) {
+    .actions {
+      flex-direction: row;
+      justify-content: flex-end;
+    }
+  }
+</style>

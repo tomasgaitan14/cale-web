@@ -6,6 +6,7 @@ dist/
 # entorno y secretos
 .env
 .env.*
+!.env.example
 
 
 # configuración local de Claude Code

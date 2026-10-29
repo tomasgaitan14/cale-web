@@ -1,0 +1,31 @@
+---
+// Campo de texto del formulario de /empezar: etiqueta, ayuda opcional y lugar para el mensaje de error.
+// El `name` es el de LeadField (lib/lead.ts); el script lo usa para leer el valor y mostrar el error.
+interface Props {
+  name: string;
+  label: string;
+  hint?: string;
+  type?: 'text' | 'tel';
+  autocomplete?: string;
+  inputmode?: 'text' | 'tel';
+  maxlength?: number;
+}
+
+const { name, label, hint, type = 'text', autocomplete, inputmode, maxlength } = Astro.props;
+const describedBy = [hint ? `hint-${name}` : undefined, `error-${name}`].filter(Boolean).join(' ');
+---
+
+<div class="field" data-field={name}>
+  <label for={`field-${name}`}>{label}</label>
+  {hint && <p class="field-hint" id={`hint-${name}`}>{hint}</p>}
+  <input
+    id={`field-${name}`}
+    name={name}
+    type={type}
+    autocomplete={autocomplete}
+    inputmode={inputmode}
+    maxlength={maxlength}
+    aria-describedby={describedBy}
+  />
+  <p class="field-error" id={`error-${name}`} data-error-for={name}></p>
+</div>
