@@ -1,0 +1,108 @@
+---
+// Simulación del final de /empezar: dos escenas de WhatsApp. El script (scripts/onboarding.ts) completa los textos con
+// los datos del negocio usando textContent; la estructura y los botones son fijos.
+import { REMINDER_PREVIEW } from '../config';
+---
+
+<div class="simulation">
+  <figure class="scene" aria-label="Escena 1: el recordatorio del día anterior">
+    <figcaption>El día anterior, Cale le escribe a tu cliente</figcaption>
+    <div class="chat">
+      <p class="chat-day">Ejemplo</p>
+      <div class="bubble bubble-in"><p data-sim="reminder"></p></div>
+      <ul class="replies">
+        {REMINDER_PREVIEW.replies.map((reply) => <li>{reply}</li>)}
+      </ul>
+    </div>
+  </figure>
+
+  <figure class="scene" aria-label="Escena 2: tu cliente escribe otra cosa">
+    <figcaption>Si tu cliente escribe otra cosa, lo mandamos a tu número</figcaption>
+    <div class="chat">
+      <div class="bubble bubble-out"><p data-sim="free-text"></p></div>
+      <div class="bubble bubble-in"><p data-sim="redirect"></p></div>
+    </div>
+  </figure>
+</div>
+
+<style>
+  /* Colores del chat de muestra: imitan la pantalla de WhatsApp, no son parte de la marca (como en PhonePreview) */
+  .simulation {
+    --chat-bg: #efeae2;
+    --chat-text: #111b21;
+    --chat-soft: #54656f;
+    --chat-reply: #00618a;
+    --chat-out: #d9fdd3;
+
+    display: grid;
+    gap: 1rem;
+  }
+
+  .scene {
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sheet);
+    background: var(--surface);
+  }
+
+  figcaption {
+    padding: 0.75rem 1rem;
+    font-size: var(--fs-small);
+    font-weight: 700;
+  }
+
+  .chat {
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.875rem 0.75rem;
+    background: var(--chat-bg);
+    color: var(--chat-text);
+    font-size: var(--fs-small);
+    line-height: 1.4;
+  }
+
+  .chat-day {
+    justify-self: center;
+    margin-bottom: 0.375rem;
+    padding: 0.125rem 0.625rem;
+    background: var(--surface);
+    border-radius: 8px;
+    color: var(--chat-soft);
+  }
+
+  .bubble {
+    max-width: 92%;
+    padding: 0.5625rem 0.75rem;
+    overflow-wrap: anywhere;
+  }
+
+  .bubble-in {
+    justify-self: start;
+    background: var(--surface);
+    border-radius: 4px 12px 12px 12px;
+  }
+
+  .bubble-out {
+    justify-self: end;
+    background: var(--chat-out);
+    border-radius: 12px 4px 12px 12px;
+  }
+
+  .replies {
+    display: grid;
+    gap: 0.1875rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .replies li {
+    padding: 0.4375rem;
+    background: var(--surface);
+    border-radius: 10px;
+    color: var(--chat-reply);
+    font-weight: 700;
+    text-align: center;
+  }
+</style>

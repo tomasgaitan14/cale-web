@@ -26,7 +26,7 @@ agregar acá nombre legal, dirección, CUIT ni IDs de cuentas. El único teléfo
 
 | Capa | Elección |
 |------|----------|
-| Build | Astro 7, salida 100 % estática, **sin JS en el cliente** |
+| Build | Astro 7, salida 100 % estática. **Sin JS en el cliente, salvo `/empezar`** (un script propio, sin framework) |
 | Estilos | CSS plano: tokens del diseño en `src/styles/tokens.css` (copia de `cale-app/docs/DISENO.md`), base en `global.css` (sin Tailwind) |
 | Tipografía | Manrope (títulos) + DM Sans (texto), autoalojadas con `@fontsource-variable` |
 | Íconos | `@phosphor-icons/core` (Bold), inline vía `src/components/Icon.astro` (calendario, reloj, tilde, doble tilde y WhatsApp) |
@@ -54,6 +54,17 @@ DNS. Los workflows `Deploy` (este repo) y `CI` (cale-app) están **desactivados*
 para reactivarlos). Para reconstruir: `infra/site.yaml`, [`docs/infra-aws.md`](docs/infra-aws.md), nameservers
 nuevos en DonWeb, dominio de Meta a verificar de nuevo y `AWS_DEPLOY_ROLE_ARN`, `SITE_BUCKET` y
 `CLOUDFRONT_DISTRIBUTION_ID` a cargar de nuevo. Lo que sigue, abajo, es el estado **antes** del borrado.
+
+**Formulario de alta `/empezar` (29/10/2026, sin deployar ni commitear):** el botón "Empezar gratis" ya no lleva a
+`cale-app` sino a `/empezar` (3 pasos: negocio, turnos, datos) y termina en una simulación del recordatorio con el
+nombre del negocio, más un cierre "te escribimos cuando tu línea esté lista". **Sin pago por ahora** (decisión de Titular:
+se suma cuando la línea de WhatsApp funcione). Guarda el alta en una tabla `leads` de **Supabase** (proyecto
+`cale-leads`, cuenta `cale.turnos@gmail.com`): el navegador solo puede llamar a la función `submit_lead`
+(`supabase/migrations/0001_leads.sql`, RLS sin políticas). `src/lib/lead.ts` (validación), `lead-api.ts` (envío),
+`simulation.ts` y `src/scripts/onboarding.ts` (recorrido). La URL y la clave pública van en `PUBLIC_SUPABASE_URL` y
+`PUBLIC_SUPABASE_ANON_KEY` (`.env.local` y Vercel, ver `.env.example`). Hosting nuevo en **Vercel** (`vercel.json` con
+las cabeceras; la CSP de `/empezar` admite su script y `https://*.supabase.co`). Pendiente: probar contra el Supabase
+real, deploy, y ajustar privacidad (ahora se guardan datos personales) y términos.
 
 **Dirección del producto (24/10/2026):** primero se usa con una amiga de Titular (estética) con **n8n** y la Cloud API,
 sin Tech Provider; Cale como producto multicliente se retoma después. Se descartó Twilio: el camino ISV exige igual
@@ -96,8 +107,8 @@ Al 2026-10-15:
   `terminos.astro` todavía dice "el mismo número" (texto legal, no se tocó).
 - **Contacto por WhatsApp** (`WHATSAPP_NUMBER` en `config.ts`): al cierre de la landing y en el pie, con un mensaje ya
   escrito. El email queda como segunda opción.
-- **Sin cookies, analítica ni formularios.** Si se agrega GTM/GA4, hay que actualizar la política de privacidad
-  y la CSP.
+- **Sin cookies ni analítica.** El único formulario es `/empezar` (guarda datos de contacto en Supabase): la política
+  de privacidad tiene que reflejarlo. Si se agrega GTM/GA4, actualizar también la política y la CSP.
 - **Rol legal:** Cale trata datos por cuenta del negocio (art. 25, Ley 25.326); el negocio es responsable y
   tiene que tener el opt-in de sus clientes.
 - **Identidad pública sin datos personales:** el sitio muestra **CRM Solutions**, **Argentina** y
@@ -126,7 +137,10 @@ Al 2026-10-15:
 - `src/layouts/BaseLayout.astro` — `<head>` (meta tags, canonical, OG, verificación de Meta), header y footer.
 - `src/layouts/LegalLayout.astro` — layout de las páginas legales con fecha de actualización.
 - `src/pages/` — `index`, `privacidad`, `terminos`, `eliminar-datos`, `404`.
-- `infra/site.yaml` — plantilla de CloudFormation del stack `cale-site`.
+- `src/pages/empezar.astro`, `src/scripts/onboarding.ts`, `src/lib/lead*.ts`, `src/lib/simulation.ts` — formulario de alta y simulación.
+- `supabase/migrations/0001_leads.sql` — tabla `leads` y función `submit_lead` (la que corrió Titular en el SQL Editor).
+- `vercel.json` — cabeceras de seguridad del hosting en Vercel (`tests/headers.test.ts`).
+- `infra/site.yaml` — plantilla de CloudFormation del stack `cale-site` (AWS, borrado el 24/10).
 - `.github/workflows/deploy.yml` — deploy a AWS en cada push a `main`.
 - `tests/site.test.ts` — controla el HTML generado (identidad, links, meta tags, CSP, contenido legal requerido).
 - `tests/infra.test.ts` — controla la plantilla y el workflow (seguridad, plan Free, alarmas, URLs, headers).

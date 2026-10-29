@@ -32,6 +32,12 @@ export const ROUTES = {
   dataDeletion: '/eliminar-datos',
 } as const;
 
+// Formulario de alta de interesados (/empezar). No está en ROUTES: no se indexa ni va al sitemap.
+export const START_ROUTE = '/empezar';
+// Versión del texto de consentimiento que se guarda con cada alta. Cambiarla cuando cambie ese texto o la política
+// de privacidad (se ajusta junto con los textos legales).
+export const LEAD_CONSENT_VERSION = '2026-10-29';
+
 // Fecha de vigencia de los textos legales (ISO, se formatea al renderizar).
 export const LEGAL_LAST_UPDATED = '2026-10-15';
 
@@ -64,9 +70,6 @@ export const LANDING_COPY = {
   cta: 'Empezar gratis',
   signIn: 'Ingresar a mi cuenta',
   tagline: 'Menos mensajes manuales. Más tiempo para tu negocio.',
-  // La conexión de WhatsApp de cada negocio depende de que Meta apruebe a Cale (Fase 5): hasta entonces, se avisa
-  whatsappNotice:
-    'Sin tarjeta. La conexión con WhatsApp se está habilitando: podés dejar todo listo y anotarte para usarla apenas esté.',
   closing: 'Tu tiempo vale más que mandar recordatorios uno por uno.',
 } as const;
 
@@ -77,12 +80,12 @@ export const HOW_IT_WORKS = [
     text: 'Cale crea un calendario de turnos para tu negocio dentro de tu Google Calendar.',
   },
   {
-    title: 'Anotá cada turno con el nombre y el celular',
-    text: 'Como ya lo hacés: “Lucía - color 11 5555-0142”.',
+    title: 'Anotá cada turno en tu calendario',
+    text: 'Cada turno se anota con el nombre de tu cliente, el servicio y su celular, para poder contactarlo ante cualquier inconveniente.',
   },
   {
     title: 'Cale le escribe a tu cliente el día anterior',
-    text: `A las ${REMINDER_SEND_TIME}, por WhatsApp. Tu cliente confirma o cancela con un botón.`,
+    text: 'Por WhatsApp, en el horario que vos digas. Tu cliente confirma, reprograma o cancela el turno con un botón.',
   },
 ] as const;
 

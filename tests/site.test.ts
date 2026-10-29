@@ -18,11 +18,13 @@ import {
   RETENTION,
   ROUTES,
   SLOT_OFFER,
+  START_ROUTE,
   TRIAL_DAYS,
   TRIAL_EXTENSION_DAYS,
   TRIAL_NOTICE_DAYS_BEFORE,
   WHATSAPP_NUMBER,
 } from '../src/config';
+import { BUSINESS_TYPES, CURRENT_METHODS, FORM_STEPS, WEEKLY_APPOINTMENTS } from '../src/lib/lead';
 import { canonicalUrl } from '../src/lib/url';
 
 const DIST_DIR = join(import.meta.dirname, '..', 'dist');
@@ -215,11 +217,12 @@ describe('contenido requerido', () => {
     expect(hero.querySelector('.tagline')?.text.trim()).toBe('Menos mensajes manuales. Más tiempo para tu negocio.');
   });
 
-  // Hasta que Meta apruebe a Cale (Fase 5), ningún negocio puede conectar su WhatsApp: la portada lo avisa
-  it('la portada avisa que la conexión con WhatsApp todavía no está disponible', () => {
-    const notice = pages.get(ROUTES.home)!.querySelector('.hero .notice')?.text ?? '';
-    expect(notice).toContain('La conexión con WhatsApp se está habilitando');
-    expect(notice).toContain('anotarte');
+  // Decisión del 29/10/2026: la portada no lleva el aviso de "sin tarjeta" ni el de la conexión de WhatsApp
+  it('la portada no lleva el aviso de sin tarjeta ni de la conexión con WhatsApp', () => {
+    const hero = pages.get(ROUTES.home)!.querySelector('.hero')!;
+    expect(hero.querySelector('.notice')).toBeNull();
+    expect(hero.text).not.toContain('Sin tarjeta');
+    expect(hero.text).not.toContain('se está habilitando');
   });
 
   // "Desde el mismo número" sale recién cuando exista la conexión (fuente de verdad, sección 8)
@@ -245,10 +248,12 @@ describe('contenido requerido', () => {
     expect(section.querySelector('h2')?.text).toBe('Cómo funciona');
     expect(section.querySelectorAll('ol > li h3').map((title) => title.text)).toEqual([
       'Entrá con tu cuenta de Google',
-      'Anotá cada turno con el nombre y el celular',
+      'Anotá cada turno en tu calendario',
       'Cale le escribe a tu cliente el día anterior',
     ]);
-    expect(section.text).toContain(`A las ${REMINDER_SEND_TIME}, por WhatsApp`);
+    expect(section.text).toContain('el nombre de tu cliente, el servicio y su celular');
+    expect(section.text).toContain('en el horario que vos digas');
+    expect(section.text).toContain('confirma, reprograma o cancela el turno con un botón');
   });
 
   it('la landing va de la portada a cómo funciona y cierra con la banda', () => {
@@ -280,13 +285,13 @@ describe('contenido requerido', () => {
     expect(page.querySelector(`#contacto a[href^="https://wa.me/${WHATSAPP_NUMBER}"]`)).not.toBeNull();
   });
 
-  // La acción principal es empezar: los dos botones de la landing y los del encabezado llevan al asistente
-  it('en la landing los botones "Empezar gratis" de la portada y del cierre llevan al asistente', () => {
+  // La acción principal es empezar: los dos botones de la landing y el del encabezado llevan al formulario de /empezar
+  it('en la landing los botones "Empezar gratis" de la portada y del cierre llevan al formulario', () => {
     const page = pages.get(ROUTES.home)!;
     const starts = page.querySelectorAll('main a.button');
     expect(starts.map((link) => [link.text.trim(), link.getAttribute('href')])).toEqual([
-      ['Empezar gratis', APP_URL],
-      ['Empezar gratis', APP_URL],
+      ['Empezar gratis', START_ROUTE],
+      ['Empezar gratis', START_ROUTE],
     ]);
   });
 
@@ -294,7 +299,7 @@ describe('contenido requerido', () => {
     const buttons = pages.get(route)!.querySelectorAll('header.site-header a.button');
     expect(buttons.map((link) => [link.text.trim(), link.getAttribute('href'), link.classList.contains('button-secondary')])).toEqual([
       ['Ingresar a mi cuenta', APP_URL, true],
-      ['Empezar gratis', APP_URL, false],
+      ['Empezar gratis', START_ROUTE, false],
     ]);
   });
 
@@ -446,5 +451,137 @@ describe('robots.txt y sitemap.xml', () => {
     const lastmod = (route: string) =>
       sitemap.querySelectorAll('url').find((url) => url.querySelector('loc')?.text === canonicalUrl(route))?.querySelector('lastmod')?.text;
     for (const route of [ROUTES.privacy, ROUTES.terms, ROUTES.dataDeletion]) expect(lastmod(route)).toBe(LEGAL_LAST_UPDATED);
+  });
+});
+
+
+// Formulario de alta (/empezar): no es una ruta indexable, así que no entra en los tests por ruta de arriba
+describe('formulario de alta (/empezar)', () => {
+  const START_FILE = routeToFile(START_ROUTE);
+  const FORM_FIELDS = [
+    'businessName',
+    'businessType',
+    'city',
+    'weeklyAppointments',
+    'currentMethod',
+    'ownerName',
+    'ownerWhatsapp',
+    'businessWhatsapp',
+    'consent',
+  ];
+  const page = () => loadPage(START_FILE);
+
+  it('se genera, no se indexa y no está en el sitemap', () => {
+    expect(existsSync(join(DIST_DIR, START_FILE))).toBe(true);
+    expect(metaContent(page(), 'meta[name="robots"]')).toBe('noindex');
+    expect(page().querySelector('link[rel="canonical"]')).toBeNull();
+    expect(readFileSync(join(DIST_DIR, 'sitemap.xml'), 'utf8')).not.toContain(START_ROUTE);
+  });
+
+  it('tiene un solo h1 y un título propio con el nombre del negocio', () => {
+    expect(page().querySelectorAll('h1')).toHaveLength(1);
+    expect(page().querySelector('title')?.text).toContain(BUSINESS_NAME);
+    const titles = [...pages.values()].map((other) => other.querySelector('title')?.text);
+    expect(titles).not.toContain(page().querySelector('title')?.text);
+  });
+
+  // La CSP de /empezar (vercel.json) admite scripts solo del propio dominio: uno inline se rompe en producción
+  it('carga un solo script, externo y del propio sitio, sin scripts ni estilos inline', () => {
+    const scripts = page().querySelectorAll('script');
+    expect(scripts).toHaveLength(1);
+    expect(scripts[0].getAttribute('src')).toMatch(/^\/_astro\/.+\.js$/);
+    expect(scripts[0].text.trim()).toBe('');
+    expect(page().querySelectorAll('style')).toHaveLength(0);
+    expect(page().querySelectorAll('[style]')).toHaveLength(0);
+  });
+
+  it('tiene los tres pasos en orden, cada uno con su título enfocable', () => {
+    const sections = page().querySelectorAll('form section[data-step]');
+    expect(sections.map((section) => section.getAttribute('data-step'))).toEqual(FORM_STEPS.map(String));
+    for (const section of sections) {
+      expect(section.querySelector('h2')?.getAttribute('tabindex')).toBe('-1');
+      expect(section.getAttribute('aria-labelledby')).toBe(section.querySelector('h2')?.id);
+    }
+  });
+
+  it('pide exactamente los campos del formulario y la trampa para robots', () => {
+    const names = new Set(page().querySelectorAll('form [name]').map((field) => field.getAttribute('name')));
+    expect([...names].sort()).toEqual([...FORM_FIELDS, 'website'].sort());
+  });
+
+  it('cada campo tiene etiqueta y su mensaje de error enlazado con aria-describedby', () => {
+    const doc = page();
+    const controls = doc.querySelectorAll('form input[name], form select').filter((field) => field.getAttribute('type') !== 'radio' && field.getAttribute('name') !== 'website');
+    expect(controls.length).toBeGreaterThan(0);
+    for (const control of controls) {
+      const id = control.id;
+      const labelled = id !== '' && doc.querySelector(`label[for="${id}"]`) !== null;
+      // Las casillas llevan su etiqueta alrededor
+      const wrapped = control.parentNode instanceof HTMLElement && control.parentNode.tagName === 'LABEL';
+      expect(labelled || wrapped, `el campo ${control.getAttribute('name')} no tiene etiqueta`).toBe(true);
+      for (const target of (control.getAttribute('aria-describedby') ?? '').split(' ').filter(Boolean)) {
+        expect(doc.querySelector(`#${target}`), `aria-describedby apunta a #${target}, que no existe`).not.toBeNull();
+      }
+    }
+    for (const field of FORM_FIELDS) {
+      expect(doc.querySelector(`[data-error-for="${field}"]`), `falta el mensaje de error de ${field}`).not.toBeNull();
+    }
+  });
+
+  it('los grupos de opciones son fieldset con legend y ofrecen las opciones de lib/lead.ts', () => {
+    const doc = page();
+    for (const [name, options] of [
+      ['weeklyAppointments', WEEKLY_APPOINTMENTS],
+      ['currentMethod', CURRENT_METHODS],
+    ] as const) {
+      const group = doc.querySelector(`fieldset[data-field="${name}"]`)!;
+      expect(group.querySelector('legend')).not.toBeNull();
+      expect(group.querySelectorAll('input[type="radio"]').map((radio) => radio.getAttribute('value'))).toEqual(
+        options.map((option) => option.value),
+      );
+    }
+    expect(doc.querySelectorAll('select[name="businessType"] option').map((option) => option.getAttribute('value'))).toEqual([
+      '',
+      ...BUSINESS_TYPES,
+    ]);
+  });
+
+  it('la trampa para robots no se ve, no se lee en voz alta y no recibe foco', () => {
+    const trap = page().querySelector('input[name="website"]')!;
+    expect(trap.getAttribute('tabindex')).toBe('-1');
+    expect(trap.getAttribute('autocomplete')).toBe('off');
+    expect(trap.parentNode instanceof HTMLElement && trap.parentNode.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  it('el consentimiento enlaza a la política de privacidad', () => {
+    expect(page().querySelector(`[data-field="consent"] a[href="${ROUTES.privacy}"]`)).not.toBeNull();
+  });
+
+  it('el formulario y el resultado arrancan ocultos; sin JavaScript se avisa cómo seguir por WhatsApp', () => {
+    const doc = page();
+    expect(doc.querySelector('[data-wizard]')?.hasAttribute('hidden')).toBe(true);
+    expect(doc.querySelector('[data-result]')?.hasAttribute('hidden')).toBe(true);
+    const fallback = doc.querySelector('noscript')?.innerHTML ?? '';
+    expect(fallback).toContain(`https://wa.me/${WHATSAPP_NUMBER}`);
+  });
+
+  it('la simulación tiene los textos que completa el script y los botones de la plantilla', () => {
+    const doc = page();
+    for (const slot of ['reminder', 'free-text', 'redirect']) {
+      expect(doc.querySelector(`[data-sim="${slot}"]`), `falta el lugar data-sim="${slot}"`).not.toBeNull();
+    }
+    expect(doc.querySelectorAll('.replies li').map((reply) => reply.text)).toEqual(REMINDER_PREVIEW.replies);
+  });
+
+  it('no carga recursos de afuera del sitio', () => {
+    const sources = page()
+      .querySelectorAll('link[href], script[src], img[src]')
+      .filter((element) => element.getAttribute('rel') !== 'canonical')
+      .map((element) => element.getAttribute('href') ?? element.getAttribute('src') ?? '');
+    expect(sources.filter((source) => /^(https?:)?\/\//.test(source))).toEqual([]);
+  });
+
+  it('no muestra precios', () => {
+    expect(bodyText(page())).not.toMatch(/\$\s?\d|\bUSD\b|\bARS\b|\bpesos\b|por mes|\/mes\b/i);
   });
 });
