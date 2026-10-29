@@ -14,3 +14,6 @@ dist/
 
 # sistema
 .DS_Store
+
+# proyecto de Vercel vinculado (local)
+.vercel
