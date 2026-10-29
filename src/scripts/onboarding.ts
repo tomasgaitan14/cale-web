@@ -134,7 +134,7 @@ function showStep(step: FormStep, moveFocus: boolean): void {
 function startCaptcha(): void {
   if (captcha) return;
   try {
-    captcha = mountCaptcha(captchaContainer, readTurnstileSiteKey(import.meta.env), {
+    captcha = mountCaptcha(captchaContainer, readTurnstileSiteKey({ PUBLIC_TURNSTILE_SITE_KEY: import.meta.env.PUBLIC_TURNSTILE_SITE_KEY }), {
       onToken: (token) => {
         captchaToken = token;
       },
