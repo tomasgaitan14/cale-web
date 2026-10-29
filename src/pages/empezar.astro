@@ -129,6 +129,7 @@ const stepCount = FORM_STEPS.length;
                 <p class="field-error" id="error-consent" data-error-for="consent"></p>
               </div>
             </div>
+            <div class="captcha" data-captcha></div>
           </section>
 
           <p class="form-error" data-form-error role="alert"></p>
@@ -240,6 +241,12 @@ const stepCount = FORM_STEPS.length;
   .fields {
     display: grid;
     gap: 1.25rem;
+    margin-top: 1.25rem;
+  }
+
+  /* Turnstile dibuja un iframe de 65 px de alto; se reserva el lugar para que el botón no salte */
+  .captcha {
+    min-height: 4.0625rem;
     margin-top: 1.25rem;
   }
 

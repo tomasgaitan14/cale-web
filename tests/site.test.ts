@@ -553,6 +553,12 @@ describe('formulario de alta (/empezar)', () => {
     expect(trap.parentNode instanceof HTMLElement && trap.parentNode.getAttribute('aria-hidden')).toBe('true');
   });
 
+  it('el captcha tiene su lugar en el último paso y no se carga desde el HTML (lo agrega el script al llegar ahí)', () => {
+    const doc = page();
+    expect(doc.querySelector('section[data-step="3"] [data-captcha]')).not.toBeNull();
+    expect(doc.innerHTML).not.toContain('challenges.cloudflare.com');
+  });
+
   it('el consentimiento enlaza a la política de privacidad', () => {
     expect(page().querySelector(`[data-field="consent"] a[href="${ROUTES.privacy}"]`)).not.toBeNull();
   });

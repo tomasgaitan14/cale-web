@@ -1,35 +1,52 @@
-// Envío del alta a Supabase: llama a la función submit_lead (supabase/migrations/0001_leads.sql) por la API REST.
-// La clave pública (anon/publishable) va en el navegador a propósito; la tabla no se puede leer ni escribir directo.
+// Envío del alta a /api/lead (api/lead.ts): la función verifica el captcha y guarda el alta en Supabase.
+// El navegador no habla con Supabase ni lleva ninguna clave suya; solo conoce la clave pública del captcha.
 import type { LeadPayload } from './lead';
 
-export const SUBMIT_LEAD_PATH = '/rest/v1/rpc/submit_lead';
-const REQUEST_TIMEOUT_MS = 15_000;
-const HTTP_BAD_REQUEST = 400;
+export const LEAD_ENDPOINT = '/api/lead';
+const REQUEST_TIMEOUT_MS = 20_000;
+const HTTP = {
+  ok: 200,
+  badRequest: 400,
+  forbidden: 403,
+  tooLarge: 413,
+  tooManyRequests: 429,
+} as const;
 
 export type LeadResult = 'created' | 'duplicate';
 
-export interface SupabaseConfig {
-  url: string;
-  anonKey: string;
-}
-
-// Falta la URL o la clave del proyecto en el build
+// Falta la clave pública del captcha en el build
 export class LeadConfigError extends Error {
   constructor() {
-    super('Falta PUBLIC_SUPABASE_URL o PUBLIC_SUPABASE_ANON_KEY');
+    super('Falta PUBLIC_TURNSTILE_SITE_KEY');
     this.name = 'LeadConfigError';
   }
 }
 
-// Supabase rechazó los datos (HTTP 400: no cumplen las reglas de la tabla)
+// El servidor rechazó los datos (no cumplen las reglas de la tabla o el pedido es inválido)
 export class LeadRejectedError extends Error {
-  constructor(detail: string) {
-    super(`Alta rechazada: ${detail}`);
+  constructor(status: number) {
+    super(`Alta rechazada (HTTP ${status})`);
     this.name = 'LeadRejectedError';
   }
 }
 
-// No se pudo hablar con Supabase (sin red, tiempo agotado, error del servidor o respuesta inesperada)
+// El captcha no pasó: hay que resolverlo de nuevo
+export class LeadCaptchaError extends Error {
+  constructor() {
+    super('El captcha no pasó la verificación');
+    this.name = 'LeadCaptchaError';
+  }
+}
+
+// Se pasó el límite de envíos por hora
+export class LeadRateLimitError extends Error {
+  constructor() {
+    super('Demasiados intentos');
+    this.name = 'LeadRateLimitError';
+  }
+}
+
+// No se pudo hablar con el servidor (sin red, tiempo agotado, error del servidor o respuesta inesperada)
 export class LeadServiceError extends Error {
   constructor(detail: string, options?: ErrorOptions) {
     super(`No se pudo guardar el alta: ${detail}`, options);
@@ -37,35 +54,32 @@ export class LeadServiceError extends Error {
   }
 }
 
-export function readSupabaseConfig(env: { PUBLIC_SUPABASE_URL?: string; PUBLIC_SUPABASE_ANON_KEY?: string }): SupabaseConfig {
-  const url = env.PUBLIC_SUPABASE_URL?.trim().replace(/\/+$/, '');
-  const anonKey = env.PUBLIC_SUPABASE_ANON_KEY?.trim();
-  if (!url || !anonKey) throw new LeadConfigError();
-  return { url, anonKey };
+export function readTurnstileSiteKey(env: { PUBLIC_TURNSTILE_SITE_KEY?: string }): string {
+  const siteKey = env.PUBLIC_TURNSTILE_SITE_KEY?.trim();
+  if (!siteKey) throw new LeadConfigError();
+  return siteKey;
 }
 
-export async function submitLead(
-  payload: LeadPayload,
-  config: SupabaseConfig,
-  fetchImpl: typeof fetch = fetch,
-): Promise<LeadResult> {
+export async function submitLead(payload: LeadPayload, captchaToken: string, fetchImpl: typeof fetch = fetch): Promise<LeadResult> {
   let response: Response;
   try {
-    response = await fetchImpl(`${config.url}${SUBMIT_LEAD_PATH}`, {
+    response = await fetchImpl(LEAD_ENDPOINT, {
       method: 'POST',
-      // Solo `apikey`: las claves nuevas (sb_publishable_…) no son un JWT y no van en Authorization
-      headers: { apikey: config.anonKey, 'content-type': 'application/json' },
-      body: JSON.stringify(payload),
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ token: captchaToken, lead: payload }),
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
   } catch (error) {
     throw new LeadServiceError('sin conexión o tiempo agotado', { cause: error });
   }
 
-  if (response.status === HTTP_BAD_REQUEST) throw new LeadRejectedError(await response.text());
+  if (response.status === HTTP.forbidden) throw new LeadCaptchaError();
+  if (response.status === HTTP.tooManyRequests) throw new LeadRateLimitError();
+  if (response.status === HTTP.badRequest || response.status === HTTP.tooLarge) throw new LeadRejectedError(response.status);
   if (!response.ok) throw new LeadServiceError(`respuesta ${response.status}`);
 
-  const created: unknown = await response.json().catch(() => undefined);
-  if (typeof created !== 'boolean') throw new LeadServiceError('respuesta inesperada');
-  return created ? 'created' : 'duplicate';
+  const body: unknown = await response.json().catch(() => undefined);
+  const result = typeof body === 'object' && body !== null ? (body as { result?: unknown }).result : undefined;
+  if (result !== 'created' && result !== 'duplicate') throw new LeadServiceError('respuesta inesperada');
+  return result;
 }
