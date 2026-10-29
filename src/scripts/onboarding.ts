@@ -1,4 +1,4 @@
-// Recorrido de /empezar: tres pasos, validación por paso, envío a Supabase y simulación final.
+// Recorrido de /empezar: tres pasos, validación por paso, captcha, envío a /api/lead y simulación final.
 // Todo texto que escribe la persona entra al DOM con textContent, nunca como HTML.
 import { LEAD_CONSENT_VERSION } from '../config';
 import {
@@ -13,8 +13,18 @@ import {
   type LeadForm,
   type LeadPayload,
 } from '../lib/lead';
-import { LeadConfigError, LeadRejectedError, LeadServiceError, readSupabaseConfig, submitLead, type LeadResult } from '../lib/lead-api';
+import {
+  LeadCaptchaError,
+  LeadConfigError,
+  LeadRateLimitError,
+  LeadRejectedError,
+  LeadServiceError,
+  readTurnstileSiteKey,
+  submitLead,
+  type LeadResult,
+} from '../lib/lead-api';
 import { buildSimulation } from '../lib/simulation';
+import { CaptchaLoadError, mountCaptcha, type CaptchaWidget } from './captcha';
 
 const NEXT_LABEL = 'Siguiente';
 const SUBMIT_LABEL = 'Ver cómo le llega a mis clientes';
@@ -25,6 +35,10 @@ const MESSAGES = {
   config: 'El formulario no está disponible en este momento. Escribinos por WhatsApp y te ayudamos.',
   rejected: 'Hay un dato que no pudimos aceptar. Revisalo y probá de nuevo.',
   service: 'No pudimos guardar tus datos. Revisá tu conexión y probá de nuevo.',
+  captchaMissing: 'Completá la verificación de arriba para continuar.',
+  captchaFailed: 'No pudimos verificar que sos una persona. Probá de nuevo.',
+  captchaLoad: 'No pudimos cargar la verificación. Desactivá el bloqueador de anuncios para esta página y recargala.',
+  rateLimited: 'Hiciste muchos intentos seguidos. Probá de nuevo en una hora o escribinos por WhatsApp.',
   unexpected: 'Algo salió mal. Probá de nuevo o escribinos por WhatsApp.',
 } as const;
 
@@ -51,6 +65,7 @@ const nextButton = required<HTMLButtonElement>(form, '[data-action="next"]');
 const sameNumber = required<HTMLInputElement>(form, '[data-same-number]');
 const businessWhatsappField = required<HTMLElement>(form, '[data-business-whatsapp]');
 const honeypot = required<HTMLInputElement>(form, 'input[name="website"]');
+const captchaContainer = required<HTMLElement>(form, '[data-captcha]');
 
 const sections = new Map<FormStep, HTMLElement>(FORM_STEPS.map((step) => [step, required<HTMLElement>(form, `[data-step="${step}"]`)]));
 const progressItems = new Map<FormStep, HTMLElement>(
@@ -59,6 +74,9 @@ const progressItems = new Map<FormStep, HTMLElement>(
 const LAST_STEP = FORM_STEPS[FORM_STEPS.length - 1];
 
 let currentStep: FormStep = FORM_STEPS[0];
+// Token del captcha vigente ('' si todavía no se resolvió, venció o ya se usó: sirve una sola vez)
+let captchaToken = '';
+let captcha: Promise<CaptchaWidget> | undefined;
 
 function readForm(): LeadForm {
   const data = new FormData(form);
@@ -109,6 +127,37 @@ function showStep(step: FormStep, moveFocus: boolean): void {
   nextButton.textContent = step === LAST_STEP ? SUBMIT_LABEL : NEXT_LABEL;
   formError.textContent = '';
   if (moveFocus) required<HTMLElement>(sections.get(step)!, 'h2').focus();
+  if (step === LAST_STEP) startCaptcha();
+}
+
+// Carga y muestra el captcha la primera vez que se llega al último paso
+function startCaptcha(): void {
+  if (captcha) return;
+  try {
+    captcha = mountCaptcha(captchaContainer, readTurnstileSiteKey(import.meta.env), {
+      onToken: (token) => {
+        captchaToken = token;
+      },
+      onInvalid: () => {
+        captchaToken = '';
+      },
+    });
+  } catch (error) {
+    if (!(error instanceof LeadConfigError)) throw error;
+    formError.textContent = MESSAGES.config;
+    return;
+  }
+  captcha.catch((error: unknown) => {
+    captcha = undefined;
+    if (!(error instanceof CaptchaLoadError)) throw error;
+    formError.textContent = MESSAGES.captchaLoad;
+  });
+}
+
+// Cada token sirve una sola vez: tras cualquier intento hay que pedir uno nuevo
+function resetCaptcha(): void {
+  captchaToken = '';
+  void captcha?.then((widget) => widget.reset());
 }
 
 function showResult(payload: LeadPayload, outcome: LeadResult): void {
@@ -141,9 +190,20 @@ function setSending(sending: boolean): void {
   nextButton.textContent = sending ? SENDING_LABEL : SUBMIT_LABEL;
 }
 
+const EXPECTED_ERRORS = [
+  LeadConfigError,
+  LeadRejectedError,
+  LeadValidationError,
+  LeadCaptchaError,
+  LeadRateLimitError,
+  LeadServiceError,
+] as const;
+
 function messageFor(error: unknown): string {
   if (error instanceof LeadConfigError) return MESSAGES.config;
   if (error instanceof LeadRejectedError || error instanceof LeadValidationError) return MESSAGES.rejected;
+  if (error instanceof LeadCaptchaError) return MESSAGES.captchaFailed;
+  if (error instanceof LeadRateLimitError) return MESSAGES.rateLimited;
   if (error instanceof LeadServiceError) return MESSAGES.service;
   return MESSAGES.unexpected;
 }
@@ -154,12 +214,21 @@ async function sendLead(values: LeadForm): Promise<void> {
   try {
     const payload = toLeadPayload(values, LEAD_CONSENT_VERSION);
     // Un robot completa la trampa: se le muestra el final igual, pero no se guarda nada
-    const outcome: LeadResult = honeypot.value ? 'created' : await submitLead(payload, readSupabaseConfig(import.meta.env));
-    showResult(payload, outcome);
+    if (honeypot.value) {
+      showResult(payload, 'created');
+      return;
+    }
+    if (!captchaToken) {
+      setSending(false);
+      formError.textContent = MESSAGES.captchaMissing;
+      return;
+    }
+    showResult(payload, await submitLead(payload, captchaToken));
   } catch (error) {
     setSending(false);
+    resetCaptcha();
     formError.textContent = messageFor(error);
-    if (!(error instanceof LeadConfigError || error instanceof LeadRejectedError || error instanceof LeadServiceError)) throw error;
+    if (!EXPECTED_ERRORS.some((expected) => error instanceof expected)) throw error;
   }
 }
 

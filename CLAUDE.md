@@ -55,16 +55,23 @@ para reactivarlos). Para reconstruir: `infra/site.yaml`, [`docs/infra-aws.md`](d
 nuevos en DonWeb, dominio de Meta a verificar de nuevo y `AWS_DEPLOY_ROLE_ARN`, `SITE_BUCKET` y
 `CLOUDFRONT_DISTRIBUTION_ID` a cargar de nuevo. Lo que sigue, abajo, es el estado **antes** del borrado.
 
-**Formulario de alta `/empezar` (29/10/2026, sin deployar ni commitear):** el botón "Empezar gratis" ya no lleva a
-`cale-app` sino a `/empezar` (3 pasos: negocio, turnos, datos) y termina en una simulación del recordatorio con el
-nombre del negocio, más un cierre "te escribimos cuando tu línea esté lista". **Sin pago por ahora** (decisión de Titular:
-se suma cuando la línea de WhatsApp funcione). Guarda el alta en una tabla `leads` de **Supabase** (proyecto
-`cale-leads`, cuenta `cale.turnos@gmail.com`): el navegador solo puede llamar a la función `submit_lead`
-(`supabase/migrations/0001_leads.sql`, RLS sin políticas). `src/lib/lead.ts` (validación), `lead-api.ts` (envío),
-`simulation.ts` y `src/scripts/onboarding.ts` (recorrido). La URL y la clave pública van en `PUBLIC_SUPABASE_URL` y
-`PUBLIC_SUPABASE_ANON_KEY` (`.env.local` y Vercel, ver `.env.example`). Hosting nuevo en **Vercel** (`vercel.json` con
-las cabeceras; la CSP de `/empezar` admite su script y `https://*.supabase.co`). Pendiente: probar contra el Supabase
-real, deploy, y ajustar privacidad (ahora se guardan datos personales) y términos.
+**Formulario de alta `/empezar` (29/10/2026, sin deployar):** el botón "Empezar gratis" ya no lleva a `cale-app` sino a
+`/empezar` (3 pasos: negocio, turnos, datos) y termina en una simulación del recordatorio con el nombre del negocio, más
+un cierre "te escribimos cuando tu línea esté lista". **Sin pago por ahora** (decisión de Titular: se suma cuando la línea de
+WhatsApp funcione). Guarda el alta en una tabla `leads` de **Supabase** (proyecto `cale-leads`, cuenta
+`cale.turnos@gmail.com`). **El navegador no habla con Supabase:** manda el formulario y un token de **Cloudflare
+Turnstile** a `/api/lead` (`api/lead.ts`, Vercel Function), que verifica el token y llama a `submit_lead` con la clave
+`service_role`. `submit_lead` solo la puede ejecutar `service_role` (`supabase/migrations/0002_lead_rate_limit.sql`) y
+corta a 5 intentos por hora por IP y 100 en total (se guarda un hash HMAC de la IP, nunca la IP). La tabla `leads` no
+tiene políticas (RLS). Archivos: `src/lib/lead.ts` (validación), `lead-api.ts` (cliente de `/api/lead`), `simulation.ts`,
+`src/scripts/onboarding.ts` y `captcha.ts` (recorrido y widget). Variables: `PUBLIC_TURNSTILE_SITE_KEY` (pública, build)
+y `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `TURNSTILE_SECRET_KEY` (secretas, solo servidor); ver `.env.example`.
+Hosting nuevo en **Vercel** (proyecto `cale-turnos`, equipo `tomasg-projects`; `vercel.json` con las cabeceras: la CSP de
+`/empezar` admite su script y `https://challenges.cloudflare.com`). Ojo con la `service_role` en formato JWT: Supabase
+exige que viaje también como `Authorization: Bearer`, no solo en `apikey` (si no, la llamada entra como `anon` y da 401);
+las `sb_secret_…` van solo en `apikey`. `vercel dev` no sirve en este proyecto (404 en todo): para probar en local, un
+servidor propio que sirva `dist/` y ejecute `api/lead.ts`. Pendiente: deploy, cargar las variables en Vercel, y ajustar
+privacidad (ahora se guardan datos personales y el captcha manda datos de la visita a Cloudflare) y términos.
 
 **Dirección del producto (24/10/2026):** primero se usa con una amiga de Titular (estética) con **n8n** y la Cloud API,
 sin Tech Provider; Cale como producto multicliente se retoma después. Se descartó Twilio: el camino ISV exige igual
@@ -138,7 +145,8 @@ Al 2026-10-15:
 - `src/layouts/LegalLayout.astro` — layout de las páginas legales con fecha de actualización.
 - `src/pages/` — `index`, `privacidad`, `terminos`, `eliminar-datos`, `404`.
 - `src/pages/empezar.astro`, `src/scripts/onboarding.ts`, `src/lib/lead*.ts`, `src/lib/simulation.ts` — formulario de alta y simulación.
-- `supabase/migrations/0001_leads.sql` — tabla `leads` y función `submit_lead` (la que corrió Titular en el SQL Editor).
+- `supabase/migrations/` — `0001_leads.sql` (tabla `leads`) y `0002_lead_rate_limit.sql` (límite de envíos y `submit_lead` solo para el servidor); las corre Titular en el SQL Editor, en orden.
+- `api/lead.ts` — Vercel Function: verifica Turnstile y guarda el alta (`tests/api-lead.test.ts`).
 - `vercel.json` — cabeceras de seguridad del hosting en Vercel (`tests/headers.test.ts`).
 - `infra/site.yaml` — plantilla de CloudFormation del stack `cale-site` (AWS, borrado el 24/10).
 - `.github/workflows/deploy.yml` — deploy a AWS en cada push a `main`.
