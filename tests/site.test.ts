@@ -27,6 +27,7 @@ import {
 } from '../src/config';
 import { SCENARIO_IDS, buildScenarios } from '../src/lib/chat-script';
 import { BUSINESS_TYPES, CURRENT_METHODS, FORM_STEPS, WEEKLY_APPOINTMENTS } from '../src/lib/lead';
+import { businessInitials } from '../src/lib/simulation';
 import { canonicalUrl } from '../src/lib/url';
 
 const DIST_DIR = join(import.meta.dirname, '..', 'dist');
@@ -316,6 +317,18 @@ describe('contenido requerido', () => {
       const transcript = preview().querySelector('ul.visually-hidden')!;
       expect(transcript.getAttribute('aria-label')).toBeTruthy();
       expect(transcript.querySelectorAll('li')).toHaveLength(4);
+    });
+
+    it('el encabezado del chat es el del negocio de ejemplo, como si se hablara con él', () => {
+      const head = preview().querySelector('.chat-head')!;
+      expect(head.querySelector('strong')?.text).toBe(LANDING_SAMPLE.businessName);
+      expect(head.querySelector('.chat-avatar')?.text.trim()).toBe(businessInitials(LANDING_SAMPLE.businessName));
+      expect(head.text).not.toMatch(/Vista previa|Recordatorio de turno/);
+    });
+
+    it('los mensajes salen del mismo negocio que el encabezado', () => {
+      const first = preview().querySelector('.scene[data-scene="1"] .msg.in:not(.typing) p')!.text;
+      expect(first).toContain(`en ${LANDING_SAMPLE.businessName} `);
     });
 
     it('tiene el botón de pausa y, sin JavaScript, solo se muestra la primera escena', () => {

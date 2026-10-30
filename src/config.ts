@@ -65,7 +65,7 @@ export const REMINDER_SEND_TIME = '7:00';
 // Negocio de ejemplo de las animaciones de la portada. El día es fijo (jueves 29/10/2026): la portada es estática y un
 // "mañana" calculado al compilar quedaría desfasado a los pocos días.
 export const LANDING_SAMPLE = {
-  businessName: 'Barbería Ribera',
+  businessName: 'Estética Cuidarte',
   businessWhatsapp: '5493415550187',
   today: '2026-10-29T15:00:00Z',
 } as const;
@@ -100,7 +100,6 @@ export const HOW_IT_WORKS = [
 // Vista previa del recordatorio: el texto y los botones reales de la plantilla cale_recordatorio_turno, con los datos de
 // ejemplo que se le dieron a Meta (cale-app: REMINDER_TEMPLATE y APPOINTMENT_BUTTONS en api/src/whatsapp/templates.ts)
 export const REMINDER_PREVIEW = {
-  day: 'Miércoles',
   message: 'Hola Lucía, te recordamos tu turno en Barbería Ribera el jueves 16/10 a las 17:30. ¿Nos confirmás si venís?',
   replies: ['Confirmo', 'Cancelo', 'Cambiar horario'],
 } as const;

@@ -5,6 +5,7 @@
 // decorativo: para quien no lo ve, el mismo contenido va como lista de texto.
 import Icon from './Icon.astro';
 import Timeline from './Timeline.astro';
+import { businessInitials } from '../lib/simulation';
 import { LANDING_SAMPLE, REMINDER_SEND_TIME } from '../config';
 import { STEP_SECONDS, buildScenarios, schedule, transcriptOf, type ScheduledScenario, type ScheduledStep } from '../lib/chat-script';
 
@@ -42,8 +43,8 @@ function pressTimes(scene: ScheduledScenario): Map<ScheduledStep, Map<string, nu
       <div class="phone" aria-hidden="true">
         <div class="phone-screen">
           <div class="chat-head">
-            <span class="chat-avatar"><Icon name="calendarCheck" /></span>
-            <span><strong>Recordatorio de turno</strong><br />Vista previa</span>
+            <span class="chat-avatar">{businessInitials(LANDING_SAMPLE.businessName)}</span>
+            <span><strong>{LANDING_SAMPLE.businessName}</strong><br />en línea</span>
           </div>
           <div class="stage">
             {
@@ -181,11 +182,8 @@ function pressTimes(scene: ScheduledScenario): Map<ScheduledStep, Map<string, nu
     background: var(--tint);
     border-radius: 50%;
     color: var(--link);
-  }
-
-  .chat-avatar :global(.icon) {
-    width: 1.25rem;
-    height: 1.25rem;
+    font: var(--fw-head) 0.9375rem/1 var(--font-head);
+    letter-spacing: -0.02em;
   }
 
   /* Alto fijo y escenas apiladas en la misma celda: los mensajes se apilan desde abajo y los viejos salen por arriba,
