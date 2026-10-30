@@ -1,15 +1,16 @@
 // Reproductor de la simulación de /empezar: recorre las escenas de lib/chat-script.ts armando los mensajes en pantalla
 // (escribiendo…, el mensaje, el toque en un botón, la respuesta) y vuelve a empezar. Tiene pausa y "ver otro ejemplo".
 // Con "reducir movimiento" no arranca sola: muestra la escena completa y quieta. Los textos entran con textContent.
-import { transcriptOf, type ChatScenario, type ChatStep } from '../lib/chat-script';
+import { STEP_SECONDS, transcriptOf, type ChatScenario, type ChatStep } from '../lib/chat-script';
 
-// Tiempos de la animación, en milisegundos
+// Tiempos de la animación, en milisegundos (los mismos que usa la portada: lib/chat-script.ts)
+const MS_PER_SECOND = 1000;
 const TIMING = {
-  typing: 1100,
-  read: 1500,
-  press: 700,
-  customer: 600,
-  hold: 2800,
+  typing: STEP_SECONDS.typing * MS_PER_SECOND,
+  read: STEP_SECONDS.read * MS_PER_SECOND,
+  press: STEP_SECONDS.press * MS_PER_SECOND,
+  customer: STEP_SECONDS.customer * MS_PER_SECOND,
+  hold: STEP_SECONDS.hold * MS_PER_SECOND,
 } as const;
 const LABELS = { pause: 'Pausar', play: 'Reproducir' } as const;
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';

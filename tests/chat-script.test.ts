@@ -2,7 +2,16 @@
 // (api/src/whatsapp/messages.ts): si ahí cambian, este test es donde se actualiza la copia.
 import { describe, expect, it } from 'vitest';
 import { REMINDER_PREVIEW } from '../src/config';
-import { SAMPLE_NEW_TIME, SCENARIO_IDS, VIEW_SLOTS_LABEL, buildScenarios, transcriptOf, type ChatStep } from '../src/lib/chat-script';
+import {
+  SAMPLE_NEW_TIME,
+  SCENARIO_IDS,
+  STEP_SECONDS,
+  VIEW_SLOTS_LABEL,
+  buildScenarios,
+  schedule,
+  transcriptOf,
+  type ChatStep,
+} from '../src/lib/chat-script';
 
 const BUSINESS = 'Peluquería Sol';
 const BUSINESS_WHATSAPP = '5493445123456';
@@ -117,5 +126,43 @@ describe('transcriptOf', () => {
     expect(transcript[0]).toContain('Tu cliente: Confirmo');
     expect(transcript[0]).toContain('Cale: ¡Gracias, Lucía! Te esperamos el viernes 30/10 a las 17:30.');
     expect(transcript[3]).toContain('Cale: Para consultas escribí directamente a wa.me/5493445123456');
+  });
+});
+
+describe('schedule', () => {
+  const { scenes, total } = schedule(scenarios);
+  const first = scenes[0];
+
+  it('una escena por escena del guion, una tras otra, sin huecos', () => {
+    expect(scenes.map((item) => item.scenario.id)).toEqual([...SCENARIO_IDS]);
+    expect(scenes[0].start).toBe(0);
+    scenes.slice(1).forEach((item, index) => expect(item.start).toBeCloseTo(scenes[index].end, 9));
+    expect(scenes.at(-1)!.end).toBeCloseTo(total, 9);
+  });
+
+  it('un mensaje de Cale aparece después de "escribiendo…", y la clienta toca un botón después de leer', () => {
+    const [reminder, press, customer, reply] = first.steps;
+    expect(reminder.typingAt).toBe(0);
+    expect(reminder.at).toBeCloseTo(STEP_SECONDS.typing, 9);
+    expect(press.at).toBeCloseTo(STEP_SECONDS.typing + STEP_SECONDS.read, 9);
+    expect(press.typingAt).toBeNull();
+    expect(customer.at).toBeCloseTo(press.at + STEP_SECONDS.press, 9);
+    expect(reply.typingAt).toBeCloseTo(customer.at + STEP_SECONDS.customer, 9);
+    expect(reply.at).toBeCloseTo(reply.typingAt! + STEP_SECONDS.typing, 9);
+  });
+
+  it('la escena termina con una pausa después de su último mensaje', () => {
+    const last = first.steps.at(-1)!;
+    expect(first.end).toBeCloseTo(last.at + STEP_SECONDS.read + STEP_SECONDS.hold, 9);
+  });
+
+  it('todo paso empieza dentro de su escena y los pasos van en orden', () => {
+    for (const scene of scenes) {
+      scene.steps.forEach((item, index) => {
+        expect(item.at).toBeGreaterThanOrEqual(scene.start);
+        expect(item.at).toBeLessThan(scene.end);
+        if (index > 0) expect(item.at).toBeGreaterThan(scene.steps[index - 1].at);
+      });
+    }
   });
 });
