@@ -1,108 +1,190 @@
 ---
-// Simulación del final de /empezar: dos escenas de WhatsApp. El script (scripts/onboarding.ts) completa los textos con
-// los datos del negocio usando textContent; la estructura y los botones son fijos.
-import { REMINDER_PREVIEW } from '../config';
+// Simulación animada del final de /empezar: un chat de WhatsApp que recorre cuatro escenas (confirma, cancela, cambia el
+// horario, escribe otra cosa). El script (scripts/chat-player.ts) arma los mensajes con textContent. La animación es
+// decorativa: para quien no la ve, el mismo contenido va como texto en una lista oculta (data-sim-transcript).
+import { SCENARIO_IDS } from '../lib/chat-script';
 ---
 
-<div class="simulation">
-  <figure class="scene" aria-label="Escena 1: el recordatorio del día anterior">
-    <figcaption>El día anterior, Cale le escribe a tu cliente</figcaption>
-    <div class="chat">
-      <p class="chat-day">Ejemplo</p>
-      <div class="bubble bubble-in"><p data-sim="reminder"></p></div>
-      <ul class="replies">
-        {REMINDER_PREVIEW.replies.map((reply) => <li>{reply}</li>)}
-      </ul>
-    </div>
-  </figure>
-
-  <figure class="scene" aria-label="Escena 2: tu cliente escribe otra cosa">
-    <figcaption>Si tu cliente escribe otra cosa, lo mandamos a tu número</figcaption>
-    <div class="chat">
-      <div class="bubble bubble-out"><p data-sim="free-text"></p></div>
-      <div class="bubble bubble-in"><p data-sim="redirect"></p></div>
-    </div>
-  </figure>
+<div class="sim" data-sim>
+  <p class="sim-caption" data-sim-caption aria-hidden="true"></p>
+  <div class="sim-phone" aria-hidden="true">
+    <div class="sim-stage" data-sim-stage></div>
+  </div>
+  <ol class="sim-progress" aria-hidden="true">
+    {SCENARIO_IDS.map((id) => <li class="sim-progress-dot" data-sim-dot={id}></li>)}
+  </ol>
+  <div class="sim-controls">
+    <button type="button" class="button button-secondary button-compact" data-sim-toggle>Pausar</button>
+    <button type="button" class="button button-secondary button-compact" data-sim-next>Ver otro ejemplo</button>
+  </div>
+  <ul class="visually-hidden" data-sim-transcript aria-label="Cómo le llegaría a tus clientes, en texto"></ul>
 </div>
 
-<style>
+<!-- Global: los mensajes los crea el script, y los estilos con alcance de Astro no llegan a elementos creados en el navegador -->
+<style is:global>
   /* Colores del chat de muestra: imitan la pantalla de WhatsApp, no son parte de la marca (como en PhonePreview) */
-  .simulation {
+  .sim {
     --chat-bg: #efeae2;
     --chat-text: #111b21;
-    --chat-soft: #54656f;
     --chat-reply: #00618a;
     --chat-out: #d9fdd3;
 
     display: grid;
-    gap: 1rem;
+    gap: 0.75rem;
   }
 
-  .scene {
-    margin: 0;
-    overflow: hidden;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sheet);
-    background: var(--surface);
-  }
-
-  figcaption {
-    padding: 0.75rem 1rem;
-    font-size: var(--fs-small);
+  .sim-caption {
+    min-height: 1.5rem;
     font-weight: 700;
   }
 
-  .chat {
-    display: grid;
-    gap: 0.25rem;
-    padding: 0.875rem 0.75rem;
+  .sim-phone {
+    overflow: hidden;
     background: var(--chat-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sheet);
+  }
+
+  /* Alto fijo: los mensajes se apilan desde abajo y los viejos salen por arriba, sin que la página salte */
+  .sim-stage {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 0.25rem;
+    height: 22rem;
+    padding: 0.875rem 0.75rem;
     color: var(--chat-text);
     font-size: var(--fs-small);
     line-height: 1.4;
   }
 
-  .chat-day {
-    justify-self: center;
-    margin-bottom: 0.375rem;
-    padding: 0.125rem 0.625rem;
-    background: var(--surface);
-    border-radius: 8px;
-    color: var(--chat-soft);
-  }
-
-  .bubble {
-    max-width: 92%;
+  .sim-msg {
+    max-width: 88%;
     padding: 0.5625rem 0.75rem;
     overflow-wrap: anywhere;
+    animation: sim-pop 220ms ease-out;
   }
 
-  .bubble-in {
-    justify-self: start;
+  .sim-in {
+    align-self: flex-start;
     background: var(--surface);
     border-radius: 4px 12px 12px 12px;
   }
 
-  .bubble-out {
-    justify-self: end;
+  .sim-out {
+    align-self: flex-end;
     background: var(--chat-out);
     border-radius: 12px 4px 12px 12px;
   }
 
-  .replies {
+  .sim-buttons {
     display: grid;
     gap: 0.1875rem;
     margin: 0;
     padding: 0;
     list-style: none;
+    animation: sim-pop 220ms ease-out;
   }
 
-  .replies li {
+  .sim-button-reply {
     padding: 0.4375rem;
     background: var(--surface);
     border-radius: 10px;
     color: var(--chat-reply);
     font-weight: 700;
     text-align: center;
+  }
+
+  /* El toque del cliente: el botón se hunde un instante y queda marcado */
+  .sim-pressed {
+    background: var(--tint);
+    animation: sim-tap 300ms ease-out;
+  }
+
+  .sim-typing {
+    display: flex;
+    gap: 0.25rem;
+    padding-block: 0.75rem;
+  }
+
+  .sim-dot {
+    width: 0.4375rem;
+    height: 0.4375rem;
+    background: var(--muted);
+    border-radius: 50%;
+    animation: sim-blink 1s infinite ease-in-out;
+  }
+
+  .sim-dot:nth-child(2) {
+    animation-delay: 150ms;
+  }
+
+  .sim-dot:nth-child(3) {
+    animation-delay: 300ms;
+  }
+
+  .sim-progress {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .sim-progress-dot {
+    width: 0.625rem;
+    height: 0.625rem;
+    background: var(--border);
+    border-radius: 50%;
+  }
+
+  .sim-progress-dot.is-done {
+    background: var(--tint-border);
+  }
+
+  .sim-progress-dot.is-current {
+    background: var(--ink);
+  }
+
+  .sim-controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  /* Solo transform y opacity */
+  @keyframes sim-pop {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+  }
+
+  @keyframes sim-tap {
+    40% {
+      transform: scale(0.96);
+    }
+  }
+
+  @keyframes sim-blink {
+    0%,
+    80%,
+    100% {
+      opacity: 0.3;
+    }
+    40% {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sim-msg,
+    .sim-buttons,
+    .sim-pressed,
+    .sim-dot {
+      animation: none;
+    }
   }
 </style>

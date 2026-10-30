@@ -6,6 +6,7 @@ import {
   SAMPLE_CLIENT_NAME,
   buildSimulation,
   businessWhatsappLink,
+  dayAfter,
   reminderText,
 } from '../src/lib/simulation';
 
@@ -69,5 +70,15 @@ describe('buildSimulation', () => {
       `Para consultas escribí directamente a wa.me/${BUSINESS_WHATSAPP}, este número es de mensajes automáticos.`,
     );
     expect(businessWhatsappLink(BUSINESS_WHATSAPP)).toBe(`wa.me/${BUSINESS_WHATSAPP}`);
+  });
+});
+
+describe('dayAfter', () => {
+  it('da el día con la hora de Argentina y el nombre corto con mayúscula y tilde, como la lista de horarios', () => {
+    // Jueves 29/10/2026, 12:00 en Argentina
+    const today = new Date('2026-10-29T15:00:00Z');
+    expect(dayAfter(today, 1)).toEqual({ weekday: 'viernes', shortWeekday: 'Vie', date: '30/10' });
+    expect(dayAfter(today, 2)).toEqual({ weekday: 'sábado', shortWeekday: 'Sáb', date: '31/10' });
+    expect(dayAfter(today, 6)).toEqual({ weekday: 'miércoles', shortWeekday: 'Mié', date: '04/11' });
   });
 });

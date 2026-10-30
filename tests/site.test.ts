@@ -24,6 +24,7 @@ import {
   TRIAL_NOTICE_DAYS_BEFORE,
   WHATSAPP_NUMBER,
 } from '../src/config';
+import { SCENARIO_IDS } from '../src/lib/chat-script';
 import { BUSINESS_TYPES, CURRENT_METHODS, FORM_STEPS, WEEKLY_APPOINTMENTS } from '../src/lib/lead';
 import { canonicalUrl } from '../src/lib/url';
 
@@ -571,12 +572,44 @@ describe('formulario de alta (/empezar)', () => {
     expect(fallback).toContain(`https://wa.me/${WHATSAPP_NUMBER}`);
   });
 
-  it('la simulación tiene los textos que completa el script y los botones de la plantilla', () => {
+  // La animación (scripts/chat-player.ts) busca estos elementos por data-attributes: si falta uno, no arranca
+  it('la simulación tiene el escenario, el rótulo, un punto por escena, la pausa y el texto para lectores de pantalla', () => {
     const doc = page();
-    for (const slot of ['reminder', 'free-text', 'redirect']) {
-      expect(doc.querySelector(`[data-sim="${slot}"]`), `falta el lugar data-sim="${slot}"`).not.toBeNull();
+    const sim = doc.querySelector('[data-result] [data-sim]')!;
+    expect(sim).not.toBeNull();
+    expect(sim.querySelector('[data-sim-stage]')).not.toBeNull();
+    expect(sim.querySelectorAll('[data-sim-dot]').map((dot) => dot.getAttribute('data-sim-dot'))).toEqual([...SCENARIO_IDS]);
+    expect(sim.querySelector('[data-sim-toggle]')?.text).toBe('Pausar');
+    expect(sim.querySelector('[data-sim-next]')?.text).toBe('Ver otro ejemplo');
+    expect(sim.querySelector('[data-sim-transcript]')?.getAttribute('aria-label')).toBeTruthy();
+  });
+
+  // Es decorativa y se repite sola: lo que se mueve no se lee en voz alta, solo la lista de texto
+  it('la animación se oculta a los lectores de pantalla y los controles son botones de verdad', () => {
+    const sim = page().querySelector('[data-sim]')!;
+    expect(sim.querySelector('.sim-phone')?.getAttribute('aria-hidden')).toBe('true');
+    expect(sim.querySelector('[data-sim-caption]')?.getAttribute('aria-hidden')).toBe('true');
+    expect(sim.querySelector('.sim-progress')?.getAttribute('aria-hidden')).toBe('true');
+    for (const control of sim.querySelectorAll('.sim-controls button')) expect(control.getAttribute('type')).toBe('button');
+  });
+
+  it('los estilos de la animación respetan "reducir movimiento" y usan solo transform y opacity', () => {
+    const css = readdirSync(join(DIST_DIR, '_astro'))
+      .filter((file) => file.endsWith('.css'))
+      .map((file) => readFileSync(join(DIST_DIR, '_astro', file), 'utf8'))
+      .join('\n');
+    // Toda clase que se anima tiene que apagar su animación con "reducir movimiento"
+    const animated = [...css.matchAll(/(\.sim-[\w-]+)(?:[^{}]*){[^}]*animation:[^;}]*\bsim-/g)].map((match) => match[1]);
+    expect(animated.sort()).toEqual(['.sim-buttons', '.sim-dot', '.sim-msg', '.sim-pressed']);
+    // Los selectores del bloque, uno por uno (no por texto: ".sim-dot" también "está" dentro de ".sim-dotx")
+    const reducedSelectors = (css.match(/prefers-reduced-motion:\s*reduce\)\s*{([^{}]*){[^}]*animation:\s*none/)?.[1] ?? '').split(',').map((selector) => selector.trim());
+    for (const selector of animated) expect(reducedSelectors, `${selector} sigue animándose con "reducir movimiento"`).toContain(selector);
+    const keyframes = [...css.matchAll(/@keyframes sim-[\w-]+\s*{((?:[^{}]|{[^{}]*})*)}/g)].map((match) => match[1]);
+    expect(keyframes).toHaveLength(3);
+    for (const body of keyframes) {
+      const properties = [...body.matchAll(/([\w-]+)\s*:/g)].map((match) => match[1]);
+      expect(properties.filter((property) => !['opacity', 'transform'].includes(property))).toEqual([]);
     }
-    expect(doc.querySelectorAll('.replies li').map((reply) => reply.text)).toEqual(REMINDER_PREVIEW.replies);
   });
 
   it('no carga recursos de afuera del sitio', () => {
