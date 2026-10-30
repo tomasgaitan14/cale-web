@@ -192,6 +192,8 @@ function pressTimes(scene: ScheduledScenario): Map<ScheduledStep, Map<string, nu
      como en un chat de verdad, sin que la portada salte */
   .stage {
     display: grid;
+    /* Fila de alto fijo: sin esto, los mensajes que quedan en una escena apagada ensanchan la fila y cortan la actual */
+    grid-template-rows: minmax(0, 1fr);
     height: 22rem;
     overflow: hidden;
     background: var(--chat-bg);
@@ -203,6 +205,7 @@ function pressTimes(scene: ScheduledScenario): Map<ScheduledStep, Map<string, nu
   .scene {
     display: flex;
     grid-area: 1 / 1;
+    min-height: 0;
     flex-direction: column;
     justify-content: flex-end;
     gap: 0.25rem;
