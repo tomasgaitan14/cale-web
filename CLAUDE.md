@@ -26,7 +26,7 @@ agregar acá nombre legal, dirección, CUIT ni IDs de cuentas. El único teléfo
 
 | Capa | Elección |
 |------|----------|
-| Build | Astro 7, salida 100 % estática. **Sin JS en el cliente, salvo `/empezar`** (un script propio, sin framework) |
+| Build | Astro 7, salida 100 % estática. **Sin JS en el cliente, salvo la portada (animación) y `/empezar`** (scripts propios, sin framework) |
 | Estilos | CSS plano: tokens del diseño en `src/styles/tokens.css` (copia de `cale-app/docs/DISENO.md`), base en `global.css` (sin Tailwind) |
 | Tipografía | Manrope (títulos) + DM Sans (texto), autoalojadas con `@fontsource-variable` |
 | Íconos | `@phosphor-icons/core` (Bold), inline vía `src/components/Icon.astro` (calendario, reloj, tilde, doble tilde y WhatsApp) |
@@ -74,6 +74,16 @@ servidor propio que sirva `dist/` y ejecute `api/lead.ts`. Nunca pasar `import.m
 Vite incrusta todo el entorno del build, incluidas las `PUBLIC_VERCEL_*` de Vercel (`tests/public-env.test.ts`). Pendiente:
 probar el formulario en producción, conectar `cale.com.ar` (y sumarlo al widget de Turnstile), y ajustar
 privacidad (ahora se guardan datos personales y el captcha manda datos de la visita a Cloudflare) y términos.
+
+**Portada animada (30/10/2026, publicada):** el celular de la portada (`PhonePreview.astro`) es un chat de WhatsApp animado
+con el negocio de ejemplo «Estética Cuidarte» (`LANDING_SAMPLE` en `config.ts`, con el día fijo jueves 29/10/2026: la
+portada es estática). Recorre las mismas cuatro escenas que la simulación de `/empezar` (`lib/chat-script.ts`, con los
+textos reales de cale-app). Todo está en el HTML y `scripts/timeline.ts` solo enciende y apaga `is-in` según un reloj
+(`lib/timeline.ts`); corre solo a la vista, tiene pausa y, con «reducir movimiento», muestra un cuadro fijo. La CSP de `/`
+admite scripts del propio sitio (`vercel.json`). **Vite incrusta en el HTML los scripts de menos de 4 KB y la CSP los
+bloquea:** `assetsInlineLimit: 0` en `astro.config.ts` (`tests/build-config.test.ts`). Se compararon tres versiones
+(celular, agenda que se actualiza, los 3 pasos en acción); se publicó la del celular y las otras dos se borraron.
+Ojo con los git worktrees: un enlace `node_modules` se puede colar en un commit (el `.gitignore` ignora el nombre a secas).
 
 **Dirección del producto (24/10/2026):** primero se usa con una amiga de Titular (estética) con **n8n** y la Cloud API,
 sin Tech Provider; Cale como producto multicliente se retoma después. Se descartó Twilio: el camino ISV exige igual
