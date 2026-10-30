@@ -9,6 +9,7 @@ import {
   BUSINESS_NAME,
   CONTACT_EMAIL,
   FACEBOOK_DOMAIN_VERIFICATION,
+  LANDING_SAMPLE,
   LEGAL_LAST_UPDATED,
   LOCATION,
   OWNER_NAME,
@@ -24,7 +25,7 @@ import {
   TRIAL_NOTICE_DAYS_BEFORE,
   WHATSAPP_NUMBER,
 } from '../src/config';
-import { SCENARIO_IDS } from '../src/lib/chat-script';
+import { SCENARIO_IDS, buildScenarios } from '../src/lib/chat-script';
 import { BUSINESS_TYPES, CURRENT_METHODS, FORM_STEPS, WEEKLY_APPOINTMENTS } from '../src/lib/lead';
 import { canonicalUrl } from '../src/lib/url';
 
@@ -238,16 +239,89 @@ describe('contenido requerido', () => {
     expect(text).not.toMatch(/mismo número|coexistencia|prueba gratis de \d+ días|\d+ días gratis/i);
   });
 
-  it('la vista previa muestra el recordatorio real con sus tres botones', () => {
-    const preview = pages.get(ROUTES.home)!.querySelector('.hero figure')!;
-    expect(preview.getAttribute('aria-label')).toBe('Vista previa del recordatorio por WhatsApp');
-    expect(preview.querySelector('.bubble p')?.text).toBe(REMINDER_PREVIEW.message);
-    expect(preview.querySelectorAll('.replies li').map((reply) => reply.text)).toEqual([
-      'Confirmo',
-      'Cancelo',
-      'Cambiar horario',
-    ]);
-    expect(preview.text).toContain(`A las ${REMINDER_SEND_TIME}`);
+  describe('celular animado de la portada', () => {
+    const preview = () => pages.get(ROUTES.home)!.querySelector('.hero figure')!;
+    const sample = buildScenarios({
+      businessName: LANDING_SAMPLE.businessName,
+      businessWhatsapp: LANDING_SAMPLE.businessWhatsapp,
+      today: new Date(LANDING_SAMPLE.today),
+    });
+
+    it('lleva el rótulo, el horario de envío y es una animación con ciclo y cuadro fijo válidos', () => {
+      expect(preview().getAttribute('aria-label')).toBe('Vista previa animada del recordatorio por WhatsApp');
+      expect(preview().text).toContain(`A las ${REMINDER_SEND_TIME}`);
+      const timeline = preview().querySelector('[data-timeline]')!;
+      const loop = Number(timeline.getAttribute('data-loop'));
+      const still = Number(timeline.getAttribute('data-static'));
+      expect(loop).toBeGreaterThan(0);
+      expect(still).toBeGreaterThanOrEqual(0);
+      expect(still).toBeLessThan(loop);
+    });
+
+    it('tiene las cuatro escenas una tras otra, sin huecos y dentro del ciclo', () => {
+      const timeline = preview().querySelector('[data-timeline]')!;
+      const loop = Number(timeline.getAttribute('data-loop'));
+      const scenes = preview().querySelectorAll('.scene');
+      expect(scenes.map((scene) => scene.getAttribute('data-scene'))).toEqual(['1', '2', '3', '4']);
+      const windows = scenes.map((scene) => [Number(scene.getAttribute('data-in')), Number(scene.getAttribute('data-out'))]);
+      expect(windows[0][0]).toBe(0);
+      windows.slice(1).forEach(([start], index) => expect(start).toBeCloseTo(windows[index][1], 1));
+      expect(windows.at(-1)![1]).toBeCloseTo(loop, 1);
+    });
+
+    it('todo elemento animado tiene tiempos válidos y los mensajes caen dentro de su escena', () => {
+      for (const scene of preview().querySelectorAll('.scene')) {
+        const [start, end] = [Number(scene.getAttribute('data-in')), Number(scene.getAttribute('data-out'))];
+        for (const item of scene.querySelectorAll('[data-in]')) {
+          const at = Number(item.getAttribute('data-in'));
+          expect(Number.isFinite(at)).toBe(true);
+          expect(at).toBeGreaterThanOrEqual(start);
+          expect(at).toBeLessThan(end);
+          const out = item.getAttribute('data-out');
+          if (item.hasAttribute('data-out')) expect(Number(out)).toBeGreaterThan(at);
+        }
+      }
+    });
+
+    it('el recordatorio de la primera escena es el real y trae sus tres botones', () => {
+      const first = preview().querySelector('.scene[data-scene="1"]')!;
+      const reminder = sample[0].steps[0];
+      expect(first.querySelector('.msg.in:not(.typing) p')?.text).toBe(reminder.kind === 'bot' ? reminder.text : '');
+      expect(first.querySelectorAll('.replies li').map((reply) => reply.text)).toEqual(REMINDER_PREVIEW.replies);
+    });
+
+    it('cada escena muestra los mensajes de su guion, en orden', () => {
+      sample.forEach((scenario, index) => {
+        const scene = preview().querySelector(`.scene[data-scene="${index + 1}"]`)!;
+        const shown = scene.querySelectorAll('.msg:not(.typing):not(.replies) p').map((message) => message.text);
+        const expected = scenario.steps.flatMap((step) => (step.kind === 'press' ? [] : [step.text]));
+        expect(shown).toEqual(expected);
+      });
+    });
+
+    it('cada toque de botón marca un botón que existe en esa escena y llega después del mensaje', () => {
+      for (const scene of preview().querySelectorAll('.scene')) {
+        for (const press of scene.querySelectorAll('.press')) {
+          const button = press.parentNode as HTMLElement;
+          expect(button.tagName).toBe('LI');
+          const list = button.parentNode as HTMLElement;
+          expect(Number(press.getAttribute('data-in'))).toBeGreaterThan(Number(list.getAttribute('data-in')));
+        }
+      }
+    });
+
+    it('lo que se mueve se oculta a los lectores de pantalla y hay una lista de texto con las cuatro escenas', () => {
+      expect(preview().querySelector('.phone')?.getAttribute('aria-hidden')).toBe('true');
+      for (const tag of preview().querySelectorAll('.tag')) expect(tag.getAttribute('aria-hidden')).toBe('true');
+      const transcript = preview().querySelector('ul.visually-hidden')!;
+      expect(transcript.getAttribute('aria-label')).toBeTruthy();
+      expect(transcript.querySelectorAll('li')).toHaveLength(4);
+    });
+
+    it('tiene el botón de pausa y, sin JavaScript, solo se muestra la primera escena', () => {
+      expect(preview().querySelector('button[data-timeline-toggle]')?.getAttribute('type')).toBe('button');
+      expect(preview().querySelectorAll('.scene').filter((scene) => scene.getAttribute('data-scene') !== '1').length).toBe(3);
+    });
   });
 
   it('"Cómo funciona" tiene 3 pasos en orden', () => {

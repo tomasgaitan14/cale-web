@@ -33,6 +33,59 @@ export interface ChatScenario {
   steps: readonly ChatStep[];
 }
 
+// Cuánto dura cada cosa en la animación, en segundos
+export const STEP_SECONDS = {
+  // "escribiendo…" antes de un mensaje de Cale
+  typing: 1.1,
+  // lo que se tarda en leer un mensaje de Cale
+  read: 1.5,
+  // el toque de la clienta en un botón
+  press: 0.7,
+  // la clienta escribe su mensaje
+  customer: 0.6,
+  // la escena completa queda a la vista antes de pasar a la siguiente
+  hold: 2.8,
+} as const;
+
+export interface ScheduledStep {
+  step: ChatStep;
+  // Segundo en que aparece
+  at: number;
+  // Segundo en que aparece "escribiendo…" (solo los mensajes de Cale)
+  typingAt: number | null;
+}
+
+export interface ScheduledScenario {
+  scenario: ChatScenario;
+  // Segundo del ciclo en que empieza y en que termina (incluye la pausa final)
+  start: number;
+  end: number;
+  steps: ScheduledStep[];
+}
+
+// Pone cada paso en el segundo en que aparece, para animaciones que se arman de antemano (la portada)
+export function schedule(scenarios: readonly ChatScenario[]): { scenes: ScheduledScenario[]; total: number } {
+  let cursor = 0;
+  const scenes = scenarios.map((scenario) => {
+    const start = cursor;
+    const steps = scenario.steps.map((step): ScheduledStep => {
+      if (step.kind === 'bot') {
+        const typingAt = cursor;
+        cursor += STEP_SECONDS.typing;
+        const at = cursor;
+        cursor += STEP_SECONDS.read;
+        return { step, at, typingAt };
+      }
+      const at = cursor;
+      cursor += step.kind === 'press' ? STEP_SECONDS.press : STEP_SECONDS.customer;
+      return { step, at, typingAt: null };
+    });
+    cursor += STEP_SECONDS.hold;
+    return { scenario, start, end: cursor, steps };
+  });
+  return { scenes, total: cursor };
+}
+
 export function buildScenarios(input: SimulationInput): ChatScenario[] {
   const simulation = buildSimulation(input);
   const tomorrow = dayAfter(input.today, 1);

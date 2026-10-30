@@ -1,38 +1,109 @@
 ---
-// Celular inclinado con la vista previa real del recordatorio y dos etiquetas flotantes (DISENO.md, "Vista previa del
-// recordatorio"). El texto es el de la plantilla que aprueba Meta, no uno de muestra.
+// Celular de la portada con el recordatorio animado: llega el mensaje, la clienta toca Confirmo, Cancelo o Cambiar horario
+// (o escribe otra cosa) y Cale responde, escena tras escena y en bucle. Los textos son los de lib/chat-script.ts (los mismos
+// que la simulación de /empezar); todo está en el HTML y scripts/timeline.ts solo lo prende y apaga según el reloj. Es
+// decorativo: para quien no lo ve, el mismo contenido va como lista de texto.
 import Icon from './Icon.astro';
-import { REMINDER_PREVIEW, REMINDER_SEND_TIME } from '../config';
+import Timeline from './Timeline.astro';
+import { LANDING_SAMPLE, REMINDER_SEND_TIME } from '../config';
+import { STEP_SECONDS, buildScenarios, schedule, transcriptOf, type ScheduledScenario, type ScheduledStep } from '../lib/chat-script';
+
+const scenarios = buildScenarios({
+  businessName: LANDING_SAMPLE.businessName,
+  businessWhatsapp: LANDING_SAMPLE.businessWhatsapp,
+  today: new Date(LANDING_SAMPLE.today),
+});
+const { scenes, total } = schedule(scenarios);
+// Con "reducir movimiento" se muestra la primera escena completa, justo antes de su pausa final
+const still = scenes[0].end - STEP_SECONDS.hold;
+
+const seconds = (value: number): string => value.toFixed(2);
+
+// A qué segundo toca la clienta cada lista de botones de un mensaje de Cale (null si no toca ninguno)
+function pressTimes(scene: ScheduledScenario): Map<ScheduledStep, Map<string, number>> {
+  const times = new Map<ScheduledStep, Map<string, number>>();
+  scene.steps.forEach((item, index) => {
+    if (item.step.kind !== 'bot' || !item.step.buttons) return;
+    const next = scene.steps.slice(index + 1).find(({ step }) => step.kind === 'press');
+    if (next && next.step.kind === 'press') times.set(item, new Map([[next.step.button, next.at]]));
+  });
+  return times;
+}
 ---
 
-<figure class="art" aria-label="Vista previa del recordatorio por WhatsApp">
-  <span class="orb" aria-hidden="true"></span>
-  <p class="tag tag-top">
-    <span class="tag-icon"><Icon name="clock" /></span>
-    <span><strong>A las {REMINDER_SEND_TIME}</strong><br />del día anterior</span>
-  </p>
-  <div class="phone">
-    <div class="phone-screen">
-      <div class="chat-head">
-        <span class="chat-avatar"><Icon name="calendarCheck" /></span>
-        <span><strong>Recordatorio de turno</strong><br />Vista previa</span>
-      </div>
-      <div class="chat">
-        <p class="chat-day">{REMINDER_PREVIEW.day}</p>
-        <div class="bubble">
-          <p>{REMINDER_PREVIEW.message}</p>
-          <p class="bubble-time">{REMINDER_SEND_TIME}</p>
+<figure class="art" aria-label="Vista previa animada del recordatorio por WhatsApp">
+  <Timeline loop={total} still={still} class="live">
+    <div class="device">
+      <span class="orb" aria-hidden="true"></span>
+      <p class="tag tag-top" aria-hidden="true">
+        <span class="tag-icon"><Icon name="clock" /></span>
+        <span><strong>A las {REMINDER_SEND_TIME}</strong><br />del día anterior</span>
+      </p>
+      <div class="phone" aria-hidden="true">
+        <div class="phone-screen">
+          <div class="chat-head">
+            <span class="chat-avatar"><Icon name="calendarCheck" /></span>
+            <span><strong>Recordatorio de turno</strong><br />Vista previa</span>
+          </div>
+          <div class="stage">
+            {
+              scenes.map((scene, index) => {
+                const presses = pressTimes(scene);
+                return (
+                  <div class="scene" data-scene={index + 1} data-in={seconds(scene.start)} data-out={seconds(scene.end)} data-fx="fade">
+                    <p class="chat-day">Ejemplo</p>
+                    {scene.steps.map((item) => {
+                      const { step, at, typingAt } = item;
+                      if (step.kind === 'press') return null;
+                      if (step.kind === 'customer') {
+                        return (
+                          <div class="msg out" data-in={seconds(at)}>
+                            <p>{step.text}</p>
+                          </div>
+                        );
+                      }
+                      const pressed = presses.get(item);
+                      return (
+                        <>
+                          {typingAt !== null && (
+                            <div class="msg in typing" data-in={seconds(typingAt)} data-out={seconds(at)} data-nojs="hide">
+                              <span class="typing-dot" />
+                              <span class="typing-dot" />
+                              <span class="typing-dot" />
+                            </div>
+                          )}
+                          <div class="msg in" data-in={seconds(at)}>
+                            <p>{step.text}</p>
+                          </div>
+                          {step.buttons && (
+                            <ul class="replies msg" data-in={seconds(at)}>
+                              {step.buttons.map((button) => (
+                                <li>
+                                  {button}
+                                  {pressed?.has(button) && <span class="press" data-in={seconds(pressed.get(button)!)} data-fx="fade" />}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </>
+                      );
+                    })}
+                  </div>
+                );
+              })
+            }
+          </div>
         </div>
-        <ul class="replies">
-          {REMINDER_PREVIEW.replies.map((reply) => <li>{reply}</li>)}
-        </ul>
       </div>
+      <p class="tag tag-bottom" aria-hidden="true">
+        <span class="tag-icon"><Icon name="check" /></span>
+        <span><strong>Confirma, reprograma</strong><br />o cancela con un botón</span>
+      </p>
     </div>
-  </div>
-  <p class="tag tag-bottom">
-    <span class="tag-icon"><Icon name="check" /></span>
-    <span><strong>Confirma o cancela</strong><br />con un botón</span>
-  </p>
+  </Timeline>
+  <ul class="visually-hidden" aria-label="Cómo le llega el recordatorio a tus clientes, en texto">
+    {transcriptOf(scenarios).map((text) => <li>{text}</li>)}
+  </ul>
 </figure>
 
 <style>
@@ -42,12 +113,23 @@ import { REMINDER_PREVIEW, REMINDER_SEND_TIME } from '../config';
     --chat-text: #111b21;
     --chat-soft: #54656f;
     --chat-reply: #00618a;
+    --chat-out: #d9fdd3;
 
+    margin: 0;
+  }
+
+  .art :global(.live) {
+    display: grid;
+    justify-items: center;
+    gap: 0.5rem;
+  }
+
+  .device {
     position: relative;
     display: grid;
     place-items: center;
     min-height: 32rem;
-    margin: 0;
+    width: 100%;
   }
 
   .orb {
@@ -106,18 +188,37 @@ import { REMINDER_PREVIEW, REMINDER_SEND_TIME } from '../config';
     height: 1.25rem;
   }
 
-  .chat {
+  /* Alto fijo y escenas apiladas en la misma celda: los mensajes se apilan desde abajo y los viejos salen por arriba,
+     como en un chat de verdad, sin que la portada salte */
+  .stage {
     display: grid;
-    gap: 0.25rem;
-    padding: 0.875rem 0.625rem;
+    height: 22rem;
+    overflow: hidden;
     background: var(--chat-bg);
     color: var(--chat-text);
     font-size: var(--fs-small);
     line-height: 1.4;
   }
 
+  .scene {
+    display: flex;
+    grid-area: 1 / 1;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 0.25rem;
+    padding: 0.875rem 0.625rem;
+  }
+
+  /* Una escena apagada no se ve ni estorba */
+  .scene:not(:global(.is-in)) {
+    visibility: hidden;
+    transition:
+      opacity 350ms ease,
+      visibility 0s 350ms;
+  }
+
   .chat-day {
-    justify-self: center;
+    align-self: center;
     margin-bottom: 0.375rem;
     padding: 0.125rem 0.625rem;
     background: var(--surface);
@@ -125,32 +226,98 @@ import { REMINDER_PREVIEW, REMINDER_SEND_TIME } from '../config';
     color: var(--chat-soft);
   }
 
-  .bubble {
-    padding: 0.5625rem 0.625rem 0.3125rem;
+  /* Los mensajes no ocupan lugar hasta que llegan: entran con un pequeño salto y empujan lo anterior hacia arriba */
+  .stage :global(.msg[data-in]) {
+    display: none;
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .stage :global(.msg[data-in].is-in) {
+    display: block;
+    animation: live-arrive 420ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .msg {
+    max-width: 88%;
+    padding: 0.5625rem 0.625rem;
+    overflow-wrap: anywhere;
+  }
+
+  .in {
+    align-self: flex-start;
     background: var(--surface);
     border-radius: 4px 12px 12px 12px;
   }
 
-  .bubble-time {
-    color: var(--chat-soft);
-    text-align: right;
+  .out {
+    align-self: flex-end;
+    background: var(--chat-out);
+    border-radius: 12px 4px 12px 12px;
+  }
+
+  .typing {
+    gap: 0.25rem;
+    padding-block: 0.75rem;
+  }
+
+  .stage :global(.typing[data-in].is-in) {
+    display: flex;
+  }
+
+  .typing-dot {
+    width: 0.4375rem;
+    height: 0.4375rem;
+    background: var(--chat-soft);
+    border-radius: 50%;
+    animation: live-blink 1s infinite ease-in-out;
+  }
+
+  .typing-dot:nth-child(2) {
+    animation-delay: 150ms;
+  }
+
+  .typing-dot:nth-child(3) {
+    animation-delay: 300ms;
   }
 
   .replies {
-    display: grid;
+    display: none;
     gap: 0.1875rem;
+    max-width: none;
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
+  .stage :global(.replies[data-in].is-in) {
+    display: grid;
+  }
+
   .replies li {
+    position: relative;
     padding: 0.4375rem;
+    overflow: hidden;
     background: var(--surface);
     border-radius: 10px;
     color: var(--chat-reply);
     font-weight: 700;
     text-align: center;
+  }
+
+  /* El toque de la clienta: el botón se tiñe */
+  .press {
+    position: absolute;
+    inset: 0;
+    background: var(--tint);
+    opacity: 0;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+  }
+
+  .replies li :global(.press.is-in) {
+    opacity: 1;
   }
 
   .tag {
@@ -167,6 +334,11 @@ import { REMINDER_PREVIEW, REMINDER_SEND_TIME } from '../config';
     color: var(--muted);
     font-size: var(--fs-small);
     line-height: 1.3;
+    animation: live-float 6s ease-in-out infinite;
+  }
+
+  .tag-bottom {
+    animation-delay: -3s;
   }
 
   .tag strong {
@@ -196,5 +368,53 @@ import { REMINDER_PREVIEW, REMINDER_SEND_TIME } from '../config';
   .tag-bottom {
     bottom: 0.625rem;
     left: 0;
+  }
+
+  /* Solo transform y opacity */
+  @keyframes live-arrive {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.97);
+    }
+  }
+
+  @keyframes live-blink {
+    0%,
+    80%,
+    100% {
+      opacity: 0.3;
+    }
+    40% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes live-float {
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+
+  /* Sin JavaScript: la primera escena completa, sin "escribiendo…" */
+  @media (scripting: none) {
+    .stage :global(.msg[data-in]:not(.typing)) {
+      display: block;
+    }
+
+    .stage :global(.replies[data-in]) {
+      display: grid;
+    }
+
+    .replies li :global(.press) {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stage :global(.msg[data-in].is-in),
+    .typing-dot,
+    .tag {
+      animation: none;
+    }
   }
 </style>

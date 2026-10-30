@@ -62,6 +62,14 @@ export const APP_SESSION = {
 // Hora (Argentina) en que salen los recordatorios, el día anterior a cada turno (cale-app: REMINDER_SEND_TIME)
 export const REMINDER_SEND_TIME = '7:00';
 
+// Negocio de ejemplo de las animaciones de la portada. El día es fijo (jueves 29/10/2026): la portada es estática y un
+// "mañana" calculado al compilar quedaría desfasado a los pocos días.
+export const LANDING_SAMPLE = {
+  businessName: 'Barbería Ribera',
+  businessWhatsapp: '5493415550187',
+  today: '2026-10-29T15:00:00Z',
+} as const;
+
 // Textos de la landing (cale-app: docs/PRODUCT_SOURCE_OF_TRUTH.md, sección 9)
 export const LANDING_COPY = {
   audience: 'Para negocios que trabajan con turnos',
