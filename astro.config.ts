@@ -11,4 +11,10 @@ export default defineConfig({
     // CSS siempre en archivos externos, para poder usar una CSP sin 'unsafe-inline'
     inlineStylesheets: 'never',
   },
+  vite: {
+    build: {
+      // Vite incrusta en el HTML los scripts de menos de 4 KB (assetsInlineLimit) y la CSP los bloquea: siempre archivos externos
+      assetsInlineLimit: 0,
+    },
+  },
 });
