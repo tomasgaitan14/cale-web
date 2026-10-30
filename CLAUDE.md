@@ -55,7 +55,7 @@ para reactivarlos). Para reconstruir: `infra/site.yaml`, [`docs/infra-aws.md`](d
 nuevos en DonWeb, dominio de Meta a verificar de nuevo y `AWS_DEPLOY_ROLE_ARN`, `SITE_BUCKET` y
 `CLOUDFRONT_DISTRIBUTION_ID` a cargar de nuevo. Lo que sigue, abajo, es el estado **antes** del borrado.
 
-**Formulario de alta `/empezar` (29/10/2026, sin deployar):** el botón "Empezar gratis" ya no lleva a `cale-app` sino a
+**Formulario de alta `/empezar` (29/10/2026, publicado en `https://cale-turnos.vercel.app`):** el botón "Empezar gratis" ya no lleva a `cale-app` sino a
 `/empezar` (3 pasos: negocio, turnos, datos) y termina en una simulación del recordatorio con el nombre del negocio, más
 un cierre "te escribimos cuando tu línea esté lista". **Sin pago por ahora** (decisión de Titular: se suma cuando la línea de
 WhatsApp funcione). Guarda el alta en una tabla `leads` de **Supabase** (proyecto `cale-leads`, cuenta
@@ -70,7 +70,9 @@ Hosting nuevo en **Vercel** (proyecto `cale-turnos`, equipo `tomasg-projects`; `
 `/empezar` admite su script y `https://challenges.cloudflare.com`). Ojo con la `service_role` en formato JWT: Supabase
 exige que viaje también como `Authorization: Bearer`, no solo en `apikey` (si no, la llamada entra como `anon` y da 401);
 las `sb_secret_…` van solo en `apikey`. `vercel dev` no sirve en este proyecto (404 en todo): para probar en local, un
-servidor propio que sirva `dist/` y ejecute `api/lead.ts`. Pendiente: deploy, cargar las variables en Vercel, y ajustar
+servidor propio que sirva `dist/` y ejecute `api/lead.ts`. Nunca pasar `import.meta.env` entero al código del navegador:
+Vite incrusta todo el entorno del build, incluidas las `PUBLIC_VERCEL_*` de Vercel (`tests/public-env.test.ts`). Pendiente:
+probar el formulario en producción, conectar `cale.com.ar` (y sumarlo al widget de Turnstile), y ajustar
 privacidad (ahora se guardan datos personales y el captcha manda datos de la visita a Cloudflare) y términos.
 
 **Dirección del producto (24/10/2026):** primero se usa con una amiga de Titular (estética) con **n8n** y la Cloud API,
