@@ -23,7 +23,8 @@ import {
   submitLead,
   type LeadResult,
 } from '../lib/lead-api';
-import { buildSimulation } from '../lib/simulation';
+import { buildScenarios } from '../lib/chat-script';
+import { startSimulation } from './chat-player';
 import { CaptchaLoadError, mountCaptcha, type CaptchaWidget } from './captcha';
 
 const NEXT_LABEL = 'Siguiente';
@@ -161,11 +162,6 @@ function resetCaptcha(): void {
 }
 
 function showResult(payload: LeadPayload, outcome: LeadResult): void {
-  const simulation = buildSimulation({
-    businessName: payload.p_business_name,
-    businessWhatsapp: payload.p_business_phone,
-    today: new Date(),
-  });
   const firstName = payload.p_owner_name.split(' ')[0];
   const setText = (selector: string, text: string) => {
     required<HTMLElement>(result, selector).textContent = text;
@@ -173,15 +169,16 @@ function showResult(payload: LeadPayload, outcome: LeadResult): void {
 
   setText('[data-result-title]', `Listo, ${firstName}. Así le llegaría a tus clientes`);
   setText('[data-result-lead]', `Ejemplo con los datos de ${payload.p_business_name}. La clienta, el día y la hora son de muestra.`);
-  setText('[data-sim="reminder"]', simulation.reminder);
-  setText('[data-sim="free-text"]', simulation.freeText);
-  setText('[data-sim="redirect"]', simulation.redirect);
   setText('[data-result-closing]', `Te anotamos. Apenas tu línea de recordatorios esté lista, te escribimos a tu WhatsApp (el que termina en ${payload.p_owner_whatsapp.slice(-PHONE_TAIL_DIGITS)}).`);
   required<HTMLElement>(result, '[data-duplicate-note]').hidden = outcome !== 'duplicate';
 
   wizard.hidden = true;
   result.hidden = false;
   required<HTMLElement>(result, '[data-result-title]').focus();
+  startSimulation(
+    required<HTMLElement>(result, '[data-sim]'),
+    buildScenarios({ businessName: payload.p_business_name, businessWhatsapp: payload.p_business_phone, today: new Date() }),
+  );
 }
 
 function setSending(sending: boolean): void {

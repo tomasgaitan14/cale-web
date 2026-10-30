@@ -28,15 +28,33 @@ export interface Simulation {
   redirect: string;
 }
 
-function tomorrowParts(today: Date): { weekday: string; date: string } {
+export interface DayLabel {
+  // "viernes"
+  weekday: string;
+  // "Vie": el nombre corto que lleva cada fila de la lista de horarios (cale-app: slotLabel)
+  shortWeekday: string;
+  // "30/10"
+  date: string;
+}
+
+const SHORT_WEEKDAY_LETTERS = 3;
+
+// El día que cae `days` días después de `today`, con la hora de Argentina
+export function dayAfter(today: Date, days: number): DayLabel {
   const parts = new Intl.DateTimeFormat('es-AR', {
     timeZone: ARGENTINA_TIME_ZONE,
     weekday: 'long',
     day: '2-digit',
     month: '2-digit',
-  }).formatToParts(new Date(today.getTime() + DAY_MS));
+  }).formatToParts(new Date(today.getTime() + days * DAY_MS));
   const part = (type: string) => parts.find((item) => item.type === type)?.value ?? '';
-  return { weekday: part('weekday'), date: `${part('day')}/${part('month')}` };
+  const weekday = part('weekday');
+  const shortWeekday = weekday.slice(0, SHORT_WEEKDAY_LETTERS);
+  return {
+    weekday,
+    shortWeekday: `${shortWeekday.charAt(0).toUpperCase()}${shortWeekday.slice(1)}`,
+    date: `${part('day')}/${part('month')}`,
+  };
 }
 
 export function reminderText(input: { clientName: string; businessName: string; weekday: string; date: string; time: string }): string {
@@ -48,7 +66,7 @@ export function businessWhatsappLink(businessWhatsapp: string): string {
 }
 
 export function buildSimulation(input: SimulationInput): Simulation {
-  const { weekday, date } = tomorrowParts(input.today);
+  const { weekday, date } = dayAfter(input.today, 1);
 
   return {
     reminder: reminderText({
