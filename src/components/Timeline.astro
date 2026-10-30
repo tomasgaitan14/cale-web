@@ -1,0 +1,106 @@
+---
+// Envoltorio de las animaciones de la portada. Los hijos con data-in / data-out / data-fx se encienden según el reloj de
+// scripts/timeline.ts. Sin JavaScript se ve un cuadro fijo (data-nojs="hide" oculta los estados de partida; data-scene
+// agrupa escenas y solo se muestra la primera). La pausa es un botón de verdad (WCAG 2.2.2: todo lo que se mueve solo
+// más de 5 segundos se puede pausar).
+interface Props {
+  // Duración del ciclo, en segundos
+  loop: number;
+  // Segundo que se muestra con "reducir movimiento"
+  still: number;
+  class?: string;
+}
+
+const { loop, still, class: className } = Astro.props;
+---
+
+<div class:list={['tl', className]} data-timeline data-loop={loop} data-static={still}>
+  <slot />
+  <button type="button" class="tl-toggle" data-timeline-toggle>Pausar animación</button>
+</div>
+
+<script>
+  import '../scripts/timeline';
+</script>
+
+<style is:global>
+  /* Estado de partida: invisible y un poco abajo. Solo transform y opacity (nada de alto, ancho ni posición) */
+  .tl [data-in] {
+    opacity: 0;
+    transform: translateY(10px);
+    transition:
+      opacity 350ms ease,
+      transform 550ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .tl [data-in].is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Rebote corto, para insignias y botones que se "tocan" */
+  .tl [data-fx='pop'] {
+    transform: scale(0.92);
+    transition:
+      opacity 250ms ease,
+      transform 450ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .tl [data-fx='fade'] {
+    transform: none;
+  }
+
+  /* Se revela de izquierda a derecha, como escrito a mano */
+  .tl [data-fx='draw'] {
+    clip-path: inset(0 100% 0 0);
+    opacity: 1;
+    transform: none;
+    transition: clip-path 900ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .tl [data-fx='draw'].is-in {
+    clip-path: inset(0);
+  }
+
+  .tl-toggle {
+    min-height: 2.5rem;
+    padding: 0 1rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--muted);
+    font: inherit;
+    font-size: var(--fs-small);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .tl-toggle:hover {
+    color: var(--text);
+  }
+
+  /* Sin JavaScript: un cuadro fijo, con todo lo permanente a la vista y sin el botón de pausa */
+  @media (scripting: none) {
+    .tl [data-in] {
+      opacity: 1;
+      transform: none;
+      clip-path: none;
+    }
+
+    .tl [data-nojs='hide'],
+    .tl [data-scene]:not([data-scene='1']) {
+      display: none;
+    }
+
+    .tl-toggle {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tl [data-in],
+    .tl [data-fx] {
+      transition: none;
+    }
+  }
+</style>

@@ -160,9 +160,15 @@ describe.each(INDEXABLE_ROUTES)('página %s', (route) => {
     expect(bodyText(page())).not.toMatch(PENDING_MARKER_PATTERN);
   });
 
-  // La CSP del sitio (SecurityHeadersFunction en infra/site.yaml) bloquea scripts y estilos inline: si aparecen, se rompen en producción.
-  it('no tiene scripts ni estilos inline', () => {
-    expect(page().querySelectorAll('script')).toHaveLength(0);
+  // La CSP (vercel.json) bloquea scripts y estilos inline: si aparecen, se rompen en producción. La portada admite solo
+  // los scripts externos del propio sitio (las animaciones); en las demás páginas, ninguno.
+  it('no tiene scripts inline ni estilos inline, y los scripts externos son solo los permitidos', () => {
+    const scripts = page().querySelectorAll('script');
+    for (const script of scripts) {
+      expect(script.getAttribute('src'), 'un script sin src es inline').toMatch(/^\/_astro\/.+\.js$/);
+      expect(script.text.trim()).toBe('');
+    }
+    if (route !== ROUTES.home) expect(scripts).toHaveLength(0);
     expect(page().querySelectorAll('style')).toHaveLength(0);
     expect(page().querySelectorAll('[style]')).toHaveLength(0);
   });

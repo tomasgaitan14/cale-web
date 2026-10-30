@@ -1,5 +1,6 @@
 // Cabeceras de seguridad del hosting en Vercel (vercel.json). Equivalen a las de la CloudFront Function de
-// infra/site.yaml, con una excepción: /empezar admite su propio script y el captcha de Cloudflare Turnstile.
+// infra/site.yaml, con dos excepciones: la portada admite su propio script (las animaciones) y /empezar, el suyo más el
+// captcha de Cloudflare Turnstile.
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -11,7 +12,8 @@ interface HeaderRule {
 }
 
 const VERCEL_CONFIG = JSON.parse(readFileSync(join(import.meta.dirname, '..', 'vercel.json'), 'utf8')) as { headers: HeaderRule[] };
-const SITE_PAGES = [...Object.values(ROUTES), '/404'];
+// Páginas sin ningún script: los textos legales y la 404. La portada (ROUTES.home) lleva solo el script del propio sitio.
+const SITE_PAGES = [...Object.values(ROUTES).filter((route) => route !== ROUTES.home), '/404'];
 const TURNSTILE_ORIGIN = 'https://challenges.cloudflare.com';
 
 // Los `source` de vercel.json son patrones tipo path-to-regexp; los que usa este archivo son expresiones regulares válidas
@@ -39,6 +41,15 @@ describe('Content-Security-Policy', () => {
     expect(directive(csp, 'connect-src')).toEqual(["'none'"]);
   });
 
+  it('la portada recibe una sola CSP: solo su propio script, sin conexiones ni Cloudflare', () => {
+    const rules = rulesFor(ROUTES.home, 'Content-Security-Policy');
+    expect(rules).toHaveLength(1);
+    const csp = headerValue(rules[0], 'Content-Security-Policy');
+    expect(directive(csp, 'script-src')).toEqual(["'self'"]);
+    expect(directive(csp, 'connect-src')).toEqual(["'none'"]);
+    expect(csp).not.toContain('cloudflare');
+  });
+
   it('el formulario recibe una sola CSP: su script, el captcha de Cloudflare y nada de Supabase en el navegador', () => {
     const rules = rulesFor(START_ROUTE, 'Content-Security-Policy');
     expect(rules).toHaveLength(1);
@@ -54,7 +65,7 @@ describe('Content-Security-Policy', () => {
     expect(headerValue(rulesFor(path, 'Content-Security-Policy')[0], 'Content-Security-Policy')).not.toContain('cloudflare');
   });
 
-  it.each([START_ROUTE, ...SITE_PAGES])('%s mantiene lo demás de la CSP cerrado', (path) => {
+  it.each([ROUTES.home, START_ROUTE, ...SITE_PAGES])('%s mantiene lo demás de la CSP cerrado', (path) => {
     const csp = headerValue(rulesFor(path, 'Content-Security-Policy')[0], 'Content-Security-Policy');
     expect(directive(csp, 'default-src')).toEqual(["'self'"]);
     expect(directive(csp, 'object-src')).toEqual(["'none'"]);
@@ -66,7 +77,7 @@ describe('Content-Security-Policy', () => {
 });
 
 describe('demás cabeceras', () => {
-  it.each([START_ROUTE, ...SITE_PAGES])('%s lleva HSTS, nosniff, DENY, referrer y permisos', (path) => {
+  it.each([ROUTES.home, START_ROUTE, ...SITE_PAGES])('%s lleva HSTS, nosniff, DENY, referrer y permisos', (path) => {
     const values = Object.fromEntries(
       VERCEL_CONFIG.headers
         .filter((rule) => new RegExp(`^${rule.source}$`).test(path))
