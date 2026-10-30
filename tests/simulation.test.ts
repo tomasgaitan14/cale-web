@@ -5,6 +5,7 @@ import {
   SAMPLE_APPOINTMENT_TIME,
   SAMPLE_CLIENT_NAME,
   buildSimulation,
+  businessInitials,
   businessWhatsappLink,
   dayAfter,
   reminderText,
@@ -80,5 +81,24 @@ describe('dayAfter', () => {
     expect(dayAfter(today, 1)).toEqual({ weekday: 'viernes', shortWeekday: 'Vie', date: '30/10' });
     expect(dayAfter(today, 2)).toEqual({ weekday: 'sábado', shortWeekday: 'Sáb', date: '31/10' });
     expect(dayAfter(today, 6)).toEqual({ weekday: 'miércoles', shortWeekday: 'Mié', date: '04/11' });
+  });
+});
+
+describe('businessInitials', () => {
+  it.each([
+    ['Estética Cuidarte', 'EC'],
+    ['Barbería Ribera', 'BR'],
+    ['Peluquería', 'P'],
+    ['  óptica   nueva  ', 'ÓN'],
+  ])('%s -> %s', (name, expected) => {
+    expect(businessInitials(name)).toBe(expected);
+  });
+
+  it('salta los signos sueltos al principio de una palabra', () => {
+    expect(businessInitials('Salón & Co.')).toBe('SC');
+  });
+
+  it('un nombre vacío no da iniciales', () => {
+    expect(businessInitials('   ')).toBe('');
   });
 });

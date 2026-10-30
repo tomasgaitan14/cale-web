@@ -61,6 +61,18 @@ export function reminderText(input: { clientName: string; businessName: string; 
   return `Hola ${input.clientName}, te recordamos tu turno en ${input.businessName} el ${input.weekday} ${input.date} a las ${input.time}. ¿Nos confirmás si venís?`;
 }
 
+const MAX_INITIALS = 2;
+
+// Las iniciales que lleva el avatar de un chat: "Estética Cuidarte" -> "EC"
+export function businessInitials(businessName: string): string {
+  return businessName
+    .split(/\s+/)
+    .filter((word) => /^\p{L}/u.test(word))
+    .slice(0, MAX_INITIALS)
+    .map((word) => word.charAt(0).toLocaleUpperCase('es-AR'))
+    .join('');
+}
+
 export function businessWhatsappLink(businessWhatsapp: string): string {
   return `wa.me/${businessWhatsapp}`;
 }
