@@ -13,6 +13,10 @@ negocio siga usando la app WhatsApp Business en su número, y eso solo se logra 
 Provider; no se usa un proveedor (BSP) intermediario. El camino completo y su estado están en
 [`docs/roadmap.md`](docs/roadmap.md). El modelo anterior (cada negocio con su propia app y un token) quedó descartado.
 
+**Regla del 2026-11-01: siempre coexistencia.** Los recordatorios salen del número que el negocio ya usa (si no tiene
+cuenta de WhatsApp Business Platform, se crea en el alta) y el negocio sigue viendo sus mensajes. No se ofrece una
+línea aparte solo para recordatorios. Cale no es una empresa: es un desarrollador individual (titular).
+
 ## Contexto
 
 Personal. Producto propio. **Sin relación** con Sinfalta / `whatsapp-bot` (decisión del 2026-10-10).
@@ -32,20 +36,37 @@ agregar acá nombre legal, dirección, CUIT ni IDs de cuentas. El único teléfo
 | Íconos | `@phosphor-icons/core` (Bold), inline vía `src/components/Icon.astro` (calendario, reloj, tilde, doble tilde y WhatsApp) |
 | Tests | Vitest sobre el HTML de `dist/` + `node-html-parser`; la plantilla de AWS y el workflow, con `yaml` |
 | Node | 24 (`.nvmrc` y `engines`; Astro 7 pide ≥ 22.12 y el `node` por defecto de nvm es 22.11) |
-| Hosting | **AWS**: S3 + CloudFront con el plan flat-rate Free, WAF, Route 53, alarmas por email. Ver [`docs/infra-aws.md`](docs/infra-aws.md) |
-| Deploy | GitHub Actions en cada push a `main` (OIDC, sin claves) |
-| Hosting anterior | Vercel (`cale-turnos.vercel.app`), dado de baja el 2026-10-14 |
+| Hosting | **Vercel** (Hobby, proyecto `cale-turnos`, equipo `tomasg-projects`): el sitio estático y la Function `api/lead.ts`. Dominios: `cale.com.ar` (y `www`, que redirige) y `cale-turnos.vercel.app`. Dejar Vercel es una opción a retomar más adelante (implicaría volver a S3 + CloudFront y rehacer `api/lead.ts` como Lambda) |
+| Deploy | Vercel despliega solo en cada push a `main` (el workflow de GitHub Actions para AWS está desactivado) |
+| Hosting anterior | AWS (S3 + CloudFront, [`docs/infra-aws.md`](docs/infra-aws.md)), borrado el 2026-10-24; antes de eso, Vercel hasta el 2026-10-14 |
 
 ## Proyectos relacionados
 
-- **`cale-app`** (repo privado, `~/projects-claude/personal/cale-app/`): el asistente de alta y el backend de Cale en
-  `https://app.cale.com.ar` (entrar con Google, calendario, perfil, recordatorios, reservas por WhatsApp y webhook).
-  Los botones "Empezar gratis" e "Ingresar a mi cuenta" llevan ahí (`APP_URL`; en el celular el encabezado muestra solo el segundo). `tokens.css` es la misma copia que
-  `cale-app/web/src/styles/tokens.css`: si cambia un valor, cambiarlo en `DISENO.md` y en los dos repos. Varios plazos y textos del sitio copian los de
-  cale-app y lo dicen en `src/config.ts` (prueba gratis, sesión, hora de los recordatorios, horarios que se ofrecen):
-  si cambian allá, cambiarlos acá y en `LEGAL_LAST_UPDATED`.
+- **`cale-app`** (repo privado, `~/projects-claude/personal/cale-app/`): el asistente de alta y el backend de Cale
+  (entrar con Google, calendario, perfil, recordatorios, reservas por WhatsApp y webhook). **Está offline desde el
+  2026-10-24** (su AWS se borró) y el sitio ya no enlaza a `app.cale.com.ar`: "Empezar gratis" va a `/empezar` y el
+  encabezado no tiene botón de ingreso (un test lo controla). Si la app vuelve, se vuelve a agregar un acceso.
+  `tokens.css` es la misma copia que `cale-app/web/src/styles/tokens.css`: si cambia un valor, cambiarlo en
+  `DISENO.md` y en los dos repos. La hora de los recordatorios (`REMINDER_SEND_TIME`) copia la de cale-app y lo dice
+  en `src/config.ts`: si cambia allá, cambiarla acá y en `LEGAL_LAST_UPDATED`.
 
 ## Estado actual
+
+**Al 2026-11-01 (publicado en `https://cale-turnos.vercel.app`; `cale.com.ar` pendiente de DNS):**
+
+- **Textos legales reescritos** (`privacidad`, `terminos`, `eliminar-datos`) para lo que existe hoy: formulario de alta
+  (datos, hash de la IP, Turnstile), copia de mensajes de la coexistencia (se descartan los que no son recordatorios),
+  proveedores Meta, Vercel, Supabase y Cloudflare, términos en "etapa de lanzamiento" y el mismo número y la misma app.
+  Sin AWS, Google, asistente ni prueba gratis. `LEGAL_LAST_UPDATED` y `LEAD_CONSENT_VERSION` = 2026-11-01. Los datos de
+  coexistencia (versión de la app, 180 días de historial, 20 mensajes por segundo) están en `COEXISTENCE` de `config.ts`.
+- Se sacó el botón "Ingresar a mi cuenta" (apuntaba a `app.cale.com.ar`, sin DNS).
+- **Dominio:** `cale.com.ar` y `www` están agregados al proyecto de Vercel, y Titular cambió en DonWeb los nameservers a
+  `ns1.vercel-dns.com` y `ns2.vercel-dns.com`. Al 01/11 el registro `.com.ar` seguía delegando a AWS: falta que
+  propague (hasta 24 h). El widget de Turnstile ya admite `cale.com.ar`.
+- **Decisiones del texto legal (asumidas, a confirmar):** la agenda del negocio no se nombra (la portada todavía dice
+  Google Calendar), sin costos ni precio, los datos del formulario se guardan 12 meses si no se activa el servicio.
+- **Pendientes de Meta:** constancia de régimen fiscal nueva (la vigente vence el 10/11/2026), estado de la verificación
+  del negocio, backend para el App Review (ver `docs/roadmap.md`) y cargar las URLs legales de `cale.com.ar` en la app.
 
 **Al 2026-10-24: toda la infraestructura de AWS está borrada y el sitio está offline** (decisión de Titular, para no
 tener ningún costo por ahora). Se eliminaron los stacks `cale-site`, `cale-app` y el de SAM, los buckets, la zona de
@@ -138,17 +159,24 @@ Al 2026-10-15:
 - **Plazos de conservación** (`RETENTION` en `config.ts`): 12 meses desde el turno; 30 días después de la baja
   de un negocio. Confirmados el 2026-10-10.
 - **Repo público:** en Hobby, Vercel no deploya repos privados cuando el autor del commit no es el dueño de la
-  cuenta de Vercel (cuentas cruzadas). Ya no importa para AWS, pero el repo sigue público.
-- **AWS en vez de Vercel** (2026-10-12): pedido del titular, con el plan más barato (USD 0) y alarmas. Detalle en
-  `docs/infra-aws.md`.
+  cuenta de Vercel (cuentas cruzadas). Con el sitio otra vez en Vercel, el repo tiene que seguir público.
+- **AWS en vez de Vercel** (2026-10-12) **quedó superado**: AWS se borró el 2026-10-24 y el 2026-11-01 el sitio se
+  quedó en Vercel (USD 0, deploy solo y la Function `api/lead.ts` ya funcionando). Dejar Vercel queda como opción
+  futura; el detalle de la infraestructura de AWS está en `docs/infra-aws.md`.
 
 ## Próximos pasos
 
-1. **Meta:** retomar la verificación del negocio el 20/10/2026 (el dominio `cale.com.ar` ya está verificado).
-2. `terminos.astro` todavía dice "el mismo número": revisarlo con los legales (y `LEGAL_LAST_UPDATED`).
-3. Que un abogado revise los textos legales: el tope de responsabilidad se calcula sobre "lo pagado por el
-   servicio", la jurisdicción no nombra una ciudad y la Ley 25.326 (art. 6) pide identificar al responsable de los
-   datos.
+1. **Dominio:** esperar que `cale.com.ar` propague a Vercel y verificarlo (`dig`, HTTPS, redirección de `www`, el
+   formulario con Turnstile).
+2. **Meta:** bajar la constancia de régimen fiscal nueva (vence el 10/11/2026), revisar el estado de la verificación del
+   negocio y volver a verificar el dominio `cale.com.ar` si hace falta.
+3. **Backend del App Review** (enviar un mensaje y crear una plantilla): decidir la arquitectura. Propuesta: un repo
+   privado aparte, con funciones en Vercel y Supabase; no en este repo, que es público.
+4. Confirmar las decisiones asumidas del texto legal (agenda, costos, plazo del formulario) y alinear la portada, que
+   todavía nombra Google Calendar.
+5. Que un abogado revise los textos legales: el tope de responsabilidad se calcula sobre "lo pagado por el servicio"
+   (hoy sería cero, porque no hay cobro), la jurisdicción no nombra una ciudad y la Ley 25.326 (art. 6) pide
+   identificar al responsable de los datos.
 
 ## Archivos clave
 

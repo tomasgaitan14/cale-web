@@ -1,6 +1,9 @@
 # Infraestructura en AWS
 
-Cómo está alojado el sitio en AWS, cómo se deploya y cómo se opera. La plantilla es
+> **Histórico: esta infraestructura se borró el 2026-10-24 y hoy el sitio está en Vercel** (proyecto `cale-turnos`).
+> Este documento queda como referencia para reconstruirla si se vuelve a AWS (ver `CLAUDE.md`, "Estado actual").
+
+Cómo estaba alojado el sitio en AWS, cómo se deploya y cómo se opera. La plantilla es
 [`infra/site.yaml`](../infra/site.yaml) (stack `cale-site`, región `us-east-1`) y sus tests están en
 [`tests/infra.test.ts`](../tests/infra.test.ts).
 

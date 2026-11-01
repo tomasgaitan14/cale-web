@@ -1,7 +1,12 @@
 # Plan hasta la coexistencia de WhatsApp
 
 Estado del camino para que Cale sea Tech Provider de Meta y pueda conectar negocios con **coexistencia** (el negocio
-sigue usando la app WhatsApp Business en su mismo número). Actualizado al 12/10/2026.
+sigue usando la app WhatsApp Business en su mismo número). Actualizado al 01/11/2026.
+
+**Regla (01/11/2026):** siempre coexistencia, en el número que el negocio ya usa; si no tiene cuenta de WhatsApp
+Business Platform, se crea en el alta. No se ofrece una línea aparte solo para recordatorios. Se evaluó pasar por un
+proveedor que ya sea Tech Provider (por ejemplo 360dialog): el plan de partner cuesta USD 500 a 1.000 por mes más USD
+25 a 49 por número al mes, así que se siguió con Tech Provider propio.
 
 ## Por qué Tech Provider
 
@@ -22,14 +27,14 @@ coexistencia, el número conectado deja de funcionar en la app WhatsApp Business
 | 2 | Información del negocio en el portfolio de Meta (nombre legal tal cual el documento, dirección, teléfono, sitio) | Hecho |
 | 3 | Verificar el dominio del sitio en Meta (metaetiqueta en el `<head>`) | Hecho con `cale.com.ar` (14/10/2026); `cale-turnos.vercel.app` eliminado del portfolio |
 | 4 | Comprar el dominio propio | Hecho: `cale.com.ar`, activo desde el 13/10/2026 |
-| 5 | Hosting en AWS (S3 + CloudFront, plan Free) con deploy automático y alarmas | Hecho (ver [infra-aws.md](infra-aws.md)) |
-| 6 | Etapa 2 de AWS: dominio en Route 53, certificado y alias | Hecho (13/10/2026) |
-| 7 | Verificación del negocio en Meta | Iniciada y pausada; lista para retomar con `cale.com.ar` verificado (Meta no aceptaba `vercel.app`) |
-| 8 | Actualizar los textos del sitio al modelo Tech Provider | Landing hecha (rediseño del 12/10); faltan los términos |
-| 9 | Backend de Cale funcionando (enviar mensajes y crear plantillas) | Pendiente: hace falta para los videos del App Review |
+| 5 | Hosting en AWS (S3 + CloudFront, plan Free) con deploy automático y alarmas | Hecho el 13/10 y **borrado el 24/10/2026** (ver [infra-aws.md](infra-aws.md)) |
+| 6 | Etapa 2 de AWS: dominio en Route 53, certificado y alias | Hecho el 13/10 y borrado el 24/10/2026 |
+| 7 | Verificación del negocio en Meta | Iniciada y pausada; retomar con `cale.com.ar` andando (Meta no aceptaba `vercel.app`) y con la constancia de régimen fiscal nueva (la vigente vence el 10/11/2026) |
+| 8 | Actualizar los textos del sitio al modelo Tech Provider | Hecho: landing (12/10) y privacidad, términos y eliminación de datos (01/11/2026) |
+| 9 | Backend de Cale funcionando (enviar mensajes y crear plantillas) | Pendiente: hace falta para los videos del App Review. Falta decidir la arquitectura (propuesta: repo privado con funciones en Vercel y Supabase) |
 | 10 | App Review y acceso avanzado | Pendiente |
-| 11 | Embedded Signup v4 con coexistencia (`featureType: whatsapp_business_app_onboarding`) | Pendiente. La v2 deja de funcionar el 15/10/2026: usar la v4 directamente |
-| 12 | Dar de baja Vercel | Hecho (14/10/2026) |
+| 11 | Embedded Signup con coexistencia | Pendiente. v2 y v3 dejaron de funcionar el 15/10/2026; la **v5** trae la coexistencia activada por defecto, sin `featureType` (para desactivarla: `enabled: false` en `features`) |
+| 12 | Hosting en Vercel y `cale.com.ar` conectado | Sitio publicado en Vercel; `cale.com.ar` y `www` agregados el 01/11/2026 y nameservers cambiados en DonWeb a `ns1.vercel-dns.com` y `ns2.vercel-dns.com`: falta que propague |
 
 ## Verificación del negocio (paso 7)
 
