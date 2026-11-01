@@ -23,8 +23,7 @@ Personal. Producto propio. **Sin relación** con Sinfalta / `whatsapp-bot` (deci
 
 **Datos privados:** la identidad legal del titular, los IDs de las cuentas (Meta, AWS, DonWeb) y la bitácora
 completa están **fuera del repo**, en `~/projects-claude/personal/cale-privado/`. Este repo es público: no
-agregar acá dirección, CUIT ni IDs de cuentas. El nombre legal es público desde el 2026-11-01 (está en
-`OWNER_NAME`, ver "Decisiones tomadas"). El único teléfono es el WhatsApp de contacto (`WHATSAPP_NUMBER`), que es
+agregar acá nombre legal, dirección, CUIT ni IDs de cuentas. El único teléfono es el WhatsApp de contacto (`WHATSAPP_NUMBER`), que es
 público a propósito.
 
 ## Stack usado en este proyecto
@@ -154,11 +153,12 @@ Al 2026-10-15:
   de privacidad tiene que reflejarlo. Si se agrega GTM/GA4, actualizar también la política y la CSP.
 - **Rol legal:** Cale trata datos por cuenta del negocio (art. 25, Ley 25.326); el negocio es responsable y
   tiene que tener el opt-in de sus clientes.
-- **Identidad pública** (decisión B del 2026-11-01): la marca es **Cale** (pie y metaetiquetas: "Cale · Argentina") y
-  el contacto, `cale.turnos@gmail.com`. El **nombre legal del titular** (`OWNER_NAME`, tal cual la constancia de ARCA)
-  se publica **solo en la política de privacidad y en los términos** (Ley 25.326, art. 6; Meta lo recomienda). CUIT y
-  domicilio fiscal siguen sin publicarse. Se sacó "CRM Solutions", que no es un negocio registrado. Tests en
-  `tests/site.test.ts` (el nombre legal solo en esas dos páginas; nunca "CRM Solutions").
+- **Identidad pública, sin datos personales** (decisión de Titular del 2026-11-01): la marca es **Cale** en todo el sitio
+  (pie y metaetiquetas: "Cale · Argentina") y el contacto, `cale.turnos@gmail.com`. **Ningún lado publica el nombre
+  legal, el domicilio, el CUIT ni otro correo**; el nombre legal va solo en el formulario privado de Meta y nunca en
+  este repo. Se sacó "CRM Solutions", que no es un negocio registrado. Test en `tests/site.test.ts` (sin CUIT, sin
+  otros correos, sin "CRM Solutions"). Riesgo aceptado: Meta podría rechazar la verificación por no ver el nombre
+  legal en el sitio (plan B en `docs/roadmap.md`).
 - **Sin precio en el sitio** (2026-10-11): ni la landing ni los términos hablan del precio del servicio. Hay
   un test que lo controla.
 - **Plazos de conservación** (`RETENTION` en `config.ts`): 12 meses desde el turno; 30 días después de la baja

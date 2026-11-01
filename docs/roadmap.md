@@ -48,9 +48,12 @@ Se inicia desde Configuración del portfolio → Centro de seguridad → Verific
 - **Confirmación:** por dominio (ya verificado) o por teléfono.
 - Si pide un nombre comercial (DBA), revisarlo antes de completarlo.
 
-**Identidad en el sitio (decisión del 01/11/2026):** el nombre legal del titular, tal cual la constancia de ARCA, se
-muestra en la política de privacidad y en los términos; el resto del sitio dice "Cale". No se publican el CUIT ni el
-domicilio fiscal. En el formulario de Meta, el nombre del negocio es el nombre legal y `Cale` va como nombre alternativo.
+**Identidad en el sitio (decisión del 01/11/2026):** el sitio no muestra el nombre legal, el domicilio, el CUIT ni
+otro correo: todo dice "Cale" y `cale.turnos@gmail.com`. En el formulario privado de Meta, el nombre del negocio es el
+nombre legal y `Cale` va como nombre alternativo.
+
+**Riesgo aceptado:** las guías recomiendan mostrar el nombre legal, así que Meta podría rechazar la verificación. Si la
+rechaza por eso, plan B: agregar solo el nombre legal en los términos y la privacidad, y volver a enviarla.
 
 ## Coexistencia: lo que el negocio tiene que saber
 
