@@ -1,8 +1,8 @@
 ---
 import LegalLayout from '../layouts/LegalLayout.astro';
 import {
-  APP_SESSION,
   BUSINESS_NAME,
+  COEXISTENCE,
   CONTACT_EMAIL,
   LOCATION,
   OWNER_NAME,
@@ -15,13 +15,13 @@ import { mailtoUrl } from '../lib/url';
 
 <LegalLayout
   heading="Política de privacidad"
-  description={`Qué datos trata ${BUSINESS_NAME} al enviar recordatorios de turnos por WhatsApp, para qué los usa, cuánto tiempo los guarda y cómo pedir que se borren, según la Ley 25.326.`}
+  description={`Qué datos trata ${BUSINESS_NAME} de quienes se interesan y de los clientes de cada negocio, para qué los usa, cuánto los guarda y cómo pedir su borrado.`}
   path={ROUTES.privacy}
 >
   <p>
-    Esta política explica qué datos personales trata {BUSINESS_NAME} cuando presta su servicio de recordatorios de
-    turnos por WhatsApp, para qué los usa, con quién los comparte, cuánto tiempo los guarda y cómo ejercer los derechos
-    que da la Ley 25.326 de Protección de los Datos Personales de la República Argentina.
+    Esta política explica qué datos personales trata {BUSINESS_NAME}, para qué los usa, con quién los comparte, cuánto
+    tiempo los guarda y cómo ejercer los derechos que da la Ley 25.326 de Protección de los Datos Personales de la
+    República Argentina.
   </p>
 
   <h2 id="quienes-somos">1. Quiénes somos</h2>
@@ -39,105 +39,83 @@ import { mailtoUrl } from '../lib/url';
   </p>
   <ul>
     <li>
-      <strong>El negocio</strong> que contrata {BUSINESS_NAME} es el responsable de la base de datos de sus clientes:
-      decide a quién se le envían recordatorios y con qué datos.
+      <strong>{BUSINESS_NAME}</strong> es responsable de los datos de los negocios que se interesan por el servicio o lo
+      usan: los del formulario de alta y los de contacto.
     </li>
     <li>
-      <strong>{BUSINESS_NAME}</strong> trata esos datos por cuenta y orden del negocio, como prestador de servicios de
-      tratamiento en los términos del artículo 25 de la Ley 25.326. Solo los usa para prestar el servicio contratado y
-      según las instrucciones del negocio.
+      <strong>El negocio</strong> es el responsable de la base de datos de sus clientes: decide a quién se le envían
+      recordatorios y con qué datos. {BUSINESS_NAME} los trata por cuenta y orden del negocio, como prestador de
+      servicios de tratamiento en los términos del artículo 25 de la Ley 25.326, solo para prestar el servicio y según
+      sus instrucciones.
     </li>
   </ul>
-  <p>
-    Además, {BUSINESS_NAME} es responsable de los datos de contacto de los propios negocios que contratan el servicio.
-  </p>
 
   <h2 id="datos">3. Qué datos tratamos</h2>
-  <h3>De los clientes finales de cada negocio</h3>
+  <h3>De quienes completan el formulario de alta</h3>
   <ul>
-    <li>Nombre. Si el cliente pide un turno por WhatsApp, el nombre de pila de su perfil de WhatsApp.</li>
-    <li>Número de teléfono de WhatsApp.</li>
     <li>
-      Datos del turno que el negocio anota en su calendario de turnos: fecha, hora y lo que escriba en el evento (por
-      ejemplo, nombre, teléfono y servicio).
+      Del negocio: nombre, tipo de negocio, ciudad, cantidad aproximada de turnos por semana y cómo avisa hoy a sus
+      clientes.
+    </li>
+    <li>De la persona que lo completa: nombre y número de WhatsApp. Si lo cargás, también el WhatsApp del negocio.</li>
+    <li>La versión del consentimiento que aceptaste y la fecha y hora en que lo hiciste.</li>
+    <li>
+      Para frenar abusos del formulario, un código irreversible (hash) calculado a partir de tu dirección IP. No
+      guardamos la IP. Ese código sirve solo para contar intentos y se descarta pasado un día.
     </li>
     <li>
-      Contenido de los mensajes que se envían y de las respuestas que da el cliente, incluidas las respuestas con
-      botones (confirmar, cancelar o pedir otro horario) y el horario que elige de la lista de horarios libres.
-    </li>
-    <li>
-      Los mensajes que el cliente le escribe al WhatsApp del negocio llegan también a {BUSINESS_NAME}, porque el negocio
-      lo conecta a ese número. {BUSINESS_NAME} solo usa los que piden un turno (los que dicen “turno”); los demás los
-      descarta sin guardarlos, y el negocio los sigue viendo en su WhatsApp Business.
-    </li>
-    <li>El último turno que reservó cada número por WhatsApp en cada negocio, para que reserve uno por vez.</li>
-    <li>
-      Estados de entrega de cada mensaje que informa Meta (enviado, entregado, leído o fallido), con su fecha y hora.
+      Cloudflare Turnstile, la verificación que comprueba que no sos un robot, recibe datos técnicos de tu visita
+      (como la dirección IP y el navegador).
     </li>
   </ul>
-  <h3>De los negocios que contratan el servicio</h3>
+
+  <h3>De los negocios que usan el servicio</h3>
   <ul>
-    <li>
-      Los datos que cargan en el asistente de alta y en su perfil: nombre del negocio, nombre de la persona responsable,
-      número de WhatsApp, días y horarios de atención, duración de los turnos y días sin atención.
-    </li>
-    <li>
-      El nombre y el correo de la cuenta de Google con la que entra (“Entrar con Google”). Con ese correo se comparte el
-      calendario de turnos. {BUSINESS_NAME} no recibe la contraseña ni otros datos de la cuenta.
-    </li>
-    <li>
-      Las fechas de su prueba gratis, lo que responde a nuestros mensajes de WhatsApp sobre la prueba (si quiere seguir,
-      si acepta días de más o si no quiere seguir) y si el servicio está activo.
-    </li>
+    <li>Sus datos de contacto y de configuración: días y horarios de atención, y duración de los turnos.</li>
     <li>
       Identificadores técnicos de su cuenta de WhatsApp Business (por ejemplo, el ID de la cuenta y del número) y los
       permisos necesarios para enviar mensajes en su nombre.
     </li>
   </ul>
 
-  <h3>De quienes usan el asistente de alta</h3>
+  <h3>De los clientes finales de cada negocio</h3>
+  <ul>
+    <li>Nombre y número de teléfono de WhatsApp.</li>
+    <li>Datos del turno que el negocio anota en su agenda: fecha, hora y servicio.</li>
+    <li>
+      Contenido de los recordatorios que se envían y de las respuestas del cliente, incluidas las respuestas con
+      botones (confirmar, cancelar o pedir otro horario).
+    </li>
+    <li>Estados de entrega de cada mensaje que informa Meta (enviado, entregado, leído o fallido), con su fecha y hora.</li>
+  </ul>
+
+  <h3>De la conexión con el WhatsApp del negocio</h3>
   <p>
-    El asistente usa dos cookies, necesarias para entrar: una acompaña cada intento de entrar con Google y dura {
-      APP_SESSION.loginAttemptMinutes
-    } minutos, y la otra guarda la sesión durante {APP_SESSION.sessionDays} días. En el navegador también guarda el avance
-    del formulario, hasta que lo mandás, y una marca de que ya entraste. No usa cookies de analítica ni de publicidad.
+    Cuando un negocio conecta su número de WhatsApp Business sin dejar de usar su app (lo que se llama coexistencia),
+    WhatsApp le envía a {BUSINESS_NAME} una copia de los mensajes que el negocio intercambia con sus clientes y hasta {
+      COEXISTENCE.historyDays
+    } días de historial. {BUSINESS_NAME} solo usa los mensajes que son respuesta a un recordatorio; los demás los
+    descarta sin guardarlos, y el negocio los sigue viendo en su app.
   </p>
 
   <h3>De quienes visitan este sitio</h3>
   <p>
-    Este sitio no tiene formularios, no usa cookies y no tiene herramientas de analítica ni publicidad. El proveedor
-    de hosting registra datos técnicos de cada visita (como la dirección IP y el navegador) para operar y proteger el
-    sitio.
+    Este sitio no usa cookies ni herramientas de analítica o publicidad. Su único formulario es el de alta, descripto
+    arriba. El proveedor de hosting registra datos técnicos de cada visita (como la dirección IP y el navegador) para
+    operar y proteger el sitio.
   </p>
 
   <h2 id="finalidad">4. Para qué usamos los datos</h2>
   <p>Usamos los datos <strong>solo</strong> para:</p>
   <ul>
-    <li>Identificar al negocio con su cuenta de Google cuando entra al asistente o a su perfil.</li>
-    <li>
-      Crear el calendario de turnos del negocio, compartírselo y leerlo para saber a quién recordarle cada turno y qué
-      horarios están libres.
-    </li>
+    <li>Contactar por WhatsApp a quien completó el formulario y preparar la activación del servicio.</li>
     <li>Enviar recordatorios de turnos por WhatsApp en nombre del negocio.</li>
     <li>
-      Hacer en el calendario lo que pide el cliente: marcar el turno que confirma, borrar el que cancela, moverlo al
-      horario que elige y anotar el que reserva por WhatsApp.
-    </li>
-    <li>
-      Responderle al cliente que pide un turno o un cambio de horario con los horarios libres del negocio, según los días
-      y horarios de atención que cargó.
-    </li>
-    <li>
-      Escribirle por WhatsApp al negocio, desde el número de {BUSINESS_NAME}, sobre su cuenta: el aviso de que termina
-      la prueba gratis, la oferta de días de más y la confirmación de lo que elija. También le avisamos al equipo
-      de {BUSINESS_NAME} lo que respondió, para seguir en contacto.
-    </li>
-    <li>
-      Registrar la respuesta del cliente (confirmación, cancelación o pedido de otro horario) y reflejarla en el
-      calendario del negocio, para que vea su agenda al día.
+      Registrar la respuesta del cliente (confirmación, cancelación o pedido de otro horario) y reflejarla en la agenda
+      del negocio.
     </li>
     <li>Controlar que los mensajes se entreguen y detectar errores de envío.</li>
-    <li>Dar soporte a los negocios y mantener la seguridad del servicio.</li>
+    <li>Dar soporte, mantener la seguridad del servicio y evitar el abuso del formulario.</li>
   </ul>
   <p>
     No vendemos ni cedemos los datos a terceros, no los usamos para enviar publicidad y no los usamos para fines
@@ -146,13 +124,15 @@ import { mailtoUrl } from '../lib/url';
 
   <h2 id="consentimiento">5. Consentimiento</h2>
   <p>
+    Al marcar la casilla del formulario de alta aceptás que {BUSINESS_NAME} use esos datos para contactarte por WhatsApp
+    sobre el servicio. Podés retirar ese consentimiento cuando quieras escribiéndonos a <a href={mailtoUrl(CONTACT_EMAIL)}
+      >{CONTACT_EMAIL}</a
+    >.
+  </p>
+  <p>
     Cada negocio es responsable de obtener el consentimiento de sus clientes para recibir mensajes por WhatsApp y de
     informarles cómo se van a usar sus datos, como exigen el artículo 5 de la Ley 25.326 y las políticas de WhatsApp
     Business. {BUSINESS_NAME} solo envía mensajes a clientes cargados por el negocio, con esa autorización.
-  </p>
-  <p>
-    El negocio acepta que {BUSINESS_NAME} le escriba por WhatsApp sobre su cuenta al cargar su número en el asistente,
-    donde se lo avisamos. Si no quiere recibir esos mensajes, puede pedirlo por los medios de la sección “Contacto”.
   </p>
 
   <h2 id="meta">6. Uso de la WhatsApp Business Platform de Meta</h2>
@@ -160,24 +140,19 @@ import { mailtoUrl } from '../lib/url';
     Los mensajes se envían a través de la <strong>WhatsApp Business Platform (Cloud API)</strong> de Meta Platforms,
     Inc. Para entregar cada mensaje, Meta recibe el número de teléfono del destinatario y el contenido del mensaje, y
     los trata según sus propias condiciones y su política de privacidad. Meta informa a {BUSINESS_NAME} los estados de
-    entrega de cada mensaje. Por la misma vía viajan los mensajes de {BUSINESS_NAME} al negocio, las respuestas que
-    el negocio y sus clientes dan con los botones y los mensajes que los clientes le escriben al negocio.
+    entrega de cada mensaje. Por la misma vía viajan las respuestas con botones de los clientes.
   </p>
 
   <h2 id="proveedores">7. Proveedores que intervienen</h2>
   <p>Para prestar el servicio trabajamos con estos proveedores:</p>
   <ul>
     <li><strong>Meta Platforms, Inc.</strong>: envío y entrega de los mensajes de WhatsApp.</li>
-    <li>
-      <strong>Amazon Web Services, Inc.</strong>: hosting de este sitio y del asistente de alta, y base de datos.
-    </li>
-    <li>
-      <strong>Google LLC</strong>: el calendario de turnos de cada negocio (Google Calendar) y el inicio de sesión con
-      Google.
-    </li>
+    <li><strong>Vercel Inc.</strong>: hosting de este sitio y recepción del formulario de alta.</li>
+    <li><strong>Supabase Inc.</strong>: base de datos donde se guardan los datos del formulario de alta.</li>
+    <li><strong>Cloudflare, Inc.</strong>: verificación anti-robots (Turnstile) del formulario de alta.</li>
   </ul>
   <p>
-    Si cambiamos de proveedor de infraestructura, actualizamos esta lista y la fecha de esta política.
+    Si cambiamos de proveedor, actualizamos esta lista y la fecha de esta política.
   </p>
 
   <h2 id="transferencia">8. Transferencia internacional</h2>
@@ -191,26 +166,21 @@ import { mailtoUrl } from '../lib/url';
   <h2 id="conservacion">9. Cuánto tiempo guardamos los datos</h2>
   <ul>
     <li>
-      Los datos de cada turno, los mensajes, sus estados de entrega y el registro de las reservas por WhatsApp se
-      guardan durante <strong>{RETENTION.appointmentDataMonths} meses</strong> desde la fecha del turno. Después se
-      borran.
+      Los datos del formulario de alta se guardan durante <strong>{RETENTION.leadMonths} meses</strong> desde que lo
+      completás si el servicio no se activa, o hasta que pidas borrarlos.
     </li>
     <li>
-      Si un negocio deja de usar {BUSINESS_NAME}, borramos su calendario de turnos y todos los datos de sus clientes
-      dentro de los <strong>{RETENTION.afterTerminationDays} días</strong> siguientes a la baja. Si el negocio lo pide
-      antes, le enviamos sus turnos en un archivo.
+      Los datos de cada turno, los mensajes y sus estados de entrega se guardan durante <strong>{
+        RETENTION.appointmentDataMonths
+      } meses</strong> desde la fecha del turno. Después se borran.
     </li>
     <li>
-      Los intentos de entrar con Google vencen a los {APP_SESSION.loginAttemptMinutes} minutos y las sesiones, a los {
-        APP_SESSION.sessionDays
-      } días.
+      Si un negocio deja de usar {BUSINESS_NAME}, borramos todos sus datos y los de sus clientes dentro de los <strong
+        >{RETENTION.afterTerminationDays} días</strong
+      > siguientes a la baja. Si el negocio lo pide antes, le enviamos sus turnos en un archivo.
     </li>
     <li>
-      Los avisos de fin de prueba se borran a los {RETENTION.trialNoticeDays} días del día en que salen, y el registro de
-      las respuestas a los botones de WhatsApp, a los {RETENTION.buttonReplyDays} días.
-    </li>
-    <li>
-      Si alguien pide el borrado de sus datos, los eliminamos en los plazos de la sección siguiente, aunque no se haya
+      Si alguien pide el borrado de sus datos, los eliminamos en los plazos de la sección 11, aunque no se haya
       cumplido el plazo general.
     </li>
   </ul>
@@ -221,9 +191,9 @@ import { mailtoUrl } from '../lib/url';
   <h2 id="seguridad">10. Seguridad</h2>
   <p>
     Las comunicaciones con el servicio viajan cifradas (HTTPS/TLS), el acceso a los datos está restringido a quien
-    presta el servicio y las credenciales de acceso se guardan cifradas. Ningún sistema es
-    completamente invulnerable, pero tomamos las medidas razonables para proteger los datos, como exige el artículo 9
-    de la Ley 25.326.
+    presta el servicio y la base de datos del formulario de alta solo se consulta desde el servidor, nunca desde tu
+    navegador. Ningún sistema es completamente invulnerable, pero tomamos las medidas razonables para proteger los
+    datos, como exige el artículo 9 de la Ley 25.326.
   </p>
 
   <h2 id="derechos">11. Tus derechos</h2>
@@ -244,8 +214,8 @@ import { mailtoUrl } from '../lib/url';
   <p>
     Para pedir el borrado de tus datos seguí los pasos de la página <a href={ROUTES.dataDeletion}>Eliminar mis
     datos</a>. Para cualquier otro pedido escribinos a <a href={mailtoUrl(CONTACT_EMAIL)}>{CONTACT_EMAIL}</a>. Como
-    tratamos los datos por cuenta de cada negocio, también podés hacer el pedido directamente al negocio que te dio el
-    turno; en ese caso lo ayudamos a cumplirlo.
+    tratamos los datos de los clientes finales por cuenta de cada negocio, también podés hacer el pedido directamente
+    al negocio que te dio el turno; en ese caso lo ayudamos a cumplirlo.
   </p>
   <div class="callout">
     <p>

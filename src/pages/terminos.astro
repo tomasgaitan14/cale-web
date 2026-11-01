@@ -2,6 +2,7 @@
 import LegalLayout from '../layouts/LegalLayout.astro';
 import {
   BUSINESS_NAME,
+  COEXISTENCE,
   CONTACT_EMAIL,
   JURISDICTION,
   LOCATION,
@@ -9,17 +10,13 @@ import {
   REMINDER_SEND_TIME,
   RETENTION,
   ROUTES,
-  SLOT_OFFER,
-  TRIAL_DAYS,
-  TRIAL_EXTENSION_DAYS,
-  TRIAL_NOTICE_DAYS_BEFORE,
 } from '../config';
 import { mailtoUrl } from '../lib/url';
 ---
 
 <LegalLayout
   heading="Términos de servicio"
-  description={`Condiciones para usar ${BUSINESS_NAME}: qué incluye el servicio, la prueba gratis, el consentimiento de los clientes, los costos de Meta y la limitación de responsabilidad.`}
+  description={`Condiciones para usar ${BUSINESS_NAME}: qué incluye el servicio, el consentimiento de los clientes, los costos de Meta y la limitación de responsabilidad.`}
   path={ROUTES.terms}
 >
   <p>
@@ -34,81 +31,54 @@ import { mailtoUrl } from '../lib/url';
     >.
   </p>
 
-  <h2 id="servicio">2. Qué incluye el servicio</h2>
+  <h2 id="estado">2. Estado del servicio</h2>
+  <ul>
+    <li>{BUSINESS_NAME} está en etapa de lanzamiento: se habilita negocio por negocio.</li>
+    <li>
+      Completar el formulario de alta no contrata nada ni garantiza el alta. Cuando tu servicio esté listo, te
+      escribimos por WhatsApp para activarlo.
+    </li>
+    <li>{BUSINESS_NAME} no cobra nada de forma automática: no pide ni guarda medios de pago.</li>
+  </ul>
+
+  <h2 id="servicio">3. Qué incluye el servicio</h2>
   <p>{BUSINESS_NAME} permite a negocios que trabajan con turnos:</p>
   <ul>
     <li>
-      Conectar su negocio desde un asistente, paso a paso, entrando con su cuenta de Google, y cambiar sus datos, sus
-      horarios de atención y sus días sin atención desde su perfil.
+      Conectar su <strong>WhatsApp Business</strong> con el mismo número: el negocio sigue usando la misma app y el
+      mismo número, y ve y responde todos sus mensajes como siempre. {BUSINESS_NAME} envía los recordatorios desde ese
+      número a través de la plataforma de WhatsApp de Meta, con mensajes aprobados por Meta.
     </li>
     <li>
-      Usar un <strong>calendario de turnos</strong>: {BUSINESS_NAME} lo crea en su cuenta de Google y se lo comparte al
-      negocio con permiso para anotar y cambiar turnos. {BUSINESS_NAME} lee ese calendario para saber a quién recordarle
-      cada turno y qué horarios están libres, y lo cambia según lo que respondan los clientes.
+      Crear su cuenta de la plataforma de WhatsApp, si todavía no la tiene, durante el mismo proceso de conexión.
     </li>
     <li>
-      Conectar su <strong>WhatsApp Business</strong>: el negocio sigue usando la misma app y el mismo número, y {
-        BUSINESS_NAME
-      } envía los recordatorios desde ese número a través de la plataforma de WhatsApp de Meta, con mensajes aprobados
-      por Meta.
+      Recordarle a cada cliente su turno por WhatsApp a las {REMINDER_SEND_TIME} del día anterior, con botones para
+      confirmar, cancelar o cambiar el horario.
     </li>
-    <li>
-      Recordarle a cada cliente su turno por WhatsApp a las {REMINDER_SEND_TIME} del día anterior, y hacer lo que
-      responda: si confirma, marca el turno; si cancela, lo borra del calendario; si pide otro horario, le ofrece hasta {
-        SLOT_OFFER.maxSlots
-      } horarios libres de los próximos {SLOT_OFFER.daysAhead} días y mueve el turno al que elija.
-    </li>
-    <li>
-      Tomar turnos por WhatsApp: cuando un cliente le escribe al negocio pidiendo un “turno”, {BUSINESS_NAME} le ofrece
-      los horarios libres y anota el que elija, uno por vez por cliente. A los demás mensajes {BUSINESS_NAME} no les
-      contesta: los responde el negocio.
-    </li>
+    <li>Reflejar lo que responde cada cliente en la agenda del negocio.</li>
   </ul>
-  <p>
-    Los horarios libres salen de los días y horarios de atención, la duración de los turnos y los días sin atención que
-    carga el negocio, y de los turnos que ya tiene en el calendario: un turno a la vez.
-  </p>
 
-  <h2 id="requisitos">3. Requisitos para usarlo</h2>
+  <h2 id="requisitos">4. Requisitos para usarlo</h2>
   <p>El negocio se compromete a:</p>
   <ul>
     <li>
-      Tener WhatsApp Business con el número de su negocio y aceptar y cumplir las condiciones y políticas de WhatsApp y
-      de Meta, incluida la política de mensajería comercial.
+      Tener la app WhatsApp Business (versión {COEXISTENCE.minAppVersion} o posterior) con el número de su negocio en
+      uso, y aceptar y cumplir las condiciones y políticas de WhatsApp y de Meta, incluida la política de mensajería
+      comercial.
     </li>
-    <li>Tener una cuenta de Google (Gmail) para agregar el calendario de turnos.</li>
     <li>Conectar su WhatsApp con el proceso de Meta y autorizar a {BUSINESS_NAME} a enviar mensajes en su nombre.</li>
     <li>Dar información verdadera sobre su negocio y mantenerla actualizada.</li>
     <li>
-      Cargar correctamente los datos de sus turnos y de sus clientes, y mantener al día su calendario, sus horarios de
-      atención y sus días sin atención: {BUSINESS_NAME} ofrece turnos según esa información.
+      Cargar correctamente los datos de sus turnos y de sus clientes, y mantener al día su agenda y sus horarios de
+      atención.
     </li>
-    <li>Cuidar los accesos a su cuenta y avisarnos si detecta un uso no autorizado.</li>
+    <li>Cuidar los accesos a sus cuentas y avisarnos si detecta un uso no autorizado.</li>
   </ul>
   <p>
     El negocio puede quitarle el acceso a {BUSINESS_NAME} en cualquier momento desde su WhatsApp Business o desde Meta.
     Sin ese acceso, {BUSINESS_NAME} no puede seguir enviando recordatorios.
   </p>
-
-  <h2 id="prueba-gratis">4. Prueba gratis</h2>
-  <ul>
-    <li>
-      {BUSINESS_NAME} es gratis durante <strong>{TRIAL_DAYS} días</strong> desde que el negocio termina la instalación.
-    </li>
-    <li>Los mensajes de WhatsApp los cobra Meta también durante la prueba (ver “Costos de Meta”).</li>
-    <li>
-      {TRIAL_NOTICE_DAYS_BEFORE} días antes de que termine la prueba, le escribimos al negocio por WhatsApp, al número que
-      cargó en el asistente, para preguntarle si quiere seguir. Si quiere, lo contactamos para acordar cómo continuar.
-    </li>
-    <li>
-      Si responde que no, le ofrecemos <strong>{TRIAL_EXTENSION_DAYS} días más</strong> de prueba gratis, una sola vez.
-    </li>
-    <li>{BUSINESS_NAME} no cobra nada de forma automática: no pide ni guarda medios de pago.</li>
-    <li>
-      Si al terminar la prueba no acordamos cómo seguir, el servicio se pausa y no se envían más recordatorios. Sus datos
-      se borran como en una baja.
-    </li>
-  </ul>
 
   <h2 id="consentimiento">5. Consentimiento de los clientes (opt-in)</h2>
   <p>
@@ -153,11 +123,17 @@ import { mailtoUrl } from '../lib/url';
     para prestar el servicio. El detalle está en la <a href={ROUTES.privacy}>política de privacidad</a>.
   </p>
 
-  <h2 id="disponibilidad">9. Disponibilidad del servicio</h2>
+  <h2 id="disponibilidad">9. Disponibilidad del servicio y límites de WhatsApp</h2>
   <p>
     Hacemos lo razonable para que {BUSINESS_NAME} funcione de forma continua, pero el servicio depende de terceros
     (Meta, proveedores de infraestructura y redes de telecomunicaciones). Por eso no garantizamos que funcione sin
     interrupciones ni que cada mensaje se entregue, se lea o se responda.
+  </p>
+  <p>
+    Al usar el mismo número en la app y en la plataforma, Meta aplica estos límites: los chats de grupo no se
+    sincronizan, las listas de difusión dejan de estar disponibles y el envío tiene un tope de {
+      COEXISTENCE.maxMessagesPerSecond
+    } mensajes por segundo.
   </p>
   <p>
     Meta puede rechazar o pausar plantillas de mensaje, limitar la cantidad de envíos o suspender una cuenta o un
@@ -173,10 +149,7 @@ import { mailtoUrl } from '../lib/url';
       Interrupciones, cambios o decisiones de Meta o de otros proveedores, incluidas la suspensión de cuentas, números o
       plantillas.
     </li>
-    <li>
-      Errores en los datos que carga el negocio, incluidos los turnos ofrecidos o tomados según horarios o un calendario
-      desactualizados.
-    </li>
+    <li>Errores en los datos que carga el negocio, incluidos los horarios o la agenda desactualizados.</li>
     <li>El incumplimiento, por parte del negocio, de las políticas de Meta o de la obligación de tener el consentimiento de sus clientes.</li>
   </ul>
   <p>
@@ -190,13 +163,15 @@ import { mailtoUrl } from '../lib/url';
 
   <h2 id="baja">11. Suspensión y baja</h2>
   <p>
-    El negocio puede dejar de usar {BUSINESS_NAME} cuando quiera, avisando por mail o por WhatsApp. {BUSINESS_NAME} puede
-    suspender o dar de baja el servicio si el negocio incumple estos términos o las políticas de Meta, o si Meta lo exige.
+    El negocio puede dejar de usar {BUSINESS_NAME} cuando quiera, avisando por mail o por WhatsApp. Su número sigue
+    siendo suyo. {BUSINESS_NAME} puede suspender o dar de baja el servicio si el negocio incumple estos términos o las
+    políticas de Meta, o si Meta lo exige.
   </p>
   <p>
     Si el negocio lo pide dentro de los {RETENTION.afterTerminationDays} días posteriores a la baja, le enviamos sus
-    turnos en un archivo para importarlos en su propio calendario. Después, el calendario de turnos y los datos se borran
-    según la <a href={ROUTES.privacy}>política de privacidad</a>.
+    turnos en un archivo para importarlos en su propia agenda. Después, los datos se borran según la <a
+      href={ROUTES.privacy}>política de privacidad</a
+    >.
   </p>
 
   <h2 id="cambios">12. Cambios en los términos</h2>

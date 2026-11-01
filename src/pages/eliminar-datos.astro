@@ -13,8 +13,9 @@ const deletionHref = mailtoUrl(CONTACT_EMAIL, DELETION_SUBJECT);
   path={ROUTES.dataDeletion}
 >
   <p>
-    Si recibiste recordatorios de turnos por WhatsApp enviados con {BUSINESS_NAME}, podés pedir que borremos todos los
-    datos que tenemos sobre vos. No hace falta dar explicaciones y el trámite es gratuito.
+    Si recibiste recordatorios de turnos por WhatsApp enviados con {BUSINESS_NAME}, o completaste el formulario de alta
+    de tu negocio, podés pedir que borremos todos los datos que tenemos sobre vos. No hace falta dar explicaciones y el
+    trámite es gratuito.
   </p>
 
   <h2 id="como-pedirlo">Cómo pedirlo</h2>
@@ -46,6 +47,7 @@ const deletionHref = mailtoUrl(CONTACT_EMAIL, DELETION_SUBJECT);
   <h2 id="que-se-borra">Qué se borra</h2>
   <ul>
     <li>Tu nombre y tu número de teléfono.</li>
+    <li>Los datos que cargaste en el formulario de alta de tu negocio.</li>
     <li>Los datos de tus turnos.</li>
     <li>El contenido de los mensajes que te enviamos y de tus respuestas.</li>
     <li>Los estados de entrega de esos mensajes.</li>
@@ -65,7 +67,7 @@ const deletionHref = mailtoUrl(CONTACT_EMAIL, DELETION_SUBJECT);
       Para esos, escribile directamente al negocio.
     </li>
     <li>
-      Los turnos que el negocio anotó en su calendario de turnos: son su agenda. Le pasamos tu pedido al negocio para
+      Los turnos que el negocio anotó en su agenda: son suyos. Le pasamos tu pedido al negocio para
       que los borre.
     </li>
     <li>
@@ -75,8 +77,8 @@ const deletionHref = mailtoUrl(CONTACT_EMAIL, DELETION_SUBJECT);
 
   <h2 id="negocios">Si sos un negocio</h2>
   <p>
-    Para dar de baja el servicio y borrar los datos de tu negocio, tu calendario de turnos y los datos de todos tus
-    clientes, escribinos desde el correo con el que te registraste en {BUSINESS_NAME}. Completamos el borrado dentro de
+    Para dar de baja el servicio y borrar los datos de tu negocio y los de todos tus clientes, escribinos desde el
+    correo con el que te contactamos en {BUSINESS_NAME}. Completamos el borrado dentro de
     los {RETENTION.afterTerminationDays} días siguientes a la baja. Si lo pedís, antes te enviamos tus turnos en un
     archivo.
   </p>
