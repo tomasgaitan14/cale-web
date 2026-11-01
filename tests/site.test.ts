@@ -113,10 +113,21 @@ describe.each(INDEXABLE_ROUTES)('página %s', (route) => {
     expect(metaContent(page(), 'meta[property="og:locale"]')).toBe('es_AR');
   });
 
-  it('muestra el negocio, el titular, la ubicación y el email de contacto', () => {
+  // Decisión del 01/11/2026: el nombre legal se publica solo donde la ley pide identificar al responsable; en el
+  // resto del sitio (pie y metaetiquetas incluidos) la marca es "Cale"
+  it('muestra el nombre legal del titular solo en privacidad y términos', () => {
+    const showsOwner = page().toString().includes(OWNER_NAME);
+    const legalRoutes: string[] = [ROUTES.privacy, ROUTES.terms];
+    expect(showsOwner).toBe(legalRoutes.includes(route));
+  });
+
+  it('no usa el nombre "CRM Solutions", que no es un negocio registrado', () => {
+    expect(page().toString()).not.toMatch(/CRM Solutions/i);
+  });
+
+  it('muestra el negocio, la ubicación y el email de contacto', () => {
     const text = bodyText(page());
     expect(text).toContain(BUSINESS_NAME);
-    expect(text).toContain(OWNER_NAME);
     expect(text).toContain(LOCATION);
     expect(text).toContain(CONTACT_EMAIL);
     const mailtoLinks = page()
@@ -432,6 +443,8 @@ describe('contenido requerido', () => {
       'a intervalos no inferiores a seis meses',
       'La Agencia de Acceso a la Información Pública, en su carácter de Órgano de Control de la Ley Nº 25.326',
       'WhatsApp Business Platform',
+      // Identifica al responsable de los datos (Ley 25.326, art. 6)
+      `${BUSINESS_NAME} es un servicio prestado por ${OWNER_NAME}`,
       // Datos de los clientes finales de cada negocio
       'número de teléfono de WhatsApp',
       'Datos del turno',
@@ -465,6 +478,7 @@ describe('contenido requerido', () => {
   it('los términos cubren el servicio real, opt-in, pago a Meta, límites de WhatsApp y responsabilidad', () => {
     const text = bodyText(pages.get(ROUTES.terms)!);
     for (const required of [
+      `${BUSINESS_NAME} es un servicio prestado por ${OWNER_NAME}`,
       'Consentimiento de los clientes (opt-in)',
       'Cada negocio paga esos mensajes directamente a Meta',
       'Limitación de responsabilidad',

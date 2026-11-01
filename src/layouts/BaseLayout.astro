@@ -7,7 +7,6 @@ import {
   CONTACT_EMAIL,
   FACEBOOK_DOMAIN_VERIFICATION,
   LOCATION,
-  OWNER_NAME,
   ROUTES,
   WHATSAPP_GREETING,
   WHATSAPP_NUMBER,
@@ -41,7 +40,7 @@ const LEGAL_LINKS = [
     <meta name="description" content={description} />
     {canonical && <link rel="canonical" href={canonical} />}
     <meta name="robots" content={canonical ? 'index, follow' : 'noindex'} />
-    <meta name="author" content={OWNER_NAME} />
+    <meta name="author" content={BUSINESS_NAME} />
     <meta name="theme-color" content="#f7f4ee" />
     <meta name="facebook-domain-verification" content={FACEBOOK_DOMAIN_VERIFICATION} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -73,7 +72,7 @@ const LEGAL_LINKS = [
     <footer class="site-footer">
       <div class="container footer-inner">
         <p>
-          {BUSINESS_NAME} es un servicio de {OWNER_NAME}, {LOCATION}.
+          {BUSINESS_NAME} · {LOCATION}.
         </p>
         <p>
           Escribinos por <a href={whatsappUrl(WHATSAPP_NUMBER, WHATSAPP_GREETING)}>WhatsApp</a> o a <a href={mailtoUrl(CONTACT_EMAIL)}>{CONTACT_EMAIL}</a>.
