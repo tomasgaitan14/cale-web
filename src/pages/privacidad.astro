@@ -5,7 +5,6 @@ import {
   COEXISTENCE,
   CONTACT_EMAIL,
   LOCATION,
-  OWNER_NAME,
   RESPONSE_DEADLINES,
   RETENTION,
   ROUTES,
@@ -26,7 +25,7 @@ import { mailtoUrl } from '../lib/url';
 
   <h2 id="quienes-somos">1. Quiénes somos</h2>
   <p>
-    {BUSINESS_NAME} es un servicio prestado por <strong>{OWNER_NAME}</strong>, con domicilio en {LOCATION}. Para
+    {BUSINESS_NAME} es un servicio con domicilio en {LOCATION}. Para
     cualquier consulta sobre esta política o sobre tus datos, escribinos a <a href={mailtoUrl(CONTACT_EMAIL)}
       >{CONTACT_EMAIL}</a
     >.
@@ -244,6 +243,6 @@ import { mailtoUrl } from '../lib/url';
 
   <h2 id="contacto">14. Contacto</h2>
   <p>
-    {OWNER_NAME} · {LOCATION} · <a href={mailtoUrl(CONTACT_EMAIL)}>{CONTACT_EMAIL}</a>
+    {BUSINESS_NAME} · {LOCATION} · <a href={mailtoUrl(CONTACT_EMAIL)}>{CONTACT_EMAIL}</a>
   </p>
 </LegalLayout>
