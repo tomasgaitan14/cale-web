@@ -15,7 +15,7 @@ Provider; no se usa un proveedor (BSP) intermediario. El camino completo y su es
 
 **Regla del 2026-11-01: siempre coexistencia.** Los recordatorios salen del número que el negocio ya usa (si no tiene
 cuenta de WhatsApp Business Platform, se crea en el alta) y el negocio sigue viendo sus mensajes. No se ofrece una
-línea aparte solo para recordatorios. Cale no es una empresa: es un desarrollador individual (titular).
+línea aparte solo para recordatorios.
 
 ## Contexto
 
@@ -23,8 +23,8 @@ Personal. Producto propio. **Sin relación** con Sinfalta / `whatsapp-bot` (deci
 
 **Datos privados:** la identidad legal del titular, los IDs de las cuentas (Meta, AWS, DonWeb) y la bitácora
 completa están **fuera del repo**, en `~/projects-claude/personal/cale-privado/`. Este repo es público: no
-agregar acá nombre legal, dirección, CUIT ni IDs de cuentas. El único teléfono es el WhatsApp de contacto (`WHATSAPP_NUMBER`), que es
-público a propósito.
+agregar acá nombre, teléfono, dirección, CUIT, situación fiscal ni IDs de cuentas. El único contacto público es
+`cale.turnos@gmail.com` (`CONTACT_EMAIL`).
 
 ## Stack usado en este proyecto
 
@@ -65,9 +65,8 @@ público a propósito.
   propague (hasta 24 h). El widget de Turnstile ya admite `cale.com.ar`.
 - **Decisiones del texto legal (asumidas, a confirmar):** la agenda del negocio no se nombra (la portada todavía dice
   Google Calendar), sin costos ni precio, los datos del formulario se guardan 12 meses si no se activa el servicio.
-- **Meta:** la verificación del negocio está en curso (constancia nueva vigente del 01/11 al 01/12/2026; tipo
-  "tipo de negocio del titular", "Registrado", nombre legal y `Cale` como alternativo); falta enviarla cuando `cale.com.ar`
-  responda. Pendientes: backend para el App Review (ver `docs/roadmap.md`) y cargar las URLs legales de `cale.com.ar`
+- **Meta:** la verificación del negocio está en curso (los datos concretos del formulario están fuera del repo);
+  falta enviarla cuando `cale.com.ar` responda. Pendientes: backend para el App Review (ver `docs/roadmap.md`) y cargar las URLs legales de `cale.com.ar`
   en la app.
 
 **Al 2026-10-24: toda la infraestructura de AWS está borrada y el sitio está offline** (decisión de Titular, para no
@@ -147,8 +146,9 @@ Al 2026-10-15:
   verdad de cale-app. La vista previa usa el texto real de la plantilla `cale_recordatorio_turno`. Sin promesas que
   todavía no se cumplen: el "mismo número" y la prueba gratis activa vuelven recién con la Fase 5 (Meta). Ojo:
   `terminos.astro` todavía dice "el mismo número" (texto legal, no se tocó).
-- **Contacto por WhatsApp** (`WHATSAPP_NUMBER` en `config.ts`): al cierre de la landing y en el pie, con un mensaje ya
-  escrito. El email queda como segunda opción.
+- **Contacto solo por correo** (decisión del 2026-11-01): al cierre de la landing, en el pie y en `/empezar`, solo
+  `cale.turnos@gmail.com`. Se sacó el WhatsApp de contacto porque era un número personal; hay un test que prohíbe
+  enlaces `wa.me` y `tel:`. (El `wa.me/…` de la animación es de un negocio de ejemplo inventado.)
 - **Sin cookies ni analítica.** El único formulario es `/empezar` (guarda datos de contacto en Supabase): la política
   de privacidad tiene que reflejarlo. Si se agrega GTM/GA4, actualizar también la política y la CSP.
 - **Rol legal:** Cale trata datos por cuenta del negocio (art. 25, Ley 25.326); el negocio es responsable y

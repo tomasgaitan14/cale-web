@@ -23,13 +23,13 @@ coexistencia, el número conectado deja de funcionar en la app WhatsApp Business
 
 | # | Paso | Estado |
 |---|------|--------|
-| 1 | Documento legal del titular (constancia de régimen fiscal) | Hecho |
+| 1 | Documento legal del titular | Hecho |
 | 2 | Información del negocio en el portfolio de Meta (nombre legal tal cual el documento, dirección, teléfono, sitio) | Hecho |
 | 3 | Verificar el dominio del sitio en Meta (metaetiqueta en el `<head>`) | Hecho con `cale.com.ar` (14/10/2026); `cale-turnos.vercel.app` eliminado del portfolio |
 | 4 | Comprar el dominio propio | Hecho: `cale.com.ar`, activo desde el 13/10/2026 |
 | 5 | Hosting en AWS (S3 + CloudFront, plan Free) con deploy automático y alarmas | Hecho el 13/10 y **borrado el 24/10/2026** (ver [infra-aws.md](infra-aws.md)) |
 | 6 | Etapa 2 de AWS: dominio en Route 53, certificado y alias | Hecho el 13/10 y borrado el 24/10/2026 |
-| 7 | Verificación del negocio en Meta | Iniciada y pausada; retomar con `cale.com.ar` andando (Meta no aceptaba `vercel.app`) y con la constancia de opción nueva (vigente del 01/11 al 01/12/2026, ya descargada). En curso el 01/11: tipo "tipo de negocio del titular", "Registrado", nombre legal más `Cale` como alternativo |
+| 7 | Verificación del negocio en Meta | Iniciada y pausada; retomar con `cale.com.ar` andando (Meta no aceptaba `vercel.app`) y con el documento legal vigente. En curso desde el 01/11/2026; el detalle de lo cargado está fuera del repo |
 | 8 | Actualizar los textos del sitio al modelo Tech Provider | Hecho: landing (12/10) y privacidad, términos y eliminación de datos (01/11/2026) |
 | 9 | Backend de Cale funcionando (enviar mensajes y crear plantillas) | Pendiente: hace falta para los videos del App Review. Falta decidir la arquitectura (propuesta: repo privado con funciones en Vercel y Supabase) |
 | 10 | App Review y acceso avanzado | Pendiente |
@@ -42,8 +42,7 @@ Se inicia desde Configuración del portfolio → Centro de seguridad → Verific
 
 - **Caso de uso:** "La app requiere acceso a los permisos en Meta for Developers" (no "Configurar una cuenta de
   WhatsApp Business").
-- **Tipo de negocio:** "tipo de negocio del titular" (titular).
-- **Documento:** la constancia de régimen fiscal (Constancia de CUIT en ARCA).
+- **Tipo de negocio y documento:** los que corresponden al titular; el detalle está fuera del repo.
 - **Sitio:** `https://cale.com.ar`, cuando esté andando y verificado en Meta.
 - **Confirmación:** por dominio (ya verificado) o por teléfono.
 - Si pide un nombre comercial (DBA), revisarlo antes de completarlo.

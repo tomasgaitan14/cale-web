@@ -9,10 +9,8 @@ import {
   HOW_IT_WORKS,
   LANDING_COPY,
   ROUTES,
-  WHATSAPP_GREETING,
-  WHATSAPP_NUMBER,
 } from '../config';
-import { mailtoUrl, whatsappUrl } from '../lib/url';
+import { mailtoUrl } from '../lib/url';
 ---
 
 <BaseLayout
@@ -56,8 +54,7 @@ import { mailtoUrl, whatsappUrl } from '../lib/url';
         <AppButton />
       </div>
       <p class="contact" id="contacto">
-        ¿Tenés dudas? Escribinos por <a href={whatsappUrl(WHATSAPP_NUMBER, WHATSAPP_GREETING)}>WhatsApp</a> o a{' '}
-        <a href={mailtoUrl(CONTACT_EMAIL)}>{CONTACT_EMAIL}</a>.
+        ¿Tenés dudas? Escribinos a <a href={mailtoUrl(CONTACT_EMAIL)}>{CONTACT_EMAIL}</a>.
       </p>
     </div>
   </section>

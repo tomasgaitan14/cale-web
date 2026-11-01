@@ -4,11 +4,11 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SimulationChat from '../components/SimulationChat.astro';
 import TextField from '../components/TextField.astro';
-import { BUSINESS_NAME, ROUTES, WHATSAPP_GREETING, WHATSAPP_NUMBER } from '../config';
+import { BUSINESS_NAME, CONTACT_EMAIL, ROUTES } from '../config';
 import { BUSINESS_TYPES, CURRENT_METHODS, FORM_STEPS, LEAD_LIMITS, WEEKLY_APPOINTMENTS } from '../lib/lead';
-import { whatsappUrl } from '../lib/url';
+import { mailtoUrl } from '../lib/url';
 
-const contactUrl = whatsappUrl(WHATSAPP_NUMBER, WHATSAPP_GREETING);
+const contactUrl = mailtoUrl(CONTACT_EMAIL);
 const stepCount = FORM_STEPS.length;
 ---
 
@@ -23,7 +23,7 @@ const stepCount = FORM_STEPS.length;
 
       <noscript>
         <p class="notice-box">
-          Para completar el formulario necesitás activar JavaScript en tu navegador. Si no podés, escribinos por <a href={contactUrl}>WhatsApp</a>.
+          Para completar el formulario necesitás activar JavaScript en tu navegador. Si no podés, escribinos a <a href={contactUrl}>{CONTACT_EMAIL}</a>.
         </p>
       </noscript>
 
@@ -149,7 +149,7 @@ const stepCount = FORM_STEPS.length;
         </p>
         <p class="closing-text" data-result-closing></p>
         <div class="actions">
-          <a class="button" href={contactUrl}>Escribinos por WhatsApp</a>
+          <a class="button" href={contactUrl}>Escribinos por correo</a>
           <a class="button button-secondary" href={ROUTES.home}>Volver al inicio</a>
         </div>
       </div>

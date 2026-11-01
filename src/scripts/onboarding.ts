@@ -33,7 +33,7 @@ const SENDING_LABEL = 'Enviando…';
 // Últimos dígitos del WhatsApp que se muestran al confirmar el alta
 const PHONE_TAIL_DIGITS = 4;
 const MESSAGES = {
-  config: 'El formulario no está disponible en este momento. Escribinos por WhatsApp y te ayudamos.',
+  config: 'El formulario no está disponible en este momento. Escribinos por correo y te ayudamos.',
   rejected: 'Hay un dato que no pudimos aceptar. Revisalo y probá de nuevo.',
   service: 'No pudimos guardar tus datos. Revisá tu conexión y probá de nuevo.',
   captchaMissing: 'Completá la verificación de arriba para continuar.',
