@@ -4,8 +4,8 @@ import { join } from 'node:path';
 import { HTMLElement, NodeType, parse, type Node } from 'node-html-parser';
 import { beforeAll, describe, expect, it } from 'vitest';
 import {
-  APP_SESSION,
   BUSINESS_NAME,
+  COEXISTENCE,
   CONTACT_EMAIL,
   FACEBOOK_DOMAIN_VERIFICATION,
   LANDING_SAMPLE,
@@ -17,11 +17,7 @@ import {
   RESPONSE_DEADLINES,
   RETENTION,
   ROUTES,
-  SLOT_OFFER,
   START_ROUTE,
-  TRIAL_DAYS,
-  TRIAL_EXTENSION_DAYS,
-  TRIAL_NOTICE_DAYS_BEFORE,
   WHATSAPP_NUMBER,
 } from '../src/config';
 import { SCENARIO_IDS, buildScenarios } from '../src/lib/chat-script';
@@ -436,64 +432,55 @@ describe('contenido requerido', () => {
       'a intervalos no inferiores a seis meses',
       'La Agencia de Acceso a la Información Pública, en su carácter de Órgano de Control de la Ley Nº 25.326',
       'WhatsApp Business Platform',
-      'Número de teléfono',
+      // Datos de los clientes finales de cada negocio
+      'número de teléfono de WhatsApp',
       'Datos del turno',
-      'Contenido de los mensajes',
+      'Contenido de los recordatorios',
       'Estados de entrega',
-      // Proveedores actuales: AWS (sitio, asistente y base), Google (calendario e inicio de sesión) y Meta (WhatsApp)
-      'Amazon Web Services',
-      'Google LLC',
-      'el inicio de sesión con Google',
-      'Meta Platforms',
-      // El asistente de alta: entrar con Google (nombre y correo), dos cookies necesarias y sin analítica
-      'El nombre y el correo de la cuenta de Google',
-      `dos cookies, necesarias para entrar: una acompaña cada intento de entrar con Google y dura ${APP_SESSION.loginAttemptMinutes} minutos`,
-      'No usa cookies de analítica ni de publicidad',
-      // Etapa 7: Cale cambia el calendario según lo que pide el cliente, toma turnos por WhatsApp y descarta los
-      // mensajes que no piden un turno
-      'borrar el que cancela, moverlo al horario que elige y anotar el que reserva por WhatsApp',
+      // Formulario de alta (/empezar): lo que pide, el código de la IP, el consentimiento y el captcha
+      'Del negocio: nombre, tipo de negocio, ciudad, cantidad aproximada de turnos por semana y cómo avisa hoy a sus clientes',
+      'nombre y número de WhatsApp',
+      'un código irreversible (hash) calculado a partir de tu dirección IP',
+      'No guardamos la IP',
+      'Cloudflare Turnstile',
+      'Podés retirar ese consentimiento',
+      // Proveedores actuales: Meta (WhatsApp), Vercel (sitio y formulario), Supabase (base) y Cloudflare (captcha)
+      'Meta Platforms, Inc.',
+      'Vercel Inc.',
+      'Supabase Inc.',
+      'Cloudflare, Inc.',
+      // Coexistencia: copia de los mensajes del negocio y qué se hace con ellos
+      `hasta ${COEXISTENCE.historyDays} días de historial`,
       'los demás los descarta sin guardarlos',
-      'el nombre de pila de su perfil de WhatsApp',
-      'días y horarios de atención, duración de los turnos y días sin atención',
-      'calendario de turnos',
+      'Este sitio no usa cookies ni herramientas de analítica o publicidad',
+      `${RETENTION.leadMonths} meses`,
       `${RETENTION.appointmentDataMonths} meses`,
       `${RETENTION.afterTerminationDays} días`,
       `${RESPONSE_DEADLINES.deletionBusinessDays} días hábiles`,
-      // Cale le escribe al negocio por WhatsApp sobre su cuenta, con su consentimiento, y guarda lo que responde
-      'Escribirle por WhatsApp al negocio',
-      'al cargar su número en el asistente, donde se lo avisamos',
-      'lo que responde a nuestros mensajes de WhatsApp sobre la prueba',
-      `${RETENTION.trialNoticeDays} días del día en que salen`,
-      `a los ${RETENTION.buttonReplyDays} días`,
     ]) {
       expect(text, `falta "${required}"`).toContain(required);
     }
   });
 
-  it('los términos cubren el servicio real, la prueba gratis, opt-in, pago a Meta y responsabilidad', () => {
+  it('los términos cubren el servicio real, opt-in, pago a Meta, límites de WhatsApp y responsabilidad', () => {
     const text = bodyText(pages.get(ROUTES.terms)!);
     for (const required of [
       'Consentimiento de los clientes (opt-in)',
       'Cada negocio paga esos mensajes directamente a Meta',
       'Limitación de responsabilidad',
       'Ley aplicable y jurisdicción',
-      // Coexistencia: mismo número y misma app, y el acceso de Cale es revocable
-      'sigue usando la misma app y el mismo número',
-      'puede quitarle el acceso',
-      // Calendario de turnos en la cuenta de Cale, que Cale cambia según lo que responde cada cliente
-      'calendario de turnos',
-      `a las ${REMINDER_SEND_TIME} del día anterior`,
-      'si cancela, lo borra del calendario',
-      `le ofrece hasta ${SLOT_OFFER.maxSlots} horarios libres de los próximos ${SLOT_OFFER.daysAhead} días y mueve el turno al que elija`,
-      'Tomar turnos por WhatsApp',
-      'uno por vez por cliente',
-      'turnos ofrecidos o tomados según horarios o un calendario desactualizados',
-      // Prueba gratis: plazo, aviso por WhatsApp, días de más una vez, sin cobro automático y qué pasa al terminar
-      `gratis durante ${TRIAL_DAYS} días`,
-      `${TRIAL_NOTICE_DAYS_BEFORE} días antes de que termine la prueba, le escribimos al negocio por WhatsApp`,
-      `${TRIAL_EXTENSION_DAYS} días más de prueba gratis, una sola vez`,
+      // Estado: se habilita negocio por negocio, el formulario no contrata nada y no hay cobro automático
+      'etapa de lanzamiento',
+      'no contrata nada ni garantiza el alta',
       'no cobra nada de forma automática',
-      'el servicio se pausa',
+      // Coexistencia: mismo número y misma app, requisitos, límites de Meta y acceso revocable
+      'sigue usando la misma app y el mismo número',
+      `versión ${COEXISTENCE.minAppVersion} o posterior`,
+      'los chats de grupo no se sincronizan',
+      `tope de ${COEXISTENCE.maxMessagesPerSecond} mensajes por segundo`,
+      'puede quitarle el acceso',
+      'Su número sigue siendo suyo',
+      `a las ${REMINDER_SEND_TIME} del día anterior`,
       // Al dar de baja, el negocio puede pedir sus turnos
       'sus turnos en un archivo',
     ]) {
@@ -501,12 +488,19 @@ describe('contenido requerido', () => {
     }
   });
 
+  // El servicio todavía no tiene asistente de cuentas, calendario propio ni prueba gratis: los legales no los prometen
+  it.each([ROUTES.privacy, ROUTES.terms, ROUTES.dataDeletion])('%s no describe un producto que no existe', (route) => {
+    expect(bodyText(pages.get(route)!)).not.toMatch(
+      /asistente|calendario de turnos|prueba gratis|entrar con Google|cookies necesarias|Google LLC/i,
+    );
+  });
+
   // Decisión de Titular (2026-10-11): el sitio no habla del precio del servicio.
   it.each(INDEXABLE_ROUTES)('%s no menciona el precio del servicio', (route) => {
     expect(bodyText(pages.get(route)!)).not.toMatch(/precio|cu[aá]nto cuesta|propuesta comercial|lo que cobra/i);
   });
 
-  it('la página de eliminación explica cómo pedirlo y en qué plazo', () => {
+  it('la página de eliminación explica cómo pedirlo, en qué plazo y que incluye el formulario de alta', () => {
     const page = pages.get(ROUTES.dataDeletion)!;
     const deletionLink = page
       .querySelectorAll('a')
@@ -514,11 +508,12 @@ describe('contenido requerido', () => {
     expect(deletionLink).toBeDefined();
     expect(bodyText(page)).toContain(`${RESPONSE_DEADLINES.deletionBusinessDays} días hábiles`);
     expect(bodyText(page)).toContain('Le pasamos tu pedido al negocio');
+    expect(bodyText(page)).toContain('Los datos que cargaste en el formulario de alta de tu negocio');
   });
 
-  // Supabase y Vercel ya no intervienen: nombrarlos sería informar mal a quién se entregan los datos
+  // AWS se borró el 24/10/2026: nombrarlo sería informar mal a quién se entregan los datos
   it.each(INDEXABLE_ROUTES)('%s no nombra proveedores que ya no se usan', (route) => {
-    expect(bodyText(pages.get(route)!)).not.toMatch(/Supabase|Vercel/);
+    expect(bodyText(pages.get(route)!)).not.toMatch(/Amazon Web Services|\bAWS\b|CloudFront|Route 53/);
   });
 });
 
