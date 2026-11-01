@@ -11,7 +11,6 @@ import {
   LANDING_SAMPLE,
   LEGAL_LAST_UPDATED,
   LOCATION,
-  OWNER_NAME,
   REMINDER_PREVIEW,
   REMINDER_SEND_TIME,
   RESPONSE_DEADLINES,
@@ -113,16 +112,14 @@ describe.each(INDEXABLE_ROUTES)('página %s', (route) => {
     expect(metaContent(page(), 'meta[property="og:locale"]')).toBe('es_AR');
   });
 
-  // Decisión del 01/11/2026: el nombre legal se publica solo donde la ley pide identificar al responsable; en el
-  // resto del sitio (pie y metaetiquetas incluidos) la marca es "Cale"
-  it('muestra el nombre legal del titular solo en privacidad y términos', () => {
-    const showsOwner = page().toString().includes(OWNER_NAME);
-    const legalRoutes: string[] = [ROUTES.privacy, ROUTES.terms];
-    expect(showsOwner).toBe(legalRoutes.includes(route));
-  });
-
-  it('no usa el nombre "CRM Solutions", que no es un negocio registrado', () => {
-    expect(page().toString()).not.toMatch(/CRM Solutions/i);
+  // Decisión de Titular (01/11/2026): el sitio no publica datos personales del titular. La marca es "Cale" en todas las
+  // páginas, pie y metaetiquetas incluidos. El nombre legal va solo en el formulario privado de Meta, nunca en el repo.
+  it('no publica datos personales: ni CUIT, ni otros correos, ni "CRM Solutions"', () => {
+    const html = page().toString();
+    expect(html).not.toMatch(/CRM Solutions/i);
+    expect(html).not.toMatch(/\b\d{2}-\d{8}-\d\b/);
+    const emails = html.match(/[\w.+-]+@[\w-]+(\.[\w-]+)+/g) ?? [];
+    expect(emails.filter((email) => email !== CONTACT_EMAIL)).toEqual([]);
   });
 
   it('muestra el negocio, la ubicación y el email de contacto', () => {
@@ -443,8 +440,7 @@ describe('contenido requerido', () => {
       'a intervalos no inferiores a seis meses',
       'La Agencia de Acceso a la Información Pública, en su carácter de Órgano de Control de la Ley Nº 25.326',
       'WhatsApp Business Platform',
-      // Identifica al responsable de los datos (Ley 25.326, art. 6)
-      `${BUSINESS_NAME} es un servicio prestado por ${OWNER_NAME}`,
+      `${BUSINESS_NAME} es un servicio con domicilio en ${LOCATION}`,
       // Datos de los clientes finales de cada negocio
       'número de teléfono de WhatsApp',
       'Datos del turno',
@@ -478,7 +474,7 @@ describe('contenido requerido', () => {
   it('los términos cubren el servicio real, opt-in, pago a Meta, límites de WhatsApp y responsabilidad', () => {
     const text = bodyText(pages.get(ROUTES.terms)!);
     for (const required of [
-      `${BUSINESS_NAME} es un servicio prestado por ${OWNER_NAME}`,
+      `${BUSINESS_NAME} es un servicio con domicilio en ${LOCATION}`,
       'Consentimiento de los clientes (opt-in)',
       'Cada negocio paga esos mensajes directamente a Meta',
       'Limitación de responsabilidad',
