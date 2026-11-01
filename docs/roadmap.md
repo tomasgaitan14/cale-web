@@ -29,7 +29,7 @@ coexistencia, el número conectado deja de funcionar en la app WhatsApp Business
 | 4 | Comprar el dominio propio | Hecho: `cale.com.ar`, activo desde el 13/10/2026 |
 | 5 | Hosting en AWS (S3 + CloudFront, plan Free) con deploy automático y alarmas | Hecho el 13/10 y **borrado el 24/10/2026** (ver [infra-aws.md](infra-aws.md)) |
 | 6 | Etapa 2 de AWS: dominio en Route 53, certificado y alias | Hecho el 13/10 y borrado el 24/10/2026 |
-| 7 | Verificación del negocio en Meta | Iniciada y pausada; retomar con `cale.com.ar` andando (Meta no aceptaba `vercel.app`) y con la constancia de régimen fiscal nueva (la vigente vence el 10/11/2026) |
+| 7 | Verificación del negocio en Meta | Iniciada y pausada; retomar con `cale.com.ar` andando (Meta no aceptaba `vercel.app`) y con la constancia de opción nueva (vigente del 01/11 al 01/12/2026, ya descargada). En curso el 01/11: tipo "tipo de negocio del titular", "Registrado", nombre legal más `Cale` como alternativo |
 | 8 | Actualizar los textos del sitio al modelo Tech Provider | Hecho: landing (12/10) y privacidad, términos y eliminación de datos (01/11/2026) |
 | 9 | Backend de Cale funcionando (enviar mensajes y crear plantillas) | Pendiente: hace falta para los videos del App Review. Falta decidir la arquitectura (propuesta: repo privado con funciones en Vercel y Supabase) |
 | 10 | App Review y acceso avanzado | Pendiente |
@@ -48,9 +48,9 @@ Se inicia desde Configuración del portfolio → Centro de seguridad → Verific
 - **Confirmación:** por dominio (ya verificado) o por teléfono.
 - Si pide un nombre comercial (DBA), revisarlo antes de completarlo.
 
-**Riesgo aceptado:** por decisión del titular, el sitio no muestra datos personales (nombre legal, dirección ni CUIT).
-Las guías recomiendan mostrar el nombre legal, así que Meta podría rechazar la verificación. Si la rechaza por eso,
-agregar solo el nombre legal en los términos y la privacidad, y volver a enviarla.
+**Identidad en el sitio (decisión del 01/11/2026):** el nombre legal del titular, tal cual la constancia de ARCA, se
+muestra en la política de privacidad y en los términos; el resto del sitio dice "Cale". No se publican el CUIT ni el
+domicilio fiscal. En el formulario de Meta, el nombre del negocio es el nombre legal y `Cale` va como nombre alternativo.
 
 ## Coexistencia: lo que el negocio tiene que saber
 

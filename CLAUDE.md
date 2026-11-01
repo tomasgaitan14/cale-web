@@ -23,8 +23,9 @@ Personal. Producto propio. **Sin relación** con Sinfalta / `whatsapp-bot` (deci
 
 **Datos privados:** la identidad legal del titular, los IDs de las cuentas (Meta, AWS, DonWeb) y la bitácora
 completa están **fuera del repo**, en `~/projects-claude/personal/cale-privado/`. Este repo es público: no
-agregar acá nombre legal, dirección, CUIT ni IDs de cuentas. El único teléfono es el WhatsApp de contacto
-(`WHATSAPP_NUMBER`), que es público a propósito.
+agregar acá dirección, CUIT ni IDs de cuentas. El nombre legal es público desde el 2026-11-01 (está en
+`OWNER_NAME`, ver "Decisiones tomadas"). El único teléfono es el WhatsApp de contacto (`WHATSAPP_NUMBER`), que es
+público a propósito.
 
 ## Stack usado en este proyecto
 
@@ -65,8 +66,10 @@ agregar acá nombre legal, dirección, CUIT ni IDs de cuentas. El único teléfo
   propague (hasta 24 h). El widget de Turnstile ya admite `cale.com.ar`.
 - **Decisiones del texto legal (asumidas, a confirmar):** la agenda del negocio no se nombra (la portada todavía dice
   Google Calendar), sin costos ni precio, los datos del formulario se guardan 12 meses si no se activa el servicio.
-- **Pendientes de Meta:** constancia de régimen fiscal nueva (la vigente vence el 10/11/2026), estado de la verificación
-  del negocio, backend para el App Review (ver `docs/roadmap.md`) y cargar las URLs legales de `cale.com.ar` en la app.
+- **Meta:** la verificación del negocio está en curso (constancia nueva vigente del 01/11 al 01/12/2026; tipo
+  "tipo de negocio del titular", "Registrado", nombre legal y `Cale` como alternativo); falta enviarla cuando `cale.com.ar`
+  responda. Pendientes: backend para el App Review (ver `docs/roadmap.md`) y cargar las URLs legales de `cale.com.ar`
+  en la app.
 
 **Al 2026-10-24: toda la infraestructura de AWS está borrada y el sitio está offline** (decisión de Titular, para no
 tener ningún costo por ahora). Se eliminaron los stacks `cale-site`, `cale-app` y el de SAM, los buckets, la zona de
@@ -151,9 +154,11 @@ Al 2026-10-15:
   de privacidad tiene que reflejarlo. Si se agrega GTM/GA4, actualizar también la política y la CSP.
 - **Rol legal:** Cale trata datos por cuenta del negocio (art. 25, Ley 25.326); el negocio es responsable y
   tiene que tener el opt-in de sus clientes.
-- **Identidad pública sin datos personales:** el sitio muestra **CRM Solutions**, **Argentina** y
-  `cale.turnos@gmail.com` (desde el 13/10/2026; antes `cale.turnos@gmail.com`). "CRM Solutions" no es un negocio registrado. Riesgo aceptado: Meta podría rechazar
-  la verificación por no ver el nombre legal (plan B en `docs/roadmap.md`).
+- **Identidad pública** (decisión B del 2026-11-01): la marca es **Cale** (pie y metaetiquetas: "Cale · Argentina") y
+  el contacto, `cale.turnos@gmail.com`. El **nombre legal del titular** (`OWNER_NAME`, tal cual la constancia de ARCA)
+  se publica **solo en la política de privacidad y en los términos** (Ley 25.326, art. 6; Meta lo recomienda). CUIT y
+  domicilio fiscal siguen sin publicarse. Se sacó "CRM Solutions", que no es un negocio registrado. Tests en
+  `tests/site.test.ts` (el nombre legal solo en esas dos páginas; nunca "CRM Solutions").
 - **Sin precio en el sitio** (2026-10-11): ni la landing ni los términos hablan del precio del servicio. Hay
   un test que lo controla.
 - **Plazos de conservación** (`RETENTION` en `config.ts`): 12 meses desde el turno; 30 días después de la baja
@@ -168,8 +173,8 @@ Al 2026-10-15:
 
 1. **Dominio:** esperar que `cale.com.ar` propague a Vercel y verificarlo (`dig`, HTTPS, redirección de `www`, el
    formulario con Turnstile).
-2. **Meta:** bajar la constancia de régimen fiscal nueva (vence el 10/11/2026), revisar el estado de la verificación del
-   negocio y volver a verificar el dominio `cale.com.ar` si hace falta.
+2. **Meta:** terminar de cargar y enviar la verificación del negocio cuando `cale.com.ar` responda, y volver a
+   verificar el dominio si hace falta.
 3. **Backend del App Review** (enviar un mensaje y crear una plantilla): decidir la arquitectura. Propuesta: un repo
    privado aparte, con funciones en Vercel y Supabase; no en este repo, que es público.
 4. Confirmar las decisiones asumidas del texto legal (agenda, costos, plazo del formulario) y alinear la portada, que
