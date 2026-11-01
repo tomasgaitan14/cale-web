@@ -4,7 +4,10 @@
 export const SITE_URL = 'https://cale.com.ar';
 
 export const BUSINESS_NAME = 'Cale';
-export const OWNER_NAME = 'CRM Solutions';
+// Titular legal, tal cual la constancia de ARCA (así lo compara Meta en la verificación del negocio). Se muestra solo en
+// la política de privacidad y en los términos (Ley 25.326, art. 6); el resto del sitio dice "Cale". CUIT y domicilio
+// fiscal no se publican.
+export const OWNER_NAME = 'TITULAR LEGAL';
 export const LOCATION = 'Argentina';
 export const CONTACT_EMAIL = 'cale.turnos@gmail.com';
 // WhatsApp de contacto: formato internacional sin "+" (54 + 9 de celular + característica + número).
