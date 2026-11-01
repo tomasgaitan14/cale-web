@@ -1,5 +1,4 @@
-// robots.txt: el sitio entero se puede rastrear (no hay áreas privadas: la app vive en app.cale.com.ar) y se indica el
-// sitemap. Se genera en el build, con el dominio de config.ts.
+// robots.txt: el sitio entero se puede rastrear (no hay áreas privadas) y se indica el sitemap. Se genera en el build, con el dominio de config.ts.
 import type { APIRoute } from 'astro';
 import { canonicalUrl } from '../lib/url';
 
