@@ -17,7 +17,6 @@ import {
   RETENTION,
   ROUTES,
   START_ROUTE,
-  WHATSAPP_NUMBER,
 } from '../src/config';
 import { SCENARIO_IDS, buildScenarios } from '../src/lib/chat-script';
 import { BUSINESS_TYPES, CURRENT_METHODS, FORM_STEPS, WEEKLY_APPOINTMENTS } from '../src/lib/lead';
@@ -365,21 +364,23 @@ describe('contenido requerido', () => {
     expect(bodyText(pages.get(ROUTES.home)!)).not.toMatch(TECHNICAL_JARGON);
   });
 
-  it.each(INDEXABLE_ROUTES)('%s tiene el botón de WhatsApp con el número del negocio', (route) => {
-    const whatsappLinks = pages
+  // Decisión de Titular (01/11/2026): el contacto público es solo el correo de Cale; ningún número personal
+  it.each(INDEXABLE_ROUTES)('%s ofrece el correo de contacto y ningún enlace a WhatsApp ni a un teléfono', (route) => {
+    const hrefs = pages
       .get(route)!
       .querySelectorAll('a')
-      .filter((link) => link.getAttribute('href')?.startsWith(`https://wa.me/${WHATSAPP_NUMBER}?text=`));
-    expect(whatsappLinks.length).toBeGreaterThan(0);
+      .map((link) => link.getAttribute('href') ?? '');
+    expect(hrefs.some((href) => href.startsWith(`mailto:${CONTACT_EMAIL}`))).toBe(true);
+    expect(hrefs.filter((href) => /wa\.me|whatsapp\.com|^tel:/i.test(href))).toEqual([]);
   });
 
-  it('la landing ofrece WhatsApp en el contacto del cierre y en el pie', () => {
+  it('la landing ofrece el correo en el contacto del cierre y en el pie', () => {
     const page = pages.get(ROUTES.home)!;
-    const whatsappLinks = page
+    const mailLinks = page
       .querySelectorAll('a')
-      .filter((link) => link.getAttribute('href')?.startsWith(`https://wa.me/${WHATSAPP_NUMBER}`));
-    expect(whatsappLinks).toHaveLength(2);
-    expect(page.querySelector(`#contacto a[href^="https://wa.me/${WHATSAPP_NUMBER}"]`)).not.toBeNull();
+      .filter((link) => link.getAttribute('href')?.startsWith(`mailto:${CONTACT_EMAIL}`));
+    expect(mailLinks).toHaveLength(2);
+    expect(page.querySelector(`#contacto a[href^="mailto:${CONTACT_EMAIL}"]`)).not.toBeNull();
   });
 
   // La acción principal es empezar: los dos botones de la landing y el del encabezado llevan al formulario de /empezar
@@ -664,12 +665,12 @@ describe('formulario de alta (/empezar)', () => {
     expect(page().querySelector(`[data-field="consent"] a[href="${ROUTES.privacy}"]`)).not.toBeNull();
   });
 
-  it('el formulario y el resultado arrancan ocultos; sin JavaScript se avisa cómo seguir por WhatsApp', () => {
+  it('el formulario y el resultado arrancan ocultos; sin JavaScript se avisa cómo seguir por correo', () => {
     const doc = page();
     expect(doc.querySelector('[data-wizard]')?.hasAttribute('hidden')).toBe(true);
     expect(doc.querySelector('[data-result]')?.hasAttribute('hidden')).toBe(true);
     const fallback = doc.querySelector('noscript')?.innerHTML ?? '';
-    expect(fallback).toContain(`https://wa.me/${WHATSAPP_NUMBER}`);
+    expect(fallback).toContain(`mailto:${CONTACT_EMAIL}`);
   });
 
   // La animación (scripts/chat-player.ts) busca estos elementos por data-attributes: si falta uno, no arranca

@@ -8,10 +8,8 @@ import {
   FACEBOOK_DOMAIN_VERIFICATION,
   LOCATION,
   ROUTES,
-  WHATSAPP_GREETING,
-  WHATSAPP_NUMBER,
 } from '../config';
-import { canonicalUrl, mailtoUrl, whatsappUrl } from '../lib/url';
+import { canonicalUrl, mailtoUrl } from '../lib/url';
 
 interface Props {
   title: string;
@@ -75,7 +73,7 @@ const LEGAL_LINKS = [
           {BUSINESS_NAME} · {LOCATION}.
         </p>
         <p>
-          Escribinos por <a href={whatsappUrl(WHATSAPP_NUMBER, WHATSAPP_GREETING)}>WhatsApp</a> o a <a href={mailtoUrl(CONTACT_EMAIL)}>{CONTACT_EMAIL}</a>.
+          Escribinos a <a href={mailtoUrl(CONTACT_EMAIL)}>{CONTACT_EMAIL}</a>.
         </p>
         <nav aria-label="Legal">
           <ul class="footer-links">

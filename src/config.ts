@@ -6,9 +6,6 @@ export const SITE_URL = 'https://cale.com.ar';
 export const BUSINESS_NAME = 'Cale';
 export const LOCATION = 'Argentina';
 export const CONTACT_EMAIL = 'cale.turnos@gmail.com';
-// WhatsApp de contacto: formato internacional sin "+" (54 + 9 de celular + característica + número).
-export const WHATSAPP_NUMBER = '5491100000000';
-export const WHATSAPP_GREETING = 'Hola, quiero saber más sobre Cale para mi negocio.';
 // Tribunales competentes que fijan los términos de servicio.
 export const JURISDICTION = 'la República Argentina';
 
