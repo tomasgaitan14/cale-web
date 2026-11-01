@@ -5,7 +5,6 @@ import { HTMLElement, NodeType, parse, type Node } from 'node-html-parser';
 import { beforeAll, describe, expect, it } from 'vitest';
 import {
   APP_SESSION,
-  APP_URL,
   BUSINESS_NAME,
   CONTACT_EMAIL,
   FACEBOOK_DOMAIN_VERIFICATION,
@@ -389,12 +388,15 @@ describe('contenido requerido', () => {
     ]);
   });
 
-  it.each(INDEXABLE_ROUTES)('%s tiene arriba "Ingresar a mi cuenta" (secundario) y "Empezar gratis" (principal)', (route) => {
+  // No hay cuenta a la que ingresar todavía (la app no existe): arriba solo va el botón que lleva al formulario
+  it.each(INDEXABLE_ROUTES)('%s tiene arriba solo "Empezar gratis", que lleva al formulario', (route) => {
     const buttons = pages.get(route)!.querySelectorAll('header.site-header a.button');
-    expect(buttons.map((link) => [link.text.trim(), link.getAttribute('href'), link.classList.contains('button-secondary')])).toEqual([
-      ['Ingresar a mi cuenta', APP_URL, true],
-      ['Empezar gratis', START_ROUTE, false],
-    ]);
+    expect(buttons.map((link) => [link.text.trim(), link.getAttribute('href')])).toEqual([['Empezar gratis', START_ROUTE]]);
+  });
+
+  it.each(INDEXABLE_ROUTES)('%s no apunta a la app de cuentas (app.cale.com.ar), que no existe', (route) => {
+    const hrefs = pages.get(route)!.querySelectorAll('a').map((link) => link.getAttribute('href') ?? '');
+    expect(hrefs.filter((href) => href.includes('app.cale.com.ar'))).toEqual([]);
   });
 
   // Decisión del 11/10/2026: ni la landing ni los legales hablan del precio del servicio

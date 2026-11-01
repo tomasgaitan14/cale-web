@@ -10,8 +10,6 @@ export const CONTACT_EMAIL = 'cale.turnos@gmail.com';
 // WhatsApp de contacto: formato internacional sin "+" (54 + 9 de celular + característica + número).
 export const WHATSAPP_NUMBER = '5491100000000';
 export const WHATSAPP_GREETING = 'Hola, quiero saber más sobre Cale para mi negocio.';
-// Asistente de alta (cale-app).
-export const APP_URL = 'https://app.cale.com.ar/';
 // Prueba gratis: los mismos plazos que cale-app (TRIAL_DAYS en shared/src/trial.ts; TRIAL_NOTICE_DAYS_BEFORE y
 // TRIAL_EXTENSION_DAYS en api/src/domain/trial.ts)
 export const TRIAL_DAYS = 30;
@@ -76,7 +74,6 @@ export const LANDING_COPY = {
   title: 'Tus recordatorios de turnos, en automático.',
   subtitle: 'Conectá tu agenda y dejá que Cale envíe los recordatorios por WhatsApp por vos.',
   cta: 'Empezar gratis',
-  signIn: 'Ingresar a mi cuenta',
   tagline: 'Menos mensajes manuales. Más tiempo para tu negocio.',
   closing: 'Tu tiempo vale más que mandar recordatorios uno por uno.',
 } as const;

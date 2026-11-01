@@ -1,19 +1,15 @@
 ---
-// Botón principal "Empezar gratis" (lleva al formulario de /empezar) o secundario "Ingresar a mi cuenta" (lleva a cale-app)
-import { APP_URL, LANDING_COPY, START_ROUTE } from '../config';
+// Botón principal "Empezar gratis" (lleva al formulario de /empezar)
+import { LANDING_COPY, START_ROUTE } from '../config';
 
 interface Props {
-  variant?: 'primary' | 'secondary';
   label?: string;
-  // Adónde lleva; sin indicar, el principal va al formulario y el secundario a la app
-  href?: string;
   // En el encabezado: más bajo y angosto
   compact?: boolean;
   class?: string;
 }
 
-const { variant = 'primary', label = LANDING_COPY.cta, compact = false, class: className, href } = Astro.props;
-const target = href ?? (variant === 'primary' ? START_ROUTE : APP_URL);
+const { label = LANDING_COPY.cta, compact = false, class: className } = Astro.props;
 ---
 
-<a class:list={['button', { 'button-secondary': variant === 'secondary', 'button-compact': compact }, className]} href={target}>{label}</a>
+<a class:list={['button', { 'button-compact': compact }, className]} href={START_ROUTE}>{label}</a>

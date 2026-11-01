@@ -4,7 +4,6 @@ import AppButton from '../components/AppButton.astro';
 import Brand from '../components/Brand.astro';
 import {
   BUSINESS_NAME,
-  LANDING_COPY,
   CONTACT_EMAIL,
   FACEBOOK_DOMAIN_VERIFICATION,
   LOCATION,
@@ -62,8 +61,7 @@ const LEGAL_LINKS = [
       <div class="container header-inner">
         <a class="home-link" href={ROUTES.home} aria-label={`${BUSINESS_NAME}, inicio`}><Brand /></a>
         <div class="header-actions">
-          <AppButton variant="secondary" label={LANDING_COPY.signIn} compact />
-          <AppButton compact class="header-start" />
+          <AppButton compact />
         </div>
       </div>
     </header>
@@ -124,13 +122,8 @@ const LEGAL_LINKS = [
     gap: 0.5rem;
   }
 
-  /* En el celular los dos no entran al lado de la marca, y "Empezar gratis" ya está en la portada: arriba queda solo
-     "Ingresar a mi cuenta" */
+  /* En el celular el botón no ocupa todo el ancho: queda al lado de la marca */
   @media (max-width: 39.99rem) {
-    .header-actions :global(.header-start) {
-      display: none;
-    }
-
     .header-actions :global(.button) {
       width: auto;
     }
