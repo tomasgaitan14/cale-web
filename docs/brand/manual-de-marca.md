@@ -49,6 +49,8 @@ perfil de WhatsApp, que se recorta en círculo, no los corte.
 | Ícono de pantalla de inicio (iOS) | 180 × 180 | [`public/apple-touch-icon.png`](../../public/apple-touch-icon.png) |
 | Ícono de la app de Meta | 1024 × 1024 | [`cale-app-icon-1024.png`](cale-app-icon-1024.png) |
 | Foto de perfil de WhatsApp | 640 × 640 | [`cale-whatsapp-profile-640.png`](cale-whatsapp-profile-640.png) |
+| Imagen para compartir el enlace (`og:image`) | 1200 × 630 | [`public/og-image.png`](../../public/og-image.png) |
+| Lockup horizontal para usar fuera del sitio | vectorial | [`cale-lockup.svg`](cale-lockup.svg) |
 
 Los PNG van a sangre, sin transparencia y con la ficha negra de lado a lado: iOS, Meta y WhatsApp aplican sus propias
 esquinas o su recorte circular, y una ficha ya redondeada dejaría bordes de otro color.
@@ -64,6 +66,13 @@ Es texto del sitio, no una imagen: se ve nítido en cualquier tamaño y lo lee u
 - La separación entre isotipo y texto es **0,375 veces el tamaño del texto** (9 px con texto de 24 px).
 - Isotipo y texto van centrados en vertical.
 - El texto va en `--text` (`#15191C`) sobre fondos claros y en blanco sobre fondos oscuros.
+
+**Fuera del sitio** (presentaciones, perfiles de redes, firmas) se usa [`cale-lockup.svg`](cale-lockup.svg): el mismo
+lockup con el nombre convertido a trazos, para que no dependa de tener Manrope instalada. Tiene fondo transparente y el
+nombre en negro, así que va sobre fondos claros. Los trazos del nombre están en [`src/lib/wordmark.ts`](../../src/lib/wordmark.ts),
+con la nota de cómo se obtuvieron.
+
+![Lockup de Cale](cale-lockup.svg)
 
 ## 4. Espacio y tamaños
 
@@ -153,19 +162,20 @@ No hacer esto con el isotipo:
 | Pantalla de inicio de iOS | `public/apple-touch-icon.png` (180 × 180) |
 | Ícono de la app de Meta | `docs/brand/cale-app-icon-1024.png` (se sube a mano en el panel de Meta) |
 | Foto de perfil de WhatsApp | `docs/brand/cale-whatsapp-profile-640.png` (se sube a mano al perfil del número) |
+| Vista previa del enlace (WhatsApp, redes, buscadores) | `public/og-image.png`: el lockup centrado sobre el crema, declarado en `og:image` y `twitter:image` de todas las páginas. Pesa menos de 300 KB, el tope de WhatsApp |
+| Datos estructurados | `Organization` y `WebSite` en la portada (`src/lib/structured-data.ts`), con el apple-touch-icon como logo |
 
-**Si cambia el dibujo:** editar solo `src/lib/brand.ts`, correr `npm run brand` para regenerar el favicon y los PNG, y
-`npm test`. Los tests fallan si el encabezado, el favicon o los PNG dejan de coincidir con el código, si los colores se
-separan de los tokens o si los tildes dejan de entrar en el círculo de la foto de perfil.
+**Si cambia el dibujo:** editar solo `src/lib/brand.ts`, correr `npm run brand` para regenerar el favicon, el lockup, la
+imagen para compartir y los PNG, y `npm test`. Los tests fallan si el encabezado, el favicon, el lockup o los PNG dejan
+de coincidir con el código, si los colores se separan de los tokens o si los tildes dejan de entrar en el círculo de la
+foto de perfil. Si cambia la tipografía o el espaciado del nombre, hay que volver a generar `src/lib/wordmark.ts` (la
+nota de ese archivo explica cómo).
 
 **Si cambia un color:** cambiarlo en `src/styles/tokens.css` (que también vive en `cale-app`) y en `BRAND_COLORS` de
 `brand.ts`; un test controla que coincidan.
 
 ## 11. Pendientes
 
-- **Lockup como archivo suelto** (SVG con el nombre convertido a trazos), para usarlo fuera del sitio: presentaciones,
-  perfiles de redes, firmas. Hoy el nombre es texto del sitio.
-- **Imagen para compartir en redes** (`og:image`): el sitio todavía no declara una; los enlaces compartidos salen sin
-  imagen.
+- **Lockup sobre fondo oscuro** (nombre en blanco): hoy el archivo suelto es solo para fondos claros.
 - **Versión monocromática** para impresión o sellos (tildes blancos sobre negro, o negros sobre blanco).
 - **`cale-app/docs/DISENO.md`** («Marca») todavía describe el calendario con tilde: actualizarlo cuando ese repo se retome.

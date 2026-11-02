@@ -33,7 +33,8 @@ const DIST_DIR = join(import.meta.dirname, '..', 'dist');
 const NOT_FOUND_FILE = '404.html';
 const DESCRIPTION_LENGTH = { min: 50, max: 160 };
 const TEXT_NODE = NodeType.TEXT_NODE;
-const TECHNICAL_JARGON = /\bAPI\b|Cloud API|plantilla|opt-in|webhook|token|Business Platform/i;
+const JSON_LD_TYPE = 'application/ld+json';
+const TECHNICAL_JARGON =/\bAPI\b|Cloud API|plantilla|opt-in|webhook|token|Business Platform/i;
 // Palabras con mayúscula interna que no son texto pegado
 const WORDS_WITH_INNER_CAPITALS = ['WhatsApp'];
 const PLACEHOLDER_PATTERN = /en construcci[oó]n|pr[oó]ximamente|lorem ipsum|coming soon/i;
@@ -171,14 +172,18 @@ describe.each(INDEXABLE_ROUTES)('página %s', (route) => {
   });
 
   // La CSP (vercel.json) bloquea scripts y estilos inline: si aparecen, se rompen en producción. La portada admite solo
-  // los scripts externos del propio sitio (las animaciones); en las demás páginas, ninguno.
+  // los scripts externos del propio sitio (las animaciones); en las demás páginas, ninguno. El JSON-LD (datos
+  // estructurados) es un bloque de datos, no se ejecuta y la CSP no lo toca: solo lo lleva la portada.
   it('no tiene scripts inline ni estilos inline, y los scripts externos son solo los permitidos', () => {
-    const scripts = page().querySelectorAll('script');
+    const scripts = page()
+      .querySelectorAll('script')
+      .filter((script) => script.getAttribute('type') !== JSON_LD_TYPE);
     for (const script of scripts) {
       expect(script.getAttribute('src'), 'un script sin src es inline').toMatch(/^\/_astro\/.+\.js$/);
       expect(script.text.trim()).toBe('');
     }
     if (route !== ROUTES.home) expect(scripts).toHaveLength(0);
+    expect(page().querySelectorAll(`script[type="${JSON_LD_TYPE}"]`)).toHaveLength(route === ROUTES.home ? 1 : 0);
     expect(page().querySelectorAll('style')).toHaveLength(0);
     expect(page().querySelectorAll('[style]')).toHaveLength(0);
   });

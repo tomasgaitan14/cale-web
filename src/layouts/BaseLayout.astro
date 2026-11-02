@@ -2,6 +2,8 @@
 import '../styles/global.css';
 import AppButton from '../components/AppButton.astro';
 import Brand from '../components/Brand.astro';
+import dmSansLatin from '@fontsource-variable/dm-sans/files/dm-sans-latin-wght-normal.woff2?url';
+import manropeLatin from '@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2?url';
 import {
   BUSINESS_NAME,
   CONTACT_EMAIL,
@@ -9,6 +11,8 @@ import {
   LOCATION,
   ROUTES,
 } from '../config';
+import { APPLE_TOUCH_ICON, OG_IMAGE } from '../lib/brand';
+import { jsonLd } from '../lib/structured-data';
 import { canonicalUrl, mailtoUrl } from '../lib/url';
 
 interface Props {
@@ -16,10 +20,16 @@ interface Props {
   description: string;
   // Ruta canónica. Sin ruta (como en la 404), la página no se indexa.
   path?: string;
+  // Datos estructurados (JSON-LD) de la página, si los tiene
+  structuredData?: object;
 }
 
-const { title, description, path } = Astro.props;
+const { title, description, path, structuredData } = Astro.props;
 const canonical = path ? canonicalUrl(path) : undefined;
+const ogImageUrl = canonicalUrl(OG_IMAGE.path);
+// Las dos tipografías del sitio (títulos y texto), solo el subconjunto latino que usa el español: se piden junto con el
+// HTML en vez de esperar a que se descargue el CSS
+const FONT_PRELOADS = [manropeLatin, dmSansLatin];
 const year = new Date().getFullYear();
 
 const LEGAL_LINKS = [
@@ -42,7 +52,8 @@ const LEGAL_LINKS = [
     <meta name="theme-color" content="#f7f4ee" />
     <meta name="facebook-domain-verification" content={FACEBOOK_DOMAIN_VERIFICATION} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" href={APPLE_TOUCH_ICON.path} />
+    {FONT_PRELOADS.map((href) => <link rel="preload" href={href} as="font" type="font/woff2" crossorigin />)}
 
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="es_AR" />
@@ -50,7 +61,14 @@ const LEGAL_LINKS = [
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     {canonical && <meta property="og:url" content={canonical} />}
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content={String(OG_IMAGE.width)} />
+    <meta property="og:image:height" content={String(OG_IMAGE.height)} />
+    <meta property="og:image:alt" content={OG_IMAGE.alt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={ogImageUrl} />
+    {structuredData && <script type="application/ld+json" set:html={jsonLd(structuredData)} />}
   </head>
   <body>
     <a class="skip-link" href="#contenido">Saltar al contenido</a>

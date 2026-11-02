@@ -18,6 +18,7 @@ import {
 } from '../config';
 import { buildScenarios, type ChatStep } from '../lib/chat-script';
 import { buildSimulation } from '../lib/simulation';
+import { homeStructuredData } from '../lib/structured-data';
 import { mailtoUrl } from '../lib/url';
 
 type TextStep = Extract<ChatStep, { text: string }>;
@@ -45,9 +46,10 @@ const closingLead = withoutSoft(LANDING_COPY.closing, LANDING_COPY.closingSoft);
 ---
 
 <BaseLayout
-  title={`${BUSINESS_NAME} · Recordatorios de turnos por WhatsApp`}
-  description={`${BUSINESS_NAME} envía por WhatsApp los recordatorios de los turnos que anotás en Google Calendar. Tu cliente confirma o cancela con un botón.`}
+  title={`Recordatorios de turnos por WhatsApp · ${BUSINESS_NAME}`}
+  description={`${BUSINESS_NAME} envía por WhatsApp los recordatorios de los turnos que anotás en Google Calendar. Tu cliente confirma o cancela con un botón. Empezá gratis.`}
   path={ROUTES.home}
+  structuredData={homeStructuredData()}
 >
   <section class="hero" aria-labelledby="portada-titulo">
     <div class="container hero-grid">

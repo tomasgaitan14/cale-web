@@ -3,12 +3,22 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse } from 'node-html-parser';
-import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
-import { BRAND_COLORS, MARK_SIZE, MARK_STROKE, MARK_TICKS, markSvg, tickPath } from '../src/lib/brand';
-import { BRAND_PNGS, FAVICON_PATH } from '../scripts/lib/brand-files';
-import { renderMarkPng } from '../scripts/lib/mark-png';
+import {
+  BRAND_COLORS,
+  LOCKUP_WIDTH,
+  MARK_SIZE,
+  MARK_STROKE,
+  MARK_TICKS,
+  OG_IMAGE,
+  lockupSvg,
+  markSvg,
+  tickPath,
+} from '../src/lib/brand';
+import { BRAND_PNGS, FAVICON_PATH, LOCKUP_PATH, OG_IMAGE_PATH } from '../scripts/lib/brand-files';
+import { renderMarkPng, renderOgPng } from '../scripts/lib/mark-png';
 import { contrast, token } from './support/color';
+import { PNG_COLOR_TYPE_RGB, differentPixelRatio, pngInfo } from './support/png';
 
 const DIST_DIR = join(import.meta.dirname, '..', 'dist');
 const NON_TEXT_CONTRAST = 3;
@@ -18,15 +28,11 @@ const MARK_CENTER = MARK_SIZE / 2;
 // Los tildes tienen que entrar en el círculo inscrito con un margen del 12,5 %: WhatsApp recorta la foto en círculo
 const CIRCLE_SAFE_RADIUS = MARK_CENTER * 0.875;
 const CENTER_TOLERANCE = 0.5;
-// Comparar un PNG guardado con el que sale hoy del código: el suavizado de bordes puede variar entre máquinas, así que
-// se tolera una fracción mínima de píxeles que difieren más de 32 (de 255) en algún canal
-const BYTES_PER_PIXEL = 3;
-const CHANNEL_TOLERANCE = 32;
+// Fracción de píxeles que puede diferir un PNG guardado del que sale hoy del código (suavizado de bordes entre máquinas)
 const DIFFERENT_PIXELS_TOLERANCE = 0.005;
-const PNG_COLOR_TYPE_OFFSET = 25;
-const PNG_COLOR_TYPE_RGB = 2;
-const PNG_WIDTH_OFFSET = 16;
-const PNG_HEIGHT_OFFSET = 20;
+// Ancho sobre alto del lockup del encabezado (Brand.astro: isotipo de 34 px, 9 px de separación, texto de 24 px): unos 2,6.
+// Si sale de este rango, cambió el dibujo, el espaciado o el trazo del nombre
+const LOCKUP_RATIO = { min: 2.5, max: 2.7 };
 
 const pages = (): string[] => readdirSync(DIST_DIR).filter((file) => file.endsWith('.html'));
 
@@ -39,14 +45,11 @@ function blend(foreground: string, background: string, opacity: number): string 
   return `#${channels.map((channel) => channel.toString(16).padStart(2, '0')).join('')}`;
 }
 
-async function pixels(png: Buffer): Promise<Buffer> {
-  return sharp(png).removeAlpha().raw().toBuffer();
-}
-
 describe('colores de la marca', () => {
   it('brand.ts usa los mismos colores que los tokens del diseño', () => {
     expect(BRAND_COLORS.ink).toBe(token('ink').toLowerCase());
     expect(BRAND_COLORS.accent).toBe(token('accent').toLowerCase());
+    expect(BRAND_COLORS.cream).toBe(token('bg').toLowerCase());
   });
 
   it('el tilde pleno se ve sobre la ficha (3:1) y el tenue se distingue de ella', () => {
@@ -97,21 +100,37 @@ describe('favicon', () => {
 describe('PNG de marca', () => {
   it.each(Object.entries(BRAND_PNGS))('%s existe, es cuadrado, del tamaño que pide la plataforma y opaco', (_name, { path, size }) => {
     expect(existsSync(path)).toBe(true);
-    const png = readFileSync(path);
-    expect(png.readUInt32BE(PNG_WIDTH_OFFSET)).toBe(size);
-    expect(png.readUInt32BE(PNG_HEIGHT_OFFSET)).toBe(size);
-    expect(png[PNG_COLOR_TYPE_OFFSET]).toBe(PNG_COLOR_TYPE_RGB);
+    expect(pngInfo(readFileSync(path))).toEqual({ width: size, height: size, colorType: PNG_COLOR_TYPE_RGB });
   });
 
   it.each(Object.entries(BRAND_PNGS))('%s coincide con el isotipo actual (corré `npm run brand` si cambió)', async (_name, { path, size }) => {
-    const [saved, current] = await Promise.all([pixels(readFileSync(path)), pixels(await renderMarkPng(size))]);
-    expect(saved.length).toBe(current.length);
-    let differentPixels = 0;
-    for (let index = 0; index < saved.length; index += BYTES_PER_PIXEL) {
-      const channelDifferences = [0, 1, 2].map((channel) => Math.abs(saved[index + channel]! - current[index + channel]!));
-      if (Math.max(...channelDifferences) > CHANNEL_TOLERANCE) differentPixels += 1;
-    }
-    expect(differentPixels / (saved.length / BYTES_PER_PIXEL)).toBeLessThanOrEqual(DIFFERENT_PIXELS_TOLERANCE);
+    expect(await differentPixelRatio(readFileSync(path), await renderMarkPng(size))).toBeLessThanOrEqual(
+      DIFFERENT_PIXELS_TOLERANCE,
+    );
+  });
+});
+
+describe('lockup e imagen para compartir', () => {
+  it('el lockup es exactamente el SVG que genera brand.ts (corré `npm run brand` si cambió)', () => {
+    expect(readFileSync(LOCKUP_PATH, 'utf8')).toBe(lockupSvg());
+  });
+
+  it('el lockup lleva el isotipo y el nombre en trazos, sin texto que dependa de una tipografía', () => {
+    const svg = lockupSvg();
+    expect(svg).not.toMatch(/<text|font-family/);
+    expect(svg).toContain(tickPath(MARK_TICKS[1].points));
+    expect(svg.match(/<path/g)).toHaveLength(MARK_TICKS.length + 1);
+  });
+
+  it('el lockup conserva las proporciones del encabezado', () => {
+    expect(LOCKUP_WIDTH / MARK_SIZE).toBeGreaterThanOrEqual(LOCKUP_RATIO.min);
+    expect(LOCKUP_WIDTH / MARK_SIZE).toBeLessThanOrEqual(LOCKUP_RATIO.max);
+  });
+
+  it('la imagen para compartir mide 1200 × 630, es opaca y coincide con el código actual', async () => {
+    const saved = readFileSync(OG_IMAGE_PATH);
+    expect(pngInfo(saved)).toEqual({ width: OG_IMAGE.width, height: OG_IMAGE.height, colorType: PNG_COLOR_TYPE_RGB });
+    expect(await differentPixelRatio(saved, await renderOgPng())).toBeLessThanOrEqual(DIFFERENT_PIXELS_TOLERANCE);
   });
 });
 
