@@ -63,6 +63,9 @@ agregar acá nombre, teléfono, dirección, CUIT, situación fiscal ni IDs de cu
   Sin AWS, Google, asistente ni prueba gratis. `LEGAL_LAST_UPDATED` y `LEAD_CONSENT_VERSION` = 2026-11-01. Los datos de
   coexistencia (versión de la app, 180 días de historial, 20 mensajes por segundo) están en `COEXISTENCE` de `config.ts`.
 - Se sacó el botón "Ingresar a mi cuenta" (apuntaba a `app.cale.com.ar`, sin DNS).
+- **`/empezar` probado en producción (01/11/2026, 23:28):** un alta de prueba (`PRUEBA BORRAR 0111`) se guardó en `leads` con el consentimiento
+  `2026-11-01`, el cierre mostró el texto nuevo y después se borró a mano en el SQL Editor (la base quedó en 0 altas y 0 intentos). Titular completó el
+  captcha de Turnstile. El modo automático no deja que Claude consulte la base de producción: la comprobación y el borrado los corre Titular.
 - **Dominio (01/11/2026, ~22:20): `cale.com.ar` está online.** Responde con HTTPS (Let's Encrypt), `www` y `http`
   redirigen con 308, el DNS de DonWeb apunta a Vercel y las páginas legales y `/empezar` dan 200. El widget de Turnstile
   ya admite `cale.com.ar`. Un recorrido del sitio en vivo no encontró nombre, teléfono ni otros correos.
@@ -183,10 +186,9 @@ Al 2026-10-15:
 
 1. **Meta:** esperar la decisión de la verificación del negocio (enviada el 01/11/2026, hasta 48 h). Con el negocio
    verificado, enviar el App Review (videos grabados, backend en `cale-api`) y cargar las URLs legales de `cale.com.ar` en la app.
-2. **Probar `/empezar` en producción** (con un alta de prueba que después se borra) y confirmar Turnstile en `cale.com.ar`.
-3. Confirmar las decisiones asumidas del texto legal (agenda, costos, plazo del formulario) y alinear la portada, que
+2. Confirmar las decisiones asumidas del texto legal (agenda, costos, plazo del formulario) y alinear la portada, que
    todavía nombra Google Calendar.
-4. Que un abogado revise los textos legales: el tope de responsabilidad se calcula sobre "lo pagado por el servicio"
+3. Que un abogado revise los textos legales: el tope de responsabilidad se calcula sobre "lo pagado por el servicio"
    (hoy sería cero, porque no hay cobro), la jurisdicción no nombra una ciudad y la Ley 25.326 (art. 6) pide
    identificar al responsable de los datos.
 
