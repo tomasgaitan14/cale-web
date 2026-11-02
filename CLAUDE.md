@@ -33,7 +33,8 @@ agregar acá nombre, teléfono, dirección, CUIT, situación fiscal ni IDs de cu
 | Build | Astro 7, salida 100 % estática. **Sin JS en el cliente, salvo la portada (animación) y `/empezar`** (scripts propios, sin framework) |
 | Estilos | CSS plano: tokens del diseño en `src/styles/tokens.css` (copia de `cale-app/docs/DISENO.md`), base en `global.css` (sin Tailwind) |
 | Tipografía | Manrope (títulos) + DM Sans (texto), autoalojadas con `@fontsource-variable` |
-| Íconos | `@phosphor-icons/core` (Bold), inline vía `src/components/Icon.astro` (calendario, reloj, tilde, doble tilde y WhatsApp) |
+| Íconos | `@phosphor-icons/core` (Bold), inline vía `src/components/Icon.astro` (reloj, tilde, doble tilde y WhatsApp). La marca no es un ícono de Phosphor: es el isotipo de `src/lib/brand.ts` |
+| Marca | Isotipo de doble tilde sobre ficha negra: fuente única en `src/lib/brand.ts`; `npm run brand` genera el favicon y los PNG (`sharp`, devDependency). Reglas en [`docs/brand/manual-de-marca.md`](docs/brand/manual-de-marca.md) |
 | Tests | Vitest sobre el HTML de `dist/` + `node-html-parser`; la plantilla de AWS y el workflow, con `yaml` |
 | Node | 24 (`.nvmrc` y `engines`; Astro 7 pide ≥ 22.12 y el `node` por defecto de nvm es 22.11) |
 | Hosting | **Vercel** (Hobby, proyecto `cale-turnos`, equipo `tomasg-projects`): el sitio estático y la Function `api/lead.ts`. Dominios: `cale.com.ar` (y `www`, que redirige) y `cale-turnos.vercel.app`. Dejar Vercel es una opción a retomar más adelante (implicaría volver a S3 + CloudFront y rehacer `api/lead.ts` como Lambda) |
@@ -54,6 +55,16 @@ agregar acá nombre, teléfono, dirección, CUIT, situación fiscal ni IDs de cu
   en `src/config.ts`: si cambia allá, cambiarla acá y en `LEGAL_LAST_UPDATED`.
 
 ## Estado actual
+
+**Al 2026-11-02 (sin publicar, a la espera del OK de Titular para commitear): logo nuevo aplicado en el sitio.** El isotipo es un doble tilde
+(tenue = recordatorio enviado, pleno = el cliente confirmó) sobre ficha negra, elegido entre tres direcciones (burbuja, reloj y doble tilde)
+y tres variantes (ficha negra, ficha verde, sin ficha). Cambios: `src/lib/brand.ts` (fuente única del dibujo), `Brand.astro` (SVG en línea con
+los tokens), `public/favicon.svg` y `public/apple-touch-icon.png` (con su `<link>` en `BaseLayout.astro`), PNG para Meta en `docs/brand/`,
+`npm run brand` (genera todo de `brand.ts`, usa `sharp` como devDependency), `tests/brand.test.ts` (el isotipo es el mismo en el encabezado, el
+favicon y los PNG; colores = tokens; contraste; cabe en el círculo de la foto de perfil; probado con 7 mutaciones) y el
+[manual de marca](docs/brand/manual-de-marca.md). Se sacó `calendarCheck` de `Icon.astro` y los helpers de color pasaron a `tests/support/color.ts`.
+Falta subir a mano el ícono de 1024 px a la app de Meta y la foto de 640 px al perfil de WhatsApp, y actualizar `cale-app/docs/DISENO.md` («Marca»)
+cuando ese repo se retome. Pendientes de marca (lockup en SVG con el nombre en trazos, `og:image`, versión monocromática): ver el manual, sección 11.
 
 **Al 2026-11-01 (publicado en `https://cale.com.ar`; `cale-turnos.vercel.app` sigue activo):**
 
@@ -151,6 +162,10 @@ Al 2026-10-15:
 
 ## Decisiones tomadas
 
+- **Logo: doble tilde sobre ficha negra** (decisión de Titular, 01/11/2026). Reemplaza al calendario con tilde de Phosphor. El verde `#25D366`
+  no va suelto sobre claro (1,8:1): por eso el isotipo lleva ficha. Descartadas: burbuja con «c», reloj-«c», ficha verde (muy cerca del
+  verde de WhatsApp) y sin ficha. Riesgo conocido: el doble tilde recuerda al «leído» de WhatsApp (símbolo de estado, no su marca). No volver
+  a proponer otros sin que Titular lo pida. Reglas de uso en `docs/brand/manual-de-marca.md`.
 - **Astro y no Vite + React:** el crawler y el revisor de Meta tienen que recibir el contenido en el HTML, no
   armado por JS.
 - **`src/config.ts` es la fuente única** de nombre, titular, ubicación, email, rutas, plazos de conservación,
@@ -210,6 +225,9 @@ Al 2026-10-15:
 - `src/config.ts` — datos del negocio, rutas, plazos, etiqueta de verificación de Meta.
 - `src/layouts/BaseLayout.astro` — `<head>` (meta tags, canonical, OG, verificación de Meta), header y footer.
 - `src/layouts/LegalLayout.astro` — layout de las páginas legales con fecha de actualización.
+- `src/lib/brand.ts`, `src/components/Brand.astro`, `scripts/brand-assets.ts`, `scripts/lib/` — isotipo (fuente única), su render en el encabezado y el generador del favicon y los PNG (`npm run brand`).
+- `docs/brand/` — [manual de marca](docs/brand/manual-de-marca.md) y los PNG para Meta (ícono de la app de 1024 px y foto de perfil de WhatsApp de 640 px).
+- `tests/brand.test.ts`, `tests/support/color.ts` — tests de la marca y helpers de color compartidos con `contrast.test.ts`.
 - `src/pages/` — `index`, `privacidad`, `terminos`, `eliminar-datos`, `404`.
 - `src/pages/empezar.astro`, `src/scripts/onboarding.ts`, `src/lib/lead*.ts`, `src/lib/simulation.ts` — formulario de alta y simulación.
 - `supabase/migrations/` — `0001_leads.sql` (tabla `leads`) y `0002_lead_rate_limit.sql` (límite de envíos y `submit_lead` solo para el servidor); las corre Titular en el SQL Editor, en orden.

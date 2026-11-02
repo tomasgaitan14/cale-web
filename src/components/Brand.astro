@@ -1,9 +1,19 @@
 ---
-// Marca de Cale: "cale" en minúscula + cuadrado negro con el calendario y tilde en verde (DISENO.md, "Marca")
-import Icon from './Icon.astro';
+// Marca de Cale: isotipo (doble tilde sobre ficha negra) + "cale" en minúscula. El dibujo sale de lib/brand.ts;
+// las reglas de uso, en docs/brand/manual-de-marca.md.
+import { MARK_RADIUS, MARK_SIZE, MARK_STROKE, MARK_TICKS, tickPath } from '../lib/brand';
 ---
 
-<span class="brand"><span class="brand-mark"><Icon name="calendarCheck" /></span>cale</span>
+<span class="brand"><svg
+    class="brand-mark"
+    viewBox={`0 0 ${MARK_SIZE} ${MARK_SIZE}`}
+    aria-hidden="true"
+    focusable="false"
+  ><rect class="mark-tile" width={MARK_SIZE} height={MARK_SIZE} rx={MARK_RADIUS} /><g
+      class="mark-ticks"
+      stroke-width={MARK_STROKE}
+    >{MARK_TICKS.map(({ points, opacity }) => <path d={tickPath(points)} stroke-opacity={opacity} />)}</g
+  ></svg>cale</span>
 
 <style>
   .brand {
@@ -16,22 +26,21 @@ import Icon from './Icon.astro';
   }
 
   .brand-mark {
-    display: grid;
-    place-items: center;
+    display: block;
+    flex: none;
     width: 2.125rem;
     height: 2.125rem;
-    background: var(--ink);
-    border-radius: 10px;
   }
 
-  /* El verde va como relleno del ícono sobre negro, nunca como color de texto */
-  .brand-mark :global(.icon) {
-    width: 1.25rem;
-    height: 1.25rem;
+  .mark-tile {
+    fill: var(--ink);
   }
 
-  /* En el svg mismo: el atributo fill="currentColor" de Phosphor le gana a un fill heredado */
-  .brand-mark :global(svg) {
-    fill: var(--accent);
+  /* El verde va como trazo sobre la ficha negra, nunca como color de texto ni sobre crema (contraste de 1,8:1) */
+  .mark-ticks {
+    fill: none;
+    stroke: var(--accent);
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 </style>
