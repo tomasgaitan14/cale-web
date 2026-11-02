@@ -5,6 +5,7 @@ import {
   FORM_STEPS,
   LeadValidationError,
   STEP_FIELDS,
+  closingMessage,
   toLeadPayload,
   validateStep,
   type FieldErrors,
@@ -30,8 +31,6 @@ import { CaptchaLoadError, mountCaptcha, type CaptchaWidget } from './captcha';
 const NEXT_LABEL = 'Siguiente';
 const SUBMIT_LABEL = 'Ver cómo le llega a mis clientes';
 const SENDING_LABEL = 'Enviando…';
-// Últimos dígitos del WhatsApp que se muestran al confirmar el alta
-const PHONE_TAIL_DIGITS = 4;
 const MESSAGES = {
   config: 'El formulario no está disponible en este momento. Escribinos por correo y te ayudamos.',
   rejected: 'Hay un dato que no pudimos aceptar. Revisalo y probá de nuevo.',
@@ -169,7 +168,7 @@ function showResult(payload: LeadPayload, outcome: LeadResult): void {
 
   setText('[data-result-title]', `Listo, ${firstName}. Así le llegaría a tus clientes`);
   setText('[data-result-lead]', `Ejemplo con los datos de ${payload.p_business_name}. La clienta, el día y la hora son de muestra.`);
-  setText('[data-result-closing]', `Te anotamos. Apenas tu línea de recordatorios esté lista, te escribimos a tu WhatsApp (el que termina en ${payload.p_owner_whatsapp.slice(-PHONE_TAIL_DIGITS)}).`);
+  setText('[data-result-closing]', closingMessage(payload.p_owner_whatsapp));
   required<HTMLElement>(result, '[data-duplicate-note]').hidden = outcome !== 'duplicate';
 
   wizard.hidden = true;

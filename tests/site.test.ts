@@ -579,6 +579,11 @@ describe('formulario de alta (/empezar)', () => {
     expect(readFileSync(join(DIST_DIR, 'sitemap.xml'), 'utf8')).not.toContain(START_ROUTE);
   });
 
+  it('no habla de una línea aparte de recordatorios: Cale usa el número del negocio', () => {
+    expect(page().text).not.toMatch(/línea de recordatorios/i);
+    expect(page().text).toContain('Para avisarte apenas Cale esté listo para tu negocio.');
+  });
+
   it('tiene un solo h1 y un título propio con el nombre del negocio', () => {
     expect(page().querySelectorAll('h1')).toHaveLength(1);
     expect(page().querySelector('title')?.text).toContain(BUSINESS_NAME);

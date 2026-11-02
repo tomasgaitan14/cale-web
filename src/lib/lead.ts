@@ -94,6 +94,14 @@ export function cleanText(value: string): string {
   return value.replace(/\s+/g, ' ').trim();
 }
 
+// Últimos dígitos del WhatsApp que se muestran al confirmar el alta
+export const PHONE_TAIL_DIGITS = 4;
+
+// El cierre de /empezar. No promete una línea aparte (Cale usa el número del negocio) ni una fecha
+export function closingMessage(ownerWhatsapp: string): string {
+  return `Te anotamos. Apenas Cale esté listo para tu negocio, te escribimos a tu WhatsApp (el que termina en ${ownerWhatsapp.slice(-PHONE_TAIL_DIGITS)}).`;
+}
+
 // WhatsApp argentino de celular: devuelve 549 + código de área + número (solo dígitos), o null si no se puede armar
 export function normalizeWhatsapp(input: string): string | null {
   let digits = input.replace(/\D/g, '');
