@@ -178,6 +178,8 @@ Al 2026-10-15:
   Manrope + DM Sans. Fuente: `~/projects-claude/personal/cale-app/docs/DISENO.md` y el prototipo que cita. El verde
   nunca es color de texto, y AAA en el texto principal y AA en el resto (los dos los controla `tests/contrast.test.ts`).
   Reemplazó al rediseño para público mayor del 2026-10-12 (Atkinson, resaltador amarillo, comparación y video).
+- **Cómo entra el negocio a Google (decisión de Titular, 02/11/2026): con la cuenta de Google del propio negocio** (OAuth por negocio), como dice la portada.
+  Google pide verificar la app si pasa de 100 usuarios; hasta entonces se usa sin verificar.
 - **De dónde salen los turnos: Google Calendar (decisión de Titular, 02/11/2026).** Cale crea un calendario de turnos en la cuenta de Google del negocio y
   de ahí saca los turnos para mandar los recordatorios. La portada lo dice (subtítulo, paso 2, una pregunta frecuente y la descripción) y un test lo
   controla; **la conexión todavía no existe** (el código viejo estaba en `cale-app`, borrada de AWS): se arma en `cale-api`. Hasta entonces los textos
@@ -216,9 +218,12 @@ Al 2026-10-15:
    verificado, enviar el App Review (videos grabados, backend en `cale-api`) y cargar las URLs legales de `cale.com.ar` en la app.
 2. **Conexión con Google Calendar** en `cale-api` (decisión del 02/11/2026): consentimiento de Google, guardar el permiso del negocio, leer los turnos
    y programar los recordatorios. Plan y puntos abiertos en `cale-api/CLAUDE.md`. Al terminar, actualizar privacidad y términos.
-3. **Los textos legales los aprobamos nosotros, sin abogado** (decisión de Titular, 02/11/2026). Puntos que quedan por cerrar a conciencia:
-   el tope de responsabilidad se calcula sobre "lo pagado por el servicio" (hoy sería cero, porque no hay cobro), la jurisdicción no nombra una
-   ciudad y la Ley 25.326 (art. 6) pide identificar al responsable de los datos, lo que choca con no publicar datos personales.
+3. ~~Textos legales~~ **Aprobados en casa, sin abogado, el 02/11/2026** (decisión de Titular). Los tres puntos abiertos se cerraron así: **tope de
+   responsabilidad** = el mayor entre lo pagado en los 12 meses anteriores y un monto fijo (`LIABILITY_CAP` en `config.ts`, hoy ARS 100.000; es la única
+   cifra de dinero permitida en el sitio y va marcada con `data-liability-minimum`); **jurisdicción** = se deja como estaba, sin nombrar ciudad;
+   **responsable de los datos** (art. 6 de la Ley 25.326) = «Cale» con el correo de contacto, sin nombre ni domicilio personales (queda el riesgo
+   legal de que Cale no es una persona jurídica; también existe la inscripción de bases de datos ante la AAIP, que habría que revisar). `LEGAL_LAST_UPDATED` y
+   `LEAD_CONSENT_VERSION` pasaron a 2026-11-02.
 
 ## Archivos clave
 
