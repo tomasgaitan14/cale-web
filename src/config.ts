@@ -23,10 +23,17 @@ export const ROUTES = {
 export const START_ROUTE = '/empezar';
 // Versión del texto de consentimiento que se guarda con cada alta. Cambiarla cuando cambie ese texto o la política
 // de privacidad (se ajusta junto con los textos legales).
-export const LEAD_CONSENT_VERSION = '2026-11-01';
+export const LEAD_CONSENT_VERSION = '2026-11-02';
 
 // Fecha de vigencia de los textos legales (ISO, se formatea al renderizar).
-export const LEGAL_LAST_UPDATED = '2026-11-01';
+export const LEGAL_LAST_UPDATED = '2026-11-02';
+
+// Tope de responsabilidad de los términos (decisión del 02/11/2026): el mayor entre lo pagado en los últimos meses y un
+// monto fijo mínimo, para que el tope no sea cero mientras no haya cobro. Cambiar el monto es una decisión del titular.
+export const LIABILITY_CAP = {
+  lookbackMonths: 12,
+  minimum: 'ARS 100.000',
+} as const;
 
 // Plazos de conservación declarados en la política de privacidad.
 export const RETENTION = {

@@ -5,6 +5,7 @@ import {
   COEXISTENCE,
   CONTACT_EMAIL,
   JURISDICTION,
+  LIABILITY_CAP,
   LOCATION,
   REMINDER_SEND_TIME,
   RETENTION,
@@ -152,9 +153,10 @@ import { mailtoUrl } from '../lib/url';
     <li>El incumplimiento, por parte del negocio, de las políticas de Meta o de la obligación de tener el consentimiento de sus clientes.</li>
   </ul>
   <p>
-    Si igualmente corresponde una responsabilidad de {BUSINESS_NAME}, se limita al monto que el negocio haya pagado por
-    el servicio en los tres meses anteriores al hecho que la origina. Esta limitación no se aplica en casos de dolo o
-    culpa grave.
+    Si igualmente corresponde una responsabilidad de {BUSINESS_NAME}, se limita al mayor de estos dos montos: lo que el
+    negocio haya pagado por el servicio en los {LIABILITY_CAP.lookbackMonths} meses anteriores al hecho que la origina,
+    o <span data-liability-minimum>{LIABILITY_CAP.minimum}</span>. Esta limitación no se aplica en casos de dolo o culpa
+    grave.
   </p>
   <p>
     Los recordatorios son una ayuda: no reemplazan la agenda del negocio ni su comunicación directa con los clientes.
