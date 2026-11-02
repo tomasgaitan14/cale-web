@@ -63,7 +63,7 @@ export const LANDING_COPY = {
   title: 'Tus recordatorios de turnos, en automático.',
   // Última frase de `title`, que va en el tono gris del título (tiene que ser el final exacto)
   titleSoft: 'en automático.',
-  subtitle: 'Pasale tus turnos a Cale y dejá que envíe los recordatorios por WhatsApp por vos.',
+  subtitle: 'Conectá tu Google Calendar y dejá que Cale envíe los recordatorios por WhatsApp por vos.',
   cta: 'Empezar gratis',
   tagline: 'Menos mensajes manuales. Más tiempo para tu negocio.',
   closing: 'Tu tiempo vale más que mandar recordatorios uno por uno.',
@@ -78,8 +78,8 @@ export const HOW_IT_WORKS = [
     text: 'Son 3 pasos cortos: cómo se llama tu negocio, cómo anotás hoy los turnos y cómo escribirte.',
   },
   {
-    title: 'Pasale tus turnos a Cale',
-    text: 'Cada turno lleva el nombre de tu cliente, el servicio y su celular, para poder contactarlo ante cualquier inconveniente.',
+    title: 'Anotá tus turnos en tu Google Calendar',
+    text: 'Cale crea un calendario de turnos en tu cuenta de Google. Cada turno lleva el nombre de tu cliente, el servicio y su celular, para poder contactarlo ante cualquier inconveniente.',
   },
   {
     title: 'Cale le escribe a tu cliente el día anterior',
@@ -126,6 +126,11 @@ export const FAQ_ITEMS = [
     question: '¿Qué recibe mi cliente?',
     answer:
       'Un mensaje de WhatsApp con el nombre de tu negocio, el día y la hora del turno, y tres botones: Confirmo, Cancelo y Cambiar horario.',
+  },
+  {
+    question: '¿Qué agenda tengo que usar?',
+    answer:
+      'Google Calendar. Cale crea un calendario de turnos en tu cuenta de Google y desde ahí manda los recordatorios; vos anotás los turnos ahí.',
   },
   {
     question: '¿Qué pasa si mi cliente escribe otra cosa?',
