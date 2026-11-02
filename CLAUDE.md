@@ -69,6 +69,14 @@ agregar acá nombre, teléfono, dirección, CUIT, situación fiscal ni IDs de cu
 - **Dominio (01/11/2026, ~22:20): `cale.com.ar` está online.** Responde con HTTPS (Let's Encrypt), `www` y `http`
   redirigen con 308, el DNS de DonWeb apunta a Vercel y las páginas legales y `/empezar` dan 200. El widget de Turnstile
   ya admite `cale.com.ar`. Un recorrido del sitio en vivo no encontró nombre, teléfono ni otros correos.
+- **Portada rediseñada (02/11/2026), versión A de «Recepción»** (inspirada en el estilo de agendamas.app, sin copiar sus cifras, precios ni testimonios):
+  encabezado en pastilla flotante de vidrio; hero asimétrico con el título en dos tonos (`.tone-soft`); banda negra con 3 datos del producto
+  (`LANDING_BAND`: hora de envío, 3 botones, 0 apps); «Cómo funciona» en bloques de tamaños distintos con mini-interfaces CSS rotuladas «Ejemplo»
+  (`HOW_IT_WORKS_SAMPLE`); sección «Qué pasa cuando tu cliente responde» (bento con las respuestas de `lib/chat-script.ts`, la de «otra cosa» la
+  contesta «Vos»); 5 preguntas frecuentes con `<details>` (`FAQ_ITEMS`); cierre en banda negra. Tipografía: se mantuvo Manrope + DM Sans (se probó
+  Outfit + Geist en una rama aparte y se eligió Manrope). Formas y sombras nuevas en `global.css` (`--radius-island`, `--shadow-tile`,
+  `--shadow-float`); `tokens.css` no cambió (copia compartida con cale-app). Movimiento solo con transform y opacity y con «reducir movimiento»
+  respetado. 471 tests. Decisiones: sin cifras de uso, sin precios, sin emojis y sin campo con el nombre del negocio en el hero (iría en la URL).
 - **Animación de la portada y de `/empezar` alineada con «siempre coexistencia»** (01/11/2026): la escena de «escribe otra cosa» ya no
   manda a la clienta a otro `wa.me`; lo que escribe fuera de los botones lo contesta el negocio desde su WhatsApp («Vos» en el texto de
   corrido, `byBusiness` en `lib/chat-script.ts`). Se sacó el número del negocio de ejemplo (`LANDING_SAMPLE.businessWhatsapp`): ningún
