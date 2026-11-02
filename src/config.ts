@@ -61,7 +61,7 @@ export const LANDING_SAMPLE = {
 export const LANDING_COPY = {
   audience: 'Para negocios que trabajan con turnos',
   title: 'Tus recordatorios de turnos, en automático.',
-  subtitle: 'Conectá tu agenda y dejá que Cale envíe los recordatorios por WhatsApp por vos.',
+  subtitle: 'Pasale tus turnos a Cale y dejá que envíe los recordatorios por WhatsApp por vos.',
   cta: 'Empezar gratis',
   tagline: 'Menos mensajes manuales. Más tiempo para tu negocio.',
   closing: 'Tu tiempo vale más que mandar recordatorios uno por uno.',
@@ -70,12 +70,12 @@ export const LANDING_COPY = {
 // "Cómo funciona" en 3 pasos (prototipo de cale-rediseno, propuesta "Recepción")
 export const HOW_IT_WORKS = [
   {
-    title: 'Entrá con tu cuenta de Google',
-    text: 'Cale crea un calendario de turnos para tu negocio dentro de tu Google Calendar.',
+    title: 'Dejanos los datos de tu negocio',
+    text: 'Son 3 pasos cortos: cómo se llama tu negocio, cómo anotás hoy los turnos y cómo escribirte.',
   },
   {
-    title: 'Anotá cada turno en tu calendario',
-    text: 'Cada turno se anota con el nombre de tu cliente, el servicio y su celular, para poder contactarlo ante cualquier inconveniente.',
+    title: 'Pasale tus turnos a Cale',
+    text: 'Cada turno lleva el nombre de tu cliente, el servicio y su celular, para poder contactarlo ante cualquier inconveniente.',
   },
   {
     title: 'Cale le escribe a tu cliente el día anterior',
