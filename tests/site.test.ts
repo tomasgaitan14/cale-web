@@ -226,7 +226,7 @@ describe('contenido requerido', () => {
     const hero = pages.get(ROUTES.home)!.querySelector('.hero')!;
     expect(hero.querySelector('h1')?.text).toBe('Tus recordatorios de turnos, en automático.');
     expect(hero.querySelector('.lead')?.text).toBe(
-      'Pasale tus turnos a Cale y dejá que envíe los recordatorios por WhatsApp por vos.',
+      'Conectá tu Google Calendar y dejá que Cale envíe los recordatorios por WhatsApp por vos.',
     );
     expect(hero.querySelector('a.button')?.text.trim()).toBe('Empezar gratis');
     expect(hero.querySelector('.tagline')?.text.trim()).toBe('Menos mensajes manuales. Más tiempo para tu negocio.');
@@ -342,12 +342,19 @@ describe('contenido requerido', () => {
     });
   });
 
-  // Todavía no está definido de dónde salen los turnos (decisión del 01/11/2026): la portada no promete una agenda concreta
-  it('la portada no promete Google Calendar ni una cuenta de Google que hoy no existen', () => {
+  // Decisión de Titular (02/11/2026): los turnos se anotan en Google Calendar. La conexión todavía no existe, pero es el producto
+  // que se está armando; los textos legales siguen sin nombrar una agenda hasta que exista (ver más abajo)
+  it('la portada dice que los turnos se anotan en Google Calendar: subtítulo, paso 2, pregunta y descripción', () => {
     const home = pages.get(ROUTES.home)!;
-    expect(bodyText(home)).not.toMatch(/google|calendar/i);
-    expect(metaContent(home, 'meta[name="description"]')).not.toMatch(/google|calendar/i);
-    expect(metaContent(home, 'meta[property="og:description"]') ?? '').not.toMatch(/google|calendar/i);
+    expect(home.querySelector('.hero .lead')?.text).toContain('Google Calendar');
+    expect(home.querySelectorAll('#como-funciona ol > li h3').map((title) => title.text)[1]).toContain('Google Calendar');
+    expect(home.querySelector('#preguntas')!.text).toContain('Google Calendar');
+    expect(metaContent(home, 'meta[name="description"]')).toContain('Google Calendar');
+    expect(metaContent(home, 'meta[property="og:description"]')).toContain('Google Calendar');
+  });
+
+  it('la portada no pide entrar con una cuenta de Google ni habla de una app de cuentas que no existe', () => {
+    expect(bodyText(pages.get(ROUTES.home)!)).not.toMatch(/entrá con tu cuenta de google|ingresar a mi cuenta/i);
   });
 
   it('"Cómo funciona" tiene 3 pasos en orden', () => {
@@ -355,7 +362,7 @@ describe('contenido requerido', () => {
     expect(section.querySelector('h2')?.text).toBe('Cómo funciona');
     expect(section.querySelectorAll('ol > li h3').map((title) => title.text)).toEqual([
       'Dejanos los datos de tu negocio',
-      'Pasale tus turnos a Cale',
+      'Anotá tus turnos en tu Google Calendar',
       'Cale le escribe a tu cliente el día anterior',
     ]);
     expect(section.text).toContain('el nombre de tu cliente, el servicio y su celular');
@@ -440,7 +447,7 @@ describe('contenido requerido', () => {
       const items = home().querySelectorAll('#preguntas details');
       expect(items.map((item) => item.querySelector('summary')?.text)).toEqual(FAQ_ITEMS.map((item) => item.question));
       for (const [index, item] of items.entries()) expect(item.querySelector('p')?.text).toContain(FAQ_ITEMS[index]!.answer);
-      expect(home().querySelector('#preguntas')!.text).not.toMatch(/\$\s?\d|gratis|mismo número|coexistencia|google|calendar/i);
+      expect(home().querySelector('#preguntas')!.text).not.toMatch(/\$\s?\d|gratis|mismo número|coexistencia/i);
       expect(home().querySelector('#preguntas a')?.getAttribute('href')).toBe(ROUTES.privacy);
     });
 
