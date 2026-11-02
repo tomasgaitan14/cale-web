@@ -56,16 +56,23 @@ agregar acá nombre, teléfono, dirección, CUIT, situación fiscal ni IDs de cu
 
 ## Estado actual
 
-**Al 2026-11-02, quick wins de SEO (commiteados, sin publicar: falta el push a `main`).** Resultado de una auditoría de producción (sin Search
-Console ni PageSpeed: la API devolvió cuota agotada). Implementado: título de la portada con la palabra clave primero (`Recordatorios de turnos por
+**Al 2026-11-02, quick wins de SEO (publicados, commit `ea35d05`).** Resultado de una auditoría de producción. Implementado: título de la portada con la palabra clave primero (`Recordatorios de turnos por
 WhatsApp · Cale`) y descripción con llamado a la acción; `og:image` de 1200 × 630 (el lockup sobre el crema, `public/og-image.png`) y
 `summary_large_image` en todas las páginas; JSON-LD `Organization` + `WebSite` solo en la portada (`src/lib/structured-data.ts`, sin teléfono ni
 domicilio; el logo es el apple-touch-icon); precarga de las dos tipografías latinas (`BaseLayout.astro`, con `?url` de `@fontsource-variable`); y
 redirección 308 de `cale-turnos.vercel.app` a `cale.com.ar` (`vercel.json`). También `docs/brand/cale-lockup.svg` (el nombre en trazos,
-`src/lib/wordmark.ts`). `tests/seo.test.ts` los controla (probado con 11 mutaciones). Pendientes: **reverificar Google Search Console** (la propiedad se
-verificó con un TXT en el DNS de AWS y el DNS ahora está en DonWeb) y enviar el sitemap con la URL completa; medir Core Web Vitals; el `h2` vacío de
-`/empezar` y su título con `|` en vez de `·` (es `noindex`); páginas por rubro (peluquerías, estéticas, consultorios) con copy de Titular. Tras publicar,
-comprobar que `cale-turnos.vercel.app` redirige y probar el `og:image` pegando el enlace en WhatsApp.
+`src/lib/wordmark.ts`). `tests/seo.test.ts` los controla (probado con 11 mutaciones).
+
+**Verificado en producción (02/11/2026):** `cale-turnos.vercel.app` redirige con 308; el enlace pegado en WhatsApp muestra el título y el logo; el Rich Results
+Test valida `Organization` (1 elemento válido, sin errores); **PageSpeed Insights móvil 100 / 100 / 100 / 100** (rendimiento, accesibilidad, recomendaciones y
+SEO; FCP 0,8 s, LCP 1,2 s, TBT 0 ms, CLS 0,002; sin datos de campo todavía) y **escritorio también 100 / 100 / 100 / 100** (FCP 0,2 s, LCP 0,2 s,
+TBT 0 ms, CLS 0,001). **Search Console:** la propiedad «Dominio» `cale.com.ar` se verificó sola
+por el proveedor de nombres de dominio (cuenta `cale.turnos@gmail.com`); no se ve el TXT en el DNS público, así que conviene sumar un segundo método en
+Ajustes → Verificación de la propiedad. Sitemap `https://cale.com.ar/sitemap.xml` enviado y procesado (4 páginas) e indexación de la portada solicitada.
+
+Pendientes de SEO: mirar Indexación de páginas en Search Console en unos días; el `h2` vacío de `/empezar` y su título con `|` en vez de `·` (es `noindex`);
+las dos solicitudes de bloqueo de renderización del CSS (ahorro estimado de 440 ms; no se puede inlinear por la CSP sin `style-src 'unsafe-inline'`); y páginas
+por rubro (peluquerías, estéticas, consultorios) con copy de Titular, que es la palanca de contenido más grande.
 
 **Al 2026-11-02 (publicado, commit `40a3c1f`): logo nuevo aplicado en el sitio.** El isotipo es un doble tilde
 (tenue = recordatorio enviado, pleno = el cliente confirmó) sobre ficha negra, elegido entre tres direcciones (burbuja, reloj y doble tilde)
