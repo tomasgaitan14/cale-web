@@ -75,8 +75,8 @@ agregar acá nombre, teléfono, dirección, CUIT, situación fiscal ni IDs de cu
   texto del sitio lleva un `wa.me`.
   El cierre de `/empezar` (`closingMessage` en `lib/lead.ts`) y la ayuda del paso 3 ya no hablan de «tu línea de recordatorios»: dicen «apenas Cale
   esté listo para tu negocio», sin prometer una línea aparte ni una fecha. Un test lo controla.
-- **Decisiones del texto legal (asumidas, a confirmar):** la agenda del negocio no se nombra (la portada todavía dice
-  Google Calendar), sin costos ni precio, los datos del formulario se guardan 12 meses si no se activa el servicio.
+- **Decisiones del texto legal (asumidas, a confirmar):** la agenda del negocio no se nombra (tampoco la portada, desde el
+  01/11/2026), sin costos ni precio, los datos del formulario se guardan 12 meses si no se activa el servicio.
 - **Meta:** la verificación del negocio se **envió el 01/11/2026** y está a la espera (hasta 48 h; los datos concretos
   están fuera del repo). El dominio `cale.com.ar` figura verificado. El backend del App Review está hecho en `cale-api`
   y los dos videos están grabados; el App Review se envía cuando el negocio quede verificado. Falta cargar las URLs
@@ -155,6 +155,9 @@ Al 2026-10-15:
   Manrope + DM Sans. Fuente: `~/projects-claude/personal/cale-app/docs/DISENO.md` y el prototipo que cita. El verde
   nunca es color de texto, y AAA en el texto principal y AA en el resto (los dos los controla `tests/contrast.test.ts`).
   Reemplazó al rediseño para público mayor del 2026-10-12 (Atkinson, resaltador amarillo, comparación y video).
+- **De dónde salen los turnos: sin definir (01/11/2026).** La portada ya no promete Google Calendar ni una cuenta de Google (el código que
+  lo conectaba estaba en `cale-app`, borrada de AWS). Los pasos dicen «Dejanos los datos de tu negocio» y «Pasale tus turnos a Cale»; un test
+  prohíbe «Google» y «Calendar» en la portada y en su descripción.
 - **Textos de la landing** (`LANDING_COPY`, `HOW_IT_WORKS`, `REMINDER_PREVIEW` en `config.ts`): los de la fuente de
   verdad de cale-app. La vista previa usa el texto real de la plantilla `cale_recordatorio_turno`. Sin promesas que
   todavía no se cumplen: el "mismo número" y la prueba gratis activa vuelven recién con la Fase 5 (Meta). Ojo:
@@ -186,8 +189,9 @@ Al 2026-10-15:
 
 1. **Meta:** esperar la decisión de la verificación del negocio (enviada el 01/11/2026, hasta 48 h). Con el negocio
    verificado, enviar el App Review (videos grabados, backend en `cale-api`) y cargar las URLs legales de `cale.com.ar` en la app.
-2. Confirmar las decisiones asumidas del texto legal (agenda, costos, plazo del formulario) y alinear la portada, que
-   todavía nombra Google Calendar.
+2. Confirmar las decisiones asumidas del texto legal (agenda, costos, plazo del formulario).
+   **Decisión de producto abierta:** de dónde salen los turnos (Google Calendar, una agenda propia de Cale o carga manual). Hasta definirlo la
+   portada es neutra («Pasale tus turnos a Cale»); cuando se defina, se reescriben los pasos 1 y 2 de «Cómo funciona» (`HOW_IT_WORKS`).
 3. Que un abogado revise los textos legales: el tope de responsabilidad se calcula sobre "lo pagado por el servicio"
    (hoy sería cero, porque no hay cobro), la jurisdicción no nombra una ciudad y la Ley 25.326 (art. 6) pide
    identificar al responsable de los datos.
