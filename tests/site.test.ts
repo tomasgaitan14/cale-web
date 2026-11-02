@@ -8,11 +8,15 @@ import {
   COEXISTENCE,
   CONTACT_EMAIL,
   FACEBOOK_DOMAIN_VERIFICATION,
+  FAQ_ITEMS,
+  LANDING_BAND,
+  LANDING_COPY,
   LANDING_SAMPLE,
   LEGAL_LAST_UPDATED,
   LOCATION,
   REMINDER_PREVIEW,
   REMINDER_SEND_TIME,
+  RESPONSES_COPY,
   RESPONSE_DEADLINES,
   RETENTION,
   ROUTES,
@@ -360,11 +364,100 @@ describe('contenido requerido', () => {
     expect(section.text).toContain('confirma, reprograma o cancela el turno con un botón');
   });
 
-  it('la landing va de la portada a cómo funciona y cierra con la banda', () => {
+  it('la landing va de la portada a la banda, cómo funciona, las respuestas y las preguntas, y cierra con la banda de empezar', () => {
     const page = pages.get(ROUTES.home)!;
-    expect(page.querySelectorAll('main > section[id]').map((section) => section.id)).toEqual(['como-funciona', 'empezar']);
+    expect(page.querySelectorAll('main > section[id]').map((section) => section.id)).toEqual([
+      'como-funciona',
+      'respuestas',
+      'preguntas',
+      'empezar',
+    ]);
     expect(page.querySelector('#empezar .closing h2')?.text).toBe('Tu tiempo vale más que mandar recordatorios uno por uno.');
     expect(page.querySelector('#instalacion, video')).toBeNull();
+  });
+
+  describe('portada de la versión nueva (bloques, banda y preguntas)', () => {
+    const home = () => pages.get(ROUTES.home)!;
+
+    // Los títulos en dos tonos parten el texto con una cuenta: si la frase gris no es el final exacto, el título se rompería
+    it('la frase en gris de cada título es el final exacto del título', () => {
+      expect(LANDING_COPY.title.endsWith(LANDING_COPY.titleSoft)).toBe(true);
+      expect(LANDING_COPY.closing.endsWith(LANDING_COPY.closingSoft)).toBe(true);
+      expect(LANDING_BAND.title.endsWith(LANDING_BAND.titleSoft)).toBe(true);
+    });
+
+    it('cada título en dos tonos se lee completo y tiene la frase gris aparte', () => {
+      const h1 = home().querySelector('h1')!;
+      expect(h1.text).toBe(LANDING_COPY.title);
+      expect(h1.querySelector('.tone-soft')?.text).toBe(LANDING_COPY.titleSoft);
+      expect(home().querySelector('#datos-titulo')?.text).toBe(LANDING_BAND.title);
+      expect(home().querySelector('#respuestas-titulo')?.text).toBe(`${RESPONSES_COPY.title} ${RESPONSES_COPY.titleSoft}`);
+      expect(home().querySelector('#empezar-titulo .tone-soft')?.text).toBe(LANDING_COPY.closingSoft);
+    });
+
+    // La banda muestra datos del producto, que se pueden verificar en la configuración, y no cifras de uso
+    it('la banda negra tiene los tres datos del producto y salen de la configuración', () => {
+      const facts = home().querySelectorAll('.island .fact');
+      expect(facts).toHaveLength(3);
+      expect(facts.map((fact) => fact.querySelector('dt')?.text)).toEqual([REMINDER_SEND_TIME, '3', '0']);
+      expect(REMINDER_PREVIEW.replies).toHaveLength(Number(LANDING_BAND.facts[1].value));
+    });
+
+    it('no inventa cifras de uso, calificaciones ni testimonios', () => {
+      const text = bodyText(home());
+      expect(text).not.toMatch(/\+\s?\d+\s*(negocios|clientes|usuarios)|\d[,.]\d\s*\/\s*5|\d+\s?%|testimonio|reseñas/i);
+    });
+
+    it('cada paso de "Cómo funciona" lleva su mini-interfaz rotulada como ejemplo y oculta a los lectores de pantalla', () => {
+      const mocks = home().querySelectorAll('#como-funciona .step .mock');
+      expect(mocks).toHaveLength(3);
+      for (const mock of mocks) {
+        expect(mock.getAttribute('aria-hidden')).toBe('true');
+        expect(mock.querySelector('.sample-tag')?.text).toBe('Ejemplo');
+      }
+    });
+
+    it('las respuestas son cuatro bloques con el texto debajo, y lo que no es un botón lo contesta el negocio', () => {
+      const tiles = home().querySelectorAll('#respuestas figure.tile');
+      expect(tiles).toHaveLength(SCENARIO_IDS.length);
+      for (const tile of tiles) {
+        // El título va después del chat: el texto queda debajo del bloque
+        expect(tile.childNodes.filter((node) => node instanceof HTMLElement).map((node) => (node as HTMLElement).tagName)).toEqual([
+          'DIV',
+          'FIGCAPTION',
+        ]);
+      }
+      const free = home().querySelector('#respuestas .tile-free-text')!;
+      expect(free.querySelector('.bubble.in .who')?.text).toBe('Vos');
+      expect(free.text).not.toMatch(/wa\.me|mensajes automáticos/i);
+      expect(home().querySelectorAll('#respuestas .tile h3').map((title) => title.text)).toEqual(
+        buildScenarios({ businessName: LANDING_SAMPLE.businessName, today: new Date(LANDING_SAMPLE.today) }).map((item) => item.caption),
+      );
+    });
+
+    // Sin JavaScript: <details> abre y cierra solo, y el texto de la respuesta está en el HTML
+    it('las preguntas frecuentes son las de la configuración, con <details>, sin precios y sin promesas que no se cumplen', () => {
+      const items = home().querySelectorAll('#preguntas details');
+      expect(items.map((item) => item.querySelector('summary')?.text)).toEqual(FAQ_ITEMS.map((item) => item.question));
+      for (const [index, item] of items.entries()) expect(item.querySelector('p')?.text).toContain(FAQ_ITEMS[index]!.answer);
+      expect(home().querySelector('#preguntas')!.text).not.toMatch(/\$\s?\d|gratis|mismo número|coexistencia|google|calendar/i);
+      expect(home().querySelector('#preguntas a')?.getAttribute('href')).toBe(ROUTES.privacy);
+    });
+
+    // Un h3 sin h2 arriba, o un h2 después de un h1 salteado, rompe la navegación con lectores de pantalla
+    it('los títulos bajan de a un nivel, sin saltos, y hay un solo h1', () => {
+      const levels = home().querySelectorAll('main h1, main h2, main h3').map((heading) => Number(heading.tagName.slice(1)));
+      expect(levels.filter((level) => level === 1)).toHaveLength(1);
+      levels.forEach((level, index) => {
+        if (index > 0) expect(level - levels[index - 1]!).toBeLessThanOrEqual(1);
+      });
+    });
+
+    it('el encabezado es una pastilla con la marca y un solo botón', () => {
+      const pill = home().querySelector('header.site-header .header-pill')!;
+      expect(pill.querySelectorAll('a.button')).toHaveLength(1);
+      expect(pill.querySelector('a.home-link')?.getAttribute('href')).toBe(ROUTES.home);
+    });
   });
 
   // Público sin conocimientos técnicos: la portada habla en criollo

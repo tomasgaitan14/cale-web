@@ -61,10 +61,14 @@ export const LANDING_SAMPLE = {
 export const LANDING_COPY = {
   audience: 'Para negocios que trabajan con turnos',
   title: 'Tus recordatorios de turnos, en automático.',
+  // Última frase de `title`, que va en el tono gris del título (tiene que ser el final exacto)
+  titleSoft: 'en automático.',
   subtitle: 'Pasale tus turnos a Cale y dejá que envíe los recordatorios por WhatsApp por vos.',
   cta: 'Empezar gratis',
   tagline: 'Menos mensajes manuales. Más tiempo para tu negocio.',
   closing: 'Tu tiempo vale más que mandar recordatorios uno por uno.',
+  // Final de `closing`, en tono gris
+  closingSoft: 'recordatorios uno por uno.',
 } as const;
 
 // "Cómo funciona" en 3 pasos (prototipo de cale-rediseno, propuesta "Recepción")
@@ -80,6 +84,65 @@ export const HOW_IT_WORKS = [
   {
     title: 'Cale le escribe a tu cliente el día anterior',
     text: 'Por WhatsApp, en el horario que vos digas. Tu cliente confirma, reprograma o cancela el turno con un botón.',
+  },
+] as const;
+
+// Datos de muestra de las mini-interfaces de "Cómo funciona". Es todo inventado y la portada los rotula "Ejemplo".
+// Los textos del formulario son los de las opciones reales de /empezar (lib/lead.ts).
+export const HOW_IT_WORKS_SAMPLE = {
+  form: [
+    { label: 'Nombre del negocio', value: LANDING_SAMPLE.businessName },
+    { label: 'Turnos por semana', value: 'Entre 31 y 60' },
+    { label: 'Cómo los avisás hoy', value: 'Les escribo por WhatsApp a mano' },
+  ],
+  appointments: [
+    { time: '17:30', client: 'Lucía', service: 'Corte' },
+    { time: '18:15', client: 'Brenda', service: 'Color' },
+    { time: '19:00', client: 'Joaquín', service: 'Barba' },
+  ],
+} as const;
+
+// La banda negra: tres datos del producto, no cifras de uso (Cale todavía no tiene clientes que respalden números)
+export const LANDING_BAND = {
+  title: 'Menos mensajes a mano. Más turnos confirmados.',
+  // Última frase de `title`, en tono gris
+  titleSoft: 'Más turnos confirmados.',
+  facts: [
+    { value: REMINDER_SEND_TIME, label: 'Hora de envío por defecto: el recordatorio sale el día anterior al turno y la podés cambiar.' },
+    { value: '3', label: 'botones en cada recordatorio: tu cliente confirma, cancela o cambia el horario.' },
+    { value: '0', label: 'aplicaciones para instalar: tu cliente responde desde su WhatsApp de siempre.' },
+  ],
+} as const;
+
+export const RESPONSES_COPY = {
+  title: 'Qué pasa cuando tu cliente responde.',
+  titleSoft: 'Cada respuesta tiene su camino.',
+} as const;
+
+// Preguntas frecuentes: solo lo que ya es verdad del producto. Sin precios (decisión del 11/10/2026) y sin promesas que
+// dependan de la conexión de WhatsApp todavía pendiente.
+export const FAQ_ITEMS = [
+  {
+    question: '¿Qué recibe mi cliente?',
+    answer:
+      'Un mensaje de WhatsApp con el nombre de tu negocio, el día y la hora del turno, y tres botones: Confirmo, Cancelo y Cambiar horario.',
+  },
+  {
+    question: '¿Qué pasa si mi cliente escribe otra cosa?',
+    answer:
+      'Te llega a vos, como cualquier mensaje de tu cliente. Cale se ocupa de los recordatorios y de lo que tu cliente responde con los botones.',
+  },
+  {
+    question: '¿Mi cliente tiene que instalar algo?',
+    answer: 'No. Recibe el recordatorio en su WhatsApp de siempre y responde con un toque.',
+  },
+  {
+    question: '¿Cuándo sale el recordatorio?',
+    answer: 'El día anterior al turno, en el horario que vos elijas.',
+  },
+  {
+    question: '¿Qué pasa con los datos de mis clientes?',
+    answer: 'Cale usa los datos de tus turnos solo para mandar los recordatorios. En la política de privacidad está todo el detalle.',
   },
 ] as const;
 
