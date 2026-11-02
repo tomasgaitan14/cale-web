@@ -49,6 +49,7 @@ describe('contraste de los tokens', () => {
     ['texto sobre blanco', 'text', 'surface', AAA],
     ['texto sobre negro', 'on-ink', 'ink', AAA],
     ['texto en avisos', 'text', 'callout', AAA],
+    ['texto sobre el verde claro (burbujas de la clienta)', 'text', 'tint', AAA],
     ['secundario sobre el fondo crema', 'muted', 'bg', AA],
     ['secundario sobre blanco', 'muted', 'surface', AA],
     ['secundario en avisos', 'muted', 'callout', AA],

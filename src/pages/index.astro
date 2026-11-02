@@ -6,11 +6,42 @@ import AppButton from '../components/AppButton.astro';
 import {
   BUSINESS_NAME,
   CONTACT_EMAIL,
+  FAQ_ITEMS,
   HOW_IT_WORKS,
+  HOW_IT_WORKS_SAMPLE,
+  LANDING_BAND,
   LANDING_COPY,
+  LANDING_SAMPLE,
+  REMINDER_PREVIEW,
+  RESPONSES_COPY,
   ROUTES,
 } from '../config';
+import { buildScenarios, type ChatStep } from '../lib/chat-script';
+import { buildSimulation } from '../lib/simulation';
 import { mailtoUrl } from '../lib/url';
+
+type TextStep = Extract<ChatStep, { text: string }>;
+
+// Los mismos textos que la animación del celular, pero quietos: lo que responde el cliente y lo que pasa después
+const sample = { businessName: LANDING_SAMPLE.businessName, today: new Date(LANDING_SAMPLE.today) };
+const scenarios = buildScenarios(sample);
+const reminder = buildSimulation(sample).reminder;
+
+function answer(id: string) {
+  const scenario = scenarios.find((item) => item.id === id);
+  if (!scenario) throw new Error(`No hay una escena ${id}`);
+  // Sin los toques de botón ni el primer mensaje (el recordatorio, que ya se ve arriba)
+  const steps = scenario.steps.filter((step): step is TextStep => step.kind !== 'press').slice(1);
+  return { id, caption: scenario.caption, steps };
+}
+
+const answers = ['confirm', 'cancel', 'reschedule', 'free-text'].map(answer);
+
+// La última frase de cada título va en gris
+const withoutSoft = (title: string, soft: string) => title.slice(0, -soft.length).trimEnd();
+const heroLead = withoutSoft(LANDING_COPY.title, LANDING_COPY.titleSoft);
+const bandLead = withoutSoft(LANDING_BAND.title, LANDING_BAND.titleSoft);
+const closingLead = withoutSoft(LANDING_COPY.closing, LANDING_COPY.closingSoft);
 ---
 
 <BaseLayout
@@ -22,7 +53,7 @@ import { mailtoUrl } from '../lib/url';
     <div class="container hero-grid">
       <div class="hero-copy">
         <p class="pill"><span class="dot" aria-hidden="true"></span>{LANDING_COPY.audience}</p>
-        <h1 id="portada-titulo">{LANDING_COPY.title}</h1>
+        <h1 id="portada-titulo">{heroLead} <span class="tone-soft">{LANDING_COPY.titleSoft}</span></h1>
         <p class="lead">{LANDING_COPY.subtitle}</p>
         <AppButton />
         <p class="tagline"><Icon name="check" class="tagline-icon" />{LANDING_COPY.tagline}</p>
@@ -31,13 +62,68 @@ import { mailtoUrl } from '../lib/url';
     </div>
   </section>
 
+  <section class="section band" aria-labelledby="datos-titulo">
+    <div class="container">
+      <div class="island reveal">
+        <h2 id="datos-titulo">{bandLead} <span class="tone-soft">{LANDING_BAND.titleSoft}</span></h2>
+        <dl class="facts">
+          {
+            LANDING_BAND.facts.map((fact) => (
+              <div class="fact">
+                <dt>{fact.value}</dt>
+                <dd>{fact.label}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+    </div>
+  </section>
+
   <section class="section how" id="como-funciona" aria-labelledby="como-funciona-titulo">
     <div class="container">
       <h2 id="como-funciona-titulo">Cómo funciona</h2>
       <ol class="how-list">
         {
-          HOW_IT_WORKS.map((step) => (
-            <li>
+          HOW_IT_WORKS.map((step, index) => (
+            <li class="step reveal">
+              {/* La mini-interfaz es decorativa: el paso se entiende leyendo el título y el texto de abajo */}
+              <figure class="mock" aria-hidden="true">
+                <span class="sample-tag">Ejemplo</span>
+                {index === 0 && (
+                  <div class="mock-form">
+                    {HOW_IT_WORKS_SAMPLE.form.map((row) => (
+                      <div class="mock-field">
+                        <span class="mock-label">{row.label}</span>
+                        <span class="mock-value">{row.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {index === 1 && (
+                  <ul class="mock-list">
+                    {HOW_IT_WORKS_SAMPLE.appointments.map((item) => (
+                      <li>
+                        <span class="mock-time">{item.time}</span>
+                        <span class="mock-who">
+                          <strong>{item.client}</strong>
+                          <span>{item.service}</span>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {index === 2 && (
+                  <div class="mock-chat">
+                    <p class="bubble in">{reminder}</p>
+                    <ul class="btns">
+                      {REMINDER_PREVIEW.replies.map((reply) => (
+                        <li>{reply}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </figure>
               <h3>{step.title}</h3>
               <p>{step.text}</p>
             </li>
@@ -47,10 +133,71 @@ import { mailtoUrl } from '../lib/url';
     </div>
   </section>
 
+  <section class="section responses" id="respuestas" aria-labelledby="respuestas-titulo">
+    <div class="container">
+      <h2 id="respuestas-titulo">{RESPONSES_COPY.title} <span class="tone-soft">{RESPONSES_COPY.titleSoft}</span></h2>
+      <div class="bento">
+        {
+          answers.map((item) => (
+            <figure class={`tile tile-${item.id} reveal`}>
+              <div class="chat">
+                {item.steps.map((step) => (
+                  <>
+                    {step.kind === 'customer' && <p class="bubble out">{step.text}</p>}
+                    {step.kind === 'bot' && (
+                      <div class="bubble in">
+                        <span class="who">{step.byBusiness ? 'Vos' : 'Cale'}</span>
+                        <p>{step.text}</p>
+                        {step.buttons && (
+                          <ul class="btns">
+                            {step.buttons.map((button) => (
+                              <li>{button}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    )}
+                  </>
+                ))}
+              </div>
+              <figcaption>
+                <h3>{item.caption}</h3>
+              </figcaption>
+            </figure>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section faq" id="preguntas" aria-labelledby="preguntas-titulo">
+    <div class="container faq-grid">
+      <h2 id="preguntas-titulo">Preguntas frecuentes</h2>
+      <div class="faq-list">
+        {
+          FAQ_ITEMS.map((item) => (
+            <details>
+              <summary>{item.question}</summary>
+              <p>
+                {item.answer}
+                {item.question.includes('datos') && (
+                  <>
+                    {' '}
+                    <a href={ROUTES.privacy}>Leer la política de privacidad</a>.
+                  </>
+                )}
+              </p>
+            </details>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
   <section class="section closing-section" id="empezar" aria-labelledby="empezar-titulo">
     <div class="container">
-      <div class="closing">
-        <h2 id="empezar-titulo">{LANDING_COPY.closing}</h2>
+      <div class="closing reveal">
+        <h2 id="empezar-titulo">{closingLead} <span class="tone-soft">{LANDING_COPY.closingSoft}</span></h2>
         <AppButton />
       </div>
       <p class="contact" id="contacto">
@@ -61,10 +208,26 @@ import { mailtoUrl } from '../lib/url';
 </BaseLayout>
 
 <style>
+  /* --- Movimiento: solo transform y opacity, y nada si la persona pidió reducirlo --- */
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+  }
+
+  @keyframes breathe {
+    50% {
+      opacity: 0.45;
+      transform: scale(1.5);
+    }
+  }
+
   /* --- Portada --- */
 
   .hero {
-    padding-block: 1.25rem 0;
+    padding-block: 1.75rem 0;
   }
 
   .hero-grid {
@@ -75,7 +238,23 @@ import { mailtoUrl } from '../lib/url';
   .hero-copy {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.125rem;
+  }
+
+  .hero-copy > :nth-child(1) {
+    --i: 0;
+  }
+  .hero-copy > :nth-child(2) {
+    --i: 1;
+  }
+  .hero-copy > :nth-child(3) {
+    --i: 2;
+  }
+  .hero-copy > :nth-child(4) {
+    --i: 3;
+  }
+  .hero-copy > :nth-child(5) {
+    --i: 4;
   }
 
   .pill {
@@ -83,10 +262,11 @@ import { mailtoUrl } from '../lib/url';
     align-self: flex-start;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.375rem 0.75rem;
+    padding: 0.375rem 0.875rem;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 999px;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9);
     font-size: var(--fs-small);
     font-weight: 600;
   }
@@ -104,6 +284,7 @@ import { mailtoUrl } from '../lib/url';
   }
 
   .lead {
+    max-width: 34rem;
     color: var(--muted);
     font-size: var(--fs-lead);
   }
@@ -121,51 +302,340 @@ import { mailtoUrl } from '../lib/url';
     color: var(--link);
   }
 
-  /* --- Cómo funciona --- */
+  /* --- Banda negra: una isla con tres datos del producto --- */
 
-  .how h2 {
-    margin-bottom: 1rem;
+  .band {
+    padding-block: clamp(2.5rem, 7vw, 4.5rem) 0;
+  }
+
+  .island {
+    position: relative;
+    display: grid;
+    gap: 1.75rem;
+    overflow: hidden;
+    padding: 1.75rem 1.375rem;
+    background: var(--ink);
+    border-radius: var(--radius-island);
+    color: var(--on-ink);
+  }
+
+  .island::after {
+    content: '';
+    position: absolute;
+    top: -9rem;
+    right: -7rem;
+    width: 20rem;
+    height: 20rem;
+    border: 1px solid rgb(255 255 255 / 0.08);
+    border-radius: 50%;
+    box-shadow: 0 0 0 36px rgb(255 255 255 / 0.03);
+    pointer-events: none;
+  }
+
+  .island h2,
+  .island .facts {
+    position: relative;
+    z-index: 1;
+  }
+
+  .island h2 {
+    max-width: 22ch;
     font-size: var(--fs-h2);
+  }
+
+  .island .tone-soft,
+  .closing .tone-soft {
+    color: var(--ink-muted);
+  }
+
+  .facts {
+    display: grid;
+    gap: 1.25rem;
+    margin: 0;
+  }
+
+  .fact {
+    display: grid;
+    gap: 0.25rem;
+    padding-top: 1.125rem;
+    border-top: 1px solid rgb(255 255 255 / 0.14);
+  }
+
+  .fact dt {
+    font: var(--fw-head) 2.75rem/1 var(--font-head);
+    letter-spacing: var(--ls-head);
+  }
+
+  .fact dd {
+    margin: 0;
+    max-width: 30ch;
+    color: var(--ink-muted);
+    font-size: var(--fs-small);
+  }
+
+  /* --- Cómo funciona: tres bloques de tamaños distintos, con el texto debajo --- */
+
+  .how h2,
+  .responses h2 {
+    margin-bottom: 1.5rem;
+    font-size: var(--fs-h2);
+  }
+
+  .responses h2 {
+    max-width: 24ch;
   }
 
   .how-list {
     display: grid;
-    gap: 0.75rem;
+    gap: 2rem;
     margin: 0;
     padding: 0;
     list-style: none;
-    counter-reset: step;
   }
 
-  /* Es una secuencia real: el número ayuda a seguir el orden */
-  .how-list li {
-    padding: 1.375rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sheet);
-    counter-increment: step;
-  }
-
-  .how-list li::before {
-    content: counter(step);
-    display: block;
-    width: 2.5rem;
-    height: 2.5rem;
-    margin-bottom: 0.875rem;
-    background: var(--tint);
-    border-radius: var(--radius-field);
-    color: var(--link);
-    font: var(--fw-head) 1.125rem/2.5rem var(--font-head);
-    text-align: center;
-  }
-
-  .how-list h3 {
-    margin-bottom: 0.375rem;
+  .step h3 {
+    margin: 1.125rem 0 0.375rem;
     font-size: var(--fs-h3);
     line-height: 1.25;
   }
 
-  .how-list p {
+  .step p {
+    max-width: 34ch;
+    color: var(--muted);
+  }
+
+  .mock {
+    position: relative;
+    display: grid;
+    align-content: center;
+    min-height: 15rem;
+    margin: 0;
+    padding: 2.75rem 1.25rem 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-island);
+    box-shadow:
+      var(--shadow-tile),
+      inset 0 1px 0 rgb(255 255 255 / 0.9);
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .sample-tag {
+    position: absolute;
+    top: 1rem;
+    left: 1.25rem;
+    padding: 0.125rem 0.625rem;
+    background: var(--tint);
+    border-radius: 999px;
+    color: var(--link);
+    font-size: 0.8125rem;
+    font-weight: 700;
+  }
+
+  .mock-form {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .mock-field {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .mock-label {
+    color: var(--muted);
+    font-size: var(--fs-small);
+    font-weight: 600;
+  }
+
+  .mock-value {
+    padding: 0.625rem 0.875rem;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-field);
+    font-weight: 600;
+  }
+
+  .mock-list {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .mock-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.625rem 0.875rem;
+    background: var(--bg);
+    border-radius: var(--radius-field);
+  }
+
+  .mock-time {
+    font: var(--fw-head) 1.125rem/1 var(--font-head);
+    letter-spacing: -0.03em;
+  }
+
+  .mock-who {
+    display: grid;
+    line-height: 1.3;
+  }
+
+  .mock-who span {
+    color: var(--muted);
+    font-size: var(--fs-small);
+  }
+
+  /* Burbujas: las usan la mini-interfaz del paso 3 y los bloques de respuestas */
+
+  .mock-chat,
+  .chat {
+    display: grid;
+    gap: 0.5rem;
+    align-content: start;
+  }
+
+  .bubble {
+    max-width: 88%;
+    margin: 0;
+    padding: 0.625rem 0.875rem;
+    border-radius: 1.125rem;
+    font-size: var(--fs-small);
+    line-height: 1.4;
+  }
+
+  .bubble.in {
+    justify-self: start;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top-left-radius: 0.375rem;
+  }
+
+  .bubble.out {
+    justify-self: end;
+    background: var(--tint);
+    border: 1px solid var(--tint-border);
+    border-top-right-radius: 0.375rem;
+  }
+
+  .who {
+    display: block;
+    margin-bottom: 0.125rem;
+    color: var(--muted);
+    font-size: 0.8125rem;
+    font-weight: 700;
+  }
+
+  .btns {
+    display: grid;
+    gap: 0.375rem;
+    margin: 0.5rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .btns li {
+    padding: 0.5rem 0.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    color: var(--link);
+    font-size: var(--fs-small);
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .mock-chat .btns {
+    margin-top: 0;
+  }
+
+  /* --- Respuestas: bento asimétrico --- */
+
+  .bento {
+    display: grid;
+    gap: 2rem;
+  }
+
+  .tile {
+    display: grid;
+    gap: 1rem;
+    align-content: start;
+    margin: 0;
+  }
+
+  .tile .chat {
+    padding: 1.5rem 1.25rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-island);
+    box-shadow:
+      var(--shadow-tile),
+      inset 0 1px 0 rgb(255 255 255 / 0.9);
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .tile h3 {
+    font-size: var(--fs-h3);
+    line-height: 1.25;
+  }
+
+  /* --- Preguntas frecuentes: una lista con líneas, sin tarjetas --- */
+
+  .faq h2 {
+    margin-bottom: 1.25rem;
+    font-size: var(--fs-h2);
+  }
+
+  .faq-list {
+    border-bottom: 1px solid var(--border);
+  }
+
+  details {
+    border-top: 1px solid var(--border);
+  }
+
+  summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 3.5rem;
+    padding-block: 0.875rem;
+    font-family: var(--font-head);
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    list-style: none;
+    cursor: pointer;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  summary::after {
+    content: '+';
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    font-size: 1.25rem;
+    line-height: 1.8rem;
+    text-align: center;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  details[open] summary::after {
+    transform: rotate(45deg);
+  }
+
+  details p {
+    max-width: 52ch;
+    padding-bottom: 1.125rem;
     color: var(--muted);
   }
 
@@ -183,7 +653,7 @@ import { mailtoUrl } from '../lib/url';
     overflow: hidden;
     padding: 1.75rem 1.375rem;
     background: var(--ink);
-    border-radius: 24px;
+    border-radius: var(--radius-island);
     color: var(--on-ink);
   }
 
@@ -197,6 +667,7 @@ import { mailtoUrl } from '../lib/url';
     border: 1px solid rgb(255 255 255 / 0.08);
     border-radius: 50%;
     box-shadow: 0 0 0 30px rgb(255 255 255 / 0.03);
+    pointer-events: none;
   }
 
   .closing h2 {
@@ -236,8 +707,94 @@ import { mailtoUrl } from '../lib/url';
       align-self: flex-start;
     }
 
+    .island {
+      grid-template-columns: 1fr 1.35fr;
+      align-items: end;
+      gap: 3rem;
+      padding: 3.25rem;
+    }
+
+    .island h2 {
+      font-size: 2.25rem;
+    }
+
+    .facts {
+      grid-template-columns: 1.1fr 1fr 1fr;
+      gap: 1.75rem;
+    }
+
+    /* Tres bloques que no son iguales: el primero es más ancho y el segundo baja */
     .how-list {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: 1.35fr 1fr 1fr;
+      align-items: start;
+      gap: 1.75rem;
+    }
+
+    .step:nth-child(2) {
+      padding-top: 3rem;
+    }
+
+    .step:nth-child(3) {
+      padding-top: 1.25rem;
+    }
+
+    .mock {
+      min-height: 17rem;
+    }
+
+    .bento {
+      grid-template-columns: 1.1fr 1fr;
+      grid-template-areas:
+        'resched confirm'
+        'resched cancel'
+        'free free';
+      gap: 2.25rem 1.75rem;
+    }
+
+    .tile-reschedule {
+      grid-area: resched;
+    }
+
+    .tile-confirm {
+      grid-area: confirm;
+    }
+
+    .tile-cancel {
+      grid-area: cancel;
+    }
+
+    .tile-free-text {
+      grid-area: free;
+    }
+
+    /* El bloque ancho reparte la charla: la pregunta a la derecha y la respuesta del negocio a la izquierda */
+    .tile-free-text .chat {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: start;
+      padding-block: 2rem;
+    }
+
+    .tile-free-text .bubble.out {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .tile-free-text .bubble.in {
+      grid-column: 1;
+      grid-row: 1;
+      margin-top: 1.25rem;
+    }
+
+    .faq-grid {
+      display: grid;
+      grid-template-columns: 0.8fr 1.4fr;
+      column-gap: 4rem;
+      align-items: start;
+    }
+
+    .faq h2 {
+      position: sticky;
+      top: 6rem;
     }
 
     .closing {
@@ -245,11 +802,39 @@ import { mailtoUrl } from '../lib/url';
       align-items: center;
       justify-content: space-between;
       gap: 2rem;
-      padding: 2.5rem;
+      padding: 3rem;
     }
 
     .closing :global(.button) {
       flex: none;
+    }
+  }
+
+  @media (hover: hover) {
+    .step:hover .mock,
+    .tile:hover .chat {
+      transform: translateY(-4px);
+    }
+  }
+
+  /* --- Entrada: cascada en la portada y aparición al llegar a cada bloque. Solo con movimiento permitido --- */
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-copy > * {
+      animation: rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation-delay: calc(var(--i, 0) * 90ms);
+    }
+
+    .dot {
+      animation: breathe 2.4s ease-in-out infinite;
+    }
+
+    @supports (animation-timeline: view()) {
+      .reveal {
+        animation: rise linear both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 45%;
+      }
     }
   }
 </style>
