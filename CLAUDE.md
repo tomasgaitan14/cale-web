@@ -70,6 +70,8 @@ agregar acá nombre, teléfono, dirección, CUIT, situación fiscal ni IDs de cu
   manda a la clienta a otro `wa.me`; lo que escribe fuera de los botones lo contesta el negocio desde su WhatsApp («Vos» en el texto de
   corrido, `byBusiness` en `lib/chat-script.ts`). Se sacó el número del negocio de ejemplo (`LANDING_SAMPLE.businessWhatsapp`): ningún
   texto del sitio lleva un `wa.me`.
+  El cierre de `/empezar` (`closingMessage` en `lib/lead.ts`) y la ayuda del paso 3 ya no hablan de «tu línea de recordatorios»: dicen «apenas Cale
+  esté listo para tu negocio», sin prometer una línea aparte ni una fecha. Un test lo controla.
 - **Decisiones del texto legal (asumidas, a confirmar):** la agenda del negocio no se nombra (la portada todavía dice
   Google Calendar), sin costos ni precio, los datos del formulario se guardan 12 meses si no se activa el servicio.
 - **Meta:** la verificación del negocio se **envió el 01/11/2026** y está a la espera (hasta 48 h; los datos concretos
@@ -182,11 +184,9 @@ Al 2026-10-15:
 1. **Meta:** esperar la decisión de la verificación del negocio (enviada el 01/11/2026, hasta 48 h). Con el negocio
    verificado, enviar el App Review (videos grabados, backend en `cale-api`) y cargar las URLs legales de `cale.com.ar` en la app.
 2. **Probar `/empezar` en producción** (con un alta de prueba que después se borra) y confirmar Turnstile en `cale.com.ar`.
-3. **Revisar «tu línea de recordatorios»** en el cierre de `/empezar` (`scripts/onboarding.ts`) y en la ayuda del paso 3 (`pages/empezar.astro`):
-   sugiere una línea aparte; con coexistencia es el mismo número del negocio.
-4. Confirmar las decisiones asumidas del texto legal (agenda, costos, plazo del formulario) y alinear la portada, que
+3. Confirmar las decisiones asumidas del texto legal (agenda, costos, plazo del formulario) y alinear la portada, que
    todavía nombra Google Calendar.
-5. Que un abogado revise los textos legales: el tope de responsabilidad se calcula sobre "lo pagado por el servicio"
+4. Que un abogado revise los textos legales: el tope de responsabilidad se calcula sobre "lo pagado por el servicio"
    (hoy sería cero, porque no hay cobro), la jurisdicción no nombra una ciudad y la Ley 25.326 (art. 6) pide
    identificar al responsable de los datos.
 
