@@ -6,12 +6,9 @@ import {
   SAMPLE_CLIENT_NAME,
   buildSimulation,
   businessInitials,
-  businessWhatsappLink,
   dayAfter,
   reminderText,
 } from '../src/lib/simulation';
-
-const BUSINESS_WHATSAPP = '5493445123456';
 
 describe('reminderText', () => {
   // La simulación tiene que decir lo mismo que la vista previa de la portada (el texto real de la plantilla)
@@ -33,7 +30,6 @@ describe('buildSimulation', () => {
     // Jueves 29/10/2026, 12:00 en Argentina
     const simulation = buildSimulation({
       businessName: 'Peluquería Sol',
-      businessWhatsapp: BUSINESS_WHATSAPP,
       today: new Date('2026-10-29T15:00:00Z'),
     });
     expect(simulation.reminder).toBe(
@@ -45,7 +41,6 @@ describe('buildSimulation', () => {
     // 23:30 del jueves 29/10 en Argentina ya es viernes 30/10 en UTC: mañana sigue siendo viernes 30/10
     const simulation = buildSimulation({
       businessName: 'Sol',
-      businessWhatsapp: BUSINESS_WHATSAPP,
       today: new Date('2026-10-30T02:30:00Z'),
     });
     expect(simulation.reminder).toContain('el viernes 30/10');
@@ -54,23 +49,22 @@ describe('buildSimulation', () => {
   it('pasa al mes siguiente a fin de mes', () => {
     const simulation = buildSimulation({
       businessName: 'Sol',
-      businessWhatsapp: BUSINESS_WHATSAPP,
       today: new Date('2026-10-31T15:00:00Z'),
     });
     expect(simulation.reminder).toContain('el domingo 01/11');
   });
 
   it('ofrece los botones de la plantilla real', () => {
-    const simulation = buildSimulation({ businessName: 'Sol', businessWhatsapp: BUSINESS_WHATSAPP, today: new Date() });
+    const simulation = buildSimulation({ businessName: 'Sol', today: new Date() });
     expect(simulation.replies).toEqual(REMINDER_PREVIEW.replies);
   });
 
-  it('manda lo que no sea un botón al WhatsApp del negocio', () => {
-    const simulation = buildSimulation({ businessName: 'Sol', businessWhatsapp: BUSINESS_WHATSAPP, today: new Date() });
-    expect(simulation.redirect).toBe(
-      `Para consultas escribí directamente a wa.me/${BUSINESS_WHATSAPP}, este número es de mensajes automáticos.`,
-    );
-    expect(businessWhatsappLink(BUSINESS_WHATSAPP)).toBe(`wa.me/${BUSINESS_WHATSAPP}`);
+  // Con coexistencia lo que no es un botón le llega al negocio: lo contesta él desde su WhatsApp
+  it('lo que no sea un botón lo contesta el negocio, sin mandar a la clienta a otro número', () => {
+    const simulation = buildSimulation({ businessName: 'Sol', today: new Date() });
+    expect(simulation.freeText).toBe('¿Tenés lugar el sábado?');
+    expect(simulation.businessReply).toBe(`¡Hola, ${SAMPLE_CLIENT_NAME}! Sí, tengo lugar el sábado a las 11:00. ¿Te lo agendo?`);
+    expect(simulation.businessReply).not.toMatch(/wa\.me|automático/i);
   });
 });
 

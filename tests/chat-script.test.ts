@@ -14,12 +14,11 @@ import {
 } from '../src/lib/chat-script';
 
 const BUSINESS = 'Peluquería Sol';
-const BUSINESS_WHATSAPP = '5493445123456';
 // Jueves 29/10/2026, 12:00 en Argentina: mañana es viernes 30/10 y pasado mañana, sábado 31/10
 const TODAY = new Date('2026-10-29T15:00:00Z');
 const [CONFIRM, CANCEL, RESCHEDULE] = REMINDER_PREVIEW.replies;
 
-const scenarios = buildScenarios({ businessName: BUSINESS, businessWhatsapp: BUSINESS_WHATSAPP, today: TODAY });
+const scenarios = buildScenarios({ businessName: BUSINESS, today: TODAY });
 
 function scenario(id: string) {
   const found = scenarios.find((candidate) => candidate.id === id);
@@ -72,12 +71,24 @@ describe('buildScenarios', () => {
     expect(steps[6]).toEqual({ kind: 'bot', text: `Listo, Lucía. Tu turno quedó para el sábado 31/10 a las ${SAMPLE_NEW_TIME}. ¡Te esperamos!` });
   });
 
-  it('otra cosa: la clienta escribe y Cale la manda al número del negocio', () => {
+  // Con coexistencia lo que no es un botón le llega al negocio y lo contesta él: Cale no redirige a ningún número
+  it('otra cosa: la clienta escribe y le contesta el negocio, no Cale', () => {
     const steps = scenario('free-text').steps;
     expect(steps.slice(1)).toEqual([
       { kind: 'customer', text: '¿Tenés lugar el sábado?' },
-      { kind: 'bot', text: `Para consultas escribí directamente a wa.me/${BUSINESS_WHATSAPP}, este número es de mensajes automáticos.` },
+      { kind: 'bot', text: '¡Hola, Lucía! Sí, tengo lugar el sábado a las 11:00. ¿Te lo agendo?', byBusiness: true },
     ]);
+    expect(scenario('free-text').caption).toBe('Si escribe otra cosa, te llega a vos, como siempre');
+  });
+
+  it('solo la respuesta del negocio va marcada como suya: los mensajes de Cale no', () => {
+    const byBusiness = scenarios.flatMap((item) => item.steps.map((step) => ({ id: item.id, step }))).filter(({ step }) => step.kind === 'bot' && step.byBusiness);
+    expect(byBusiness.map(({ id }) => id)).toEqual(['free-text']);
+  });
+
+  it('ninguna escena manda a la clienta a otro número ni habla de una línea de mensajes automáticos', () => {
+    const everything = JSON.stringify(scenarios) + transcriptOf(scenarios).join(' ');
+    expect(everything).not.toMatch(/wa\.me|mensajes automáticos|escribí directamente/i);
   });
 
   it('cada toque de botón apunta a un botón que está en el último mensaje de Cale', () => {
@@ -104,7 +115,6 @@ describe('buildScenarios', () => {
   it('las fechas siguen a "hoy": un fin de mes pasa al mes siguiente', () => {
     const endOfMonth = buildScenarios({
       businessName: BUSINESS,
-      businessWhatsapp: BUSINESS_WHATSAPP,
       today: new Date('2026-10-31T15:00:00Z'),
     });
     const moved = endOfMonth.find((item) => item.id === 'reschedule')!.steps.at(-1) as { text: string };
@@ -113,7 +123,7 @@ describe('buildScenarios', () => {
   });
 
   it('el nombre del negocio entra tal cual, sin interpretarse como HTML (el reproductor usa textContent)', () => {
-    const odd = buildScenarios({ businessName: 'Salón <b>Luz</b> & Co.', businessWhatsapp: BUSINESS_WHATSAPP, today: TODAY });
+    const odd = buildScenarios({ businessName: 'Salón <b>Luz</b> & Co.', today: TODAY });
     expect(JSON.stringify(odd)).toContain('Salón <b>Luz</b> & Co.');
   });
 });
@@ -125,7 +135,10 @@ describe('transcriptOf', () => {
     expect(transcript[0]).toContain('Tu cliente confirma con un toque. Cale: Hola Lucía');
     expect(transcript[0]).toContain('Tu cliente: Confirmo');
     expect(transcript[0]).toContain('Cale: ¡Gracias, Lucía! Te esperamos el viernes 30/10 a las 17:30.');
-    expect(transcript[3]).toContain('Cale: Para consultas escribí directamente a wa.me/5493445123456');
+    expect(transcript[3]).toContain('Si escribe otra cosa, te llega a vos, como siempre.');
+    expect(transcript[3]).toContain('Tu cliente: ¿Tenés lugar el sábado?');
+    expect(transcript[3]).toContain('Vos: ¡Hola, Lucía! Sí, tengo lugar el sábado a las 11:00. ¿Te lo agendo?');
+    expect(transcript[3]).not.toContain('Cale: ¡Hola, Lucía!');
   });
 });
 

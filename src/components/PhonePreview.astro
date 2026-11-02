@@ -11,7 +11,6 @@ import { STEP_SECONDS, buildScenarios, schedule, transcriptOf, type ScheduledSce
 
 const scenarios = buildScenarios({
   businessName: LANDING_SAMPLE.businessName,
-  businessWhatsapp: LANDING_SAMPLE.businessWhatsapp,
   today: new Date(LANDING_SAMPLE.today),
 });
 const { scenes, total } = schedule(scenarios);

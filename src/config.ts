@@ -54,8 +54,6 @@ export const REMINDER_SEND_TIME = '7:00';
 // "mañana" calculado al compilar quedaría desfasado a los pocos días.
 export const LANDING_SAMPLE = {
   businessName: 'Estética Cuidarte',
-  // Número inventado a propósito: un subscriptor argentino no puede empezar con 0, así que no es de nadie
-  businessWhatsapp: '5491100000000',
   today: '2026-10-29T15:00:00Z',
 } as const;
 
