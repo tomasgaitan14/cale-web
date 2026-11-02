@@ -3,6 +3,14 @@
   "framework": "astro",
   "cleanUrls": true,
   "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "cale-turnos.vercel.app" }],
+      "destination": "https://cale.com.ar/$1",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
       "source": "/",

@@ -56,7 +56,18 @@ agregar acá nombre, teléfono, dirección, CUIT, situación fiscal ni IDs de cu
 
 ## Estado actual
 
-**Al 2026-11-02 (sin publicar, a la espera del OK de Titular para commitear): logo nuevo aplicado en el sitio.** El isotipo es un doble tilde
+**Al 2026-11-02, quick wins de SEO (commiteados, sin publicar: falta el push a `main`).** Resultado de una auditoría de producción (sin Search
+Console ni PageSpeed: la API devolvió cuota agotada). Implementado: título de la portada con la palabra clave primero (`Recordatorios de turnos por
+WhatsApp · Cale`) y descripción con llamado a la acción; `og:image` de 1200 × 630 (el lockup sobre el crema, `public/og-image.png`) y
+`summary_large_image` en todas las páginas; JSON-LD `Organization` + `WebSite` solo en la portada (`src/lib/structured-data.ts`, sin teléfono ni
+domicilio; el logo es el apple-touch-icon); precarga de las dos tipografías latinas (`BaseLayout.astro`, con `?url` de `@fontsource-variable`); y
+redirección 308 de `cale-turnos.vercel.app` a `cale.com.ar` (`vercel.json`). También `docs/brand/cale-lockup.svg` (el nombre en trazos,
+`src/lib/wordmark.ts`). `tests/seo.test.ts` los controla (probado con 11 mutaciones). Pendientes: **reverificar Google Search Console** (la propiedad se
+verificó con un TXT en el DNS de AWS y el DNS ahora está en DonWeb) y enviar el sitemap con la URL completa; medir Core Web Vitals; el `h2` vacío de
+`/empezar` y su título con `|` en vez de `·` (es `noindex`); páginas por rubro (peluquerías, estéticas, consultorios) con copy de Titular. Tras publicar,
+comprobar que `cale-turnos.vercel.app` redirige y probar el `og:image` pegando el enlace en WhatsApp.
+
+**Al 2026-11-02 (publicado, commit `40a3c1f`): logo nuevo aplicado en el sitio.** El isotipo es un doble tilde
 (tenue = recordatorio enviado, pleno = el cliente confirmó) sobre ficha negra, elegido entre tres direcciones (burbuja, reloj y doble tilde)
 y tres variantes (ficha negra, ficha verde, sin ficha). Cambios: `src/lib/brand.ts` (fuente única del dibujo), `Brand.astro` (SVG en línea con
 los tokens), `public/favicon.svg` y `public/apple-touch-icon.png` (con su `<link>` en `BaseLayout.astro`), PNG para Meta en `docs/brand/`,
@@ -64,7 +75,7 @@ los tokens), `public/favicon.svg` y `public/apple-touch-icon.png` (con su `<link
 favicon y los PNG; colores = tokens; contraste; cabe en el círculo de la foto de perfil; probado con 7 mutaciones) y el
 [manual de marca](docs/brand/manual-de-marca.md). Se sacó `calendarCheck` de `Icon.astro` y los helpers de color pasaron a `tests/support/color.ts`.
 Falta subir a mano el ícono de 1024 px a la app de Meta y la foto de 640 px al perfil de WhatsApp, y actualizar `cale-app/docs/DISENO.md` («Marca»)
-cuando ese repo se retome. Pendientes de marca (lockup en SVG con el nombre en trazos, `og:image`, versión monocromática): ver el manual, sección 11.
+cuando ese repo se retome. Pendientes de marca (lockup sobre fondo oscuro, versión monocromática): ver el manual, sección 11.
 
 **Al 2026-11-01 (publicado en `https://cale.com.ar`; `cale-turnos.vercel.app` sigue activo):**
 
@@ -229,7 +240,8 @@ Al 2026-10-15:
 - `src/config.ts` — datos del negocio, rutas, plazos, etiqueta de verificación de Meta.
 - `src/layouts/BaseLayout.astro` — `<head>` (meta tags, canonical, OG, verificación de Meta), header y footer.
 - `src/layouts/LegalLayout.astro` — layout de las páginas legales con fecha de actualización.
-- `src/lib/brand.ts`, `src/components/Brand.astro`, `scripts/brand-assets.ts`, `scripts/lib/` — isotipo (fuente única), su render en el encabezado y el generador del favicon y los PNG (`npm run brand`).
+- `src/lib/brand.ts`, `src/lib/wordmark.ts`, `src/components/Brand.astro`, `scripts/brand-assets.ts`, `scripts/lib/` — isotipo (fuente única), el nombre en trazos, su render en el encabezado y el generador del favicon, el lockup, la imagen para compartir y los PNG (`npm run brand`).
+- `src/lib/structured-data.ts`, `tests/seo.test.ts` — JSON-LD de la portada y los controles de SEO (título, `og:image`, precarga de fuentes, redirección de `vercel.app`).
 - `docs/brand/` — [manual de marca](docs/brand/manual-de-marca.md) y los PNG para Meta (ícono de la app de 1024 px y foto de perfil de WhatsApp de 640 px).
 - `tests/brand.test.ts`, `tests/support/color.ts` — tests de la marca y helpers de color compartidos con `contrast.test.ts`.
 - `src/pages/` — `index`, `privacidad`, `terminos`, `eliminar-datos`, `404`.
