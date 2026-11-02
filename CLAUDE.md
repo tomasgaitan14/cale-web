@@ -163,9 +163,11 @@ Al 2026-10-15:
   Manrope + DM Sans. Fuente: `~/projects-claude/personal/cale-app/docs/DISENO.md` y el prototipo que cita. El verde
   nunca es color de texto, y AAA en el texto principal y AA en el resto (los dos los controla `tests/contrast.test.ts`).
   Reemplazó al rediseño para público mayor del 2026-10-12 (Atkinson, resaltador amarillo, comparación y video).
-- **De dónde salen los turnos: sin definir (01/11/2026).** La portada ya no promete Google Calendar ni una cuenta de Google (el código que
-  lo conectaba estaba en `cale-app`, borrada de AWS). Los pasos dicen «Dejanos los datos de tu negocio» y «Pasale tus turnos a Cale»; un test
-  prohíbe «Google» y «Calendar» en la portada y en su descripción.
+- **De dónde salen los turnos: Google Calendar (decisión de Titular, 02/11/2026).** Cale crea un calendario de turnos en la cuenta de Google del negocio y
+  de ahí saca los turnos para mandar los recordatorios. La portada lo dice (subtítulo, paso 2, una pregunta frecuente y la descripción) y un test lo
+  controla; **la conexión todavía no existe** (el código viejo estaba en `cale-app`, borrada de AWS): se arma en `cale-api`. Hasta entonces los textos
+  legales **no nombran ninguna agenda** (hay un test); cuando exista, la política de privacidad tiene que explicar qué datos de Google se leen
+  y para qué (política de datos de usuario de las API de Google, uso limitado) y los términos tienen que reflejarlo.
 - **Textos de la landing** (`LANDING_COPY`, `HOW_IT_WORKS`, `REMINDER_PREVIEW` en `config.ts`): los de la fuente de
   verdad de cale-app. La vista previa usa el texto real de la plantilla `cale_recordatorio_turno`. Sin promesas que
   todavía no se cumplen: el "mismo número" y la prueba gratis activa vuelven recién con la Fase 5 (Meta). Ojo:
@@ -197,12 +199,11 @@ Al 2026-10-15:
 
 1. **Meta:** esperar la decisión de la verificación del negocio (enviada el 01/11/2026, hasta 48 h). Con el negocio
    verificado, enviar el App Review (videos grabados, backend en `cale-api`) y cargar las URLs legales de `cale.com.ar` en la app.
-2. Confirmar las decisiones asumidas del texto legal (agenda, costos, plazo del formulario).
-   **Decisión de producto abierta:** de dónde salen los turnos (Google Calendar, una agenda propia de Cale o carga manual). Hasta definirlo la
-   portada es neutra («Pasale tus turnos a Cale»); cuando se defina, se reescriben los pasos 1 y 2 de «Cómo funciona» (`HOW_IT_WORKS`).
-3. Que un abogado revise los textos legales: el tope de responsabilidad se calcula sobre "lo pagado por el servicio"
-   (hoy sería cero, porque no hay cobro), la jurisdicción no nombra una ciudad y la Ley 25.326 (art. 6) pide
-   identificar al responsable de los datos.
+2. **Conexión con Google Calendar** en `cale-api` (decisión del 02/11/2026): consentimiento de Google, guardar el permiso del negocio, leer los turnos
+   y programar los recordatorios. Plan y puntos abiertos en `cale-api/CLAUDE.md`. Al terminar, actualizar privacidad y términos.
+3. **Los textos legales los aprobamos nosotros, sin abogado** (decisión de Titular, 02/11/2026). Puntos que quedan por cerrar a conciencia:
+   el tope de responsabilidad se calcula sobre "lo pagado por el servicio" (hoy sería cero, porque no hay cobro), la jurisdicción no nombra una
+   ciudad y la Ley 25.326 (art. 6) pide identificar al responsable de los datos, lo que choca con no publicar datos personales.
 
 ## Archivos clave
 
