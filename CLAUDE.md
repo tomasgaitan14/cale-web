@@ -218,12 +218,11 @@ Al 2026-10-15:
    verificado, enviar el App Review (videos grabados, backend en `cale-api`) y cargar las URLs legales de `cale.com.ar` en la app.
 2. **Conexión con Google Calendar** en `cale-api` (decisión del 02/11/2026): consentimiento de Google, guardar el permiso del negocio, leer los turnos
    y programar los recordatorios. Plan y puntos abiertos en `cale-api/CLAUDE.md`. Al terminar, actualizar privacidad y términos.
-3. ~~Textos legales~~ **Aprobados en casa, sin abogado, el 02/11/2026** (decisión de Titular). Los tres puntos abiertos se cerraron así: **tope de
-   responsabilidad** = el mayor entre lo pagado en los 12 meses anteriores y un monto fijo (`LIABILITY_CAP` en `config.ts`, hoy ARS 100.000; es la única
-   cifra de dinero permitida en el sitio y va marcada con `data-liability-minimum`); **jurisdicción** = se deja como estaba, sin nombrar ciudad;
-   **responsable de los datos** (art. 6 de la Ley 25.326) = «Cale» con el correo de contacto, sin nombre ni domicilio personales (queda el riesgo
-   legal de que Cale no es una persona jurídica; también existe la inscripción de bases de datos ante la AAIP, que habría que revisar). `LEGAL_LAST_UPDATED` y
-   `LEAD_CONSENT_VERSION` pasaron a 2026-11-02.
+3. ~~Textos legales~~ **CERRADO por Titular el 02/11/2026: no se retoma.** Aprobados en casa, sin abogado. Quedó así: **tope de responsabilidad** = el mayor
+   entre lo pagado en los 12 meses anteriores y un monto fijo (`LIABILITY_CAP` en `config.ts`, ARS 100.000; es la única cifra de dinero permitida en el sitio y
+   va marcada con `data-liability-minimum`); **jurisdicción** = sin nombrar ciudad; **responsable de los datos** (art. 6 de la Ley 25.326) = «Cale» con el correo
+   de contacto, sin nombre ni domicilio. **Riesgos aceptados al cerrar el tema:** Cale no es una persona jurídica y no se trabaja la inscripción de bases de
+   datos ante la AAIP. Si algún día cambia el modelo (cobro, más clientes), se reabre. `LEGAL_LAST_UPDATED` y `LEAD_CONSENT_VERSION` = 2026-11-02.
 
 ## Archivos clave
 
