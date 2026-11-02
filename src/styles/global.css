@@ -9,6 +9,11 @@
   --gutter: 1rem;
   --section-space: clamp(3.5rem, 9vw, 6rem);
 
+  /* Formas y sombras de las "islas" y los bloques grandes (solo de este sitio: tokens.css es una copia compartida) */
+  --radius-island: clamp(1.75rem, 5vw, 2.5rem);
+  --shadow-tile: 0 24px 48px -28px rgb(70 52 24 / 0.22);
+  --shadow-float: 0 14px 34px -14px rgb(70 52 24 / 0.28);
+
   color-scheme: light;
 }
 
@@ -56,6 +61,11 @@ h3 {
 p {
   margin: 0;
   text-wrap: pretty;
+}
+
+/* Segunda frase de un título, en gris: jerarquía sin sumar otro color */
+.tone-soft {
+  color: var(--muted);
 }
 
 a {
