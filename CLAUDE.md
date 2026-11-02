@@ -66,8 +66,8 @@ agregar acá nombre, teléfono, dirección, CUIT, situación fiscal ni IDs de cu
 - **Dominio (01/11/2026, ~22:20): `cale.com.ar` está online.** Responde con HTTPS (Let's Encrypt), `www` y `http`
   redirigen con 308, el DNS de DonWeb apunta a Vercel y las páginas legales y `/empezar` dan 200. El widget de Turnstile
   ya admite `cale.com.ar`. Un recorrido del sitio en vivo no encontró nombre, teléfono ni otros correos.
-- **Ojo, número de ejemplo:** `LANDING_SAMPLE.businessWhatsapp` (el `wa.me` de la animación) tiene forma de celular real de
-  Rosario; cambiarlo por uno que no pueda existir (ver Próximos pasos).
+- **Número de ejemplo de la portada** (`LANDING_SAMPLE.businessWhatsapp`, el `wa.me` de la animación): cambiado el 01/11/2026 por uno
+  imposible (el abonado empieza con 0). El anterior tenía forma de celular real; `tests/landing-sample.test.ts` lo controla.
 - **Decisiones del texto legal (asumidas, a confirmar):** la agenda del negocio no se nombra (la portada todavía dice
   Google Calendar), sin costos ni precio, los datos del formulario se guardan 12 meses si no se activa el servicio.
 - **Meta:** la verificación del negocio se **envió el 01/11/2026** y está a la espera (hasta 48 h; los datos concretos
@@ -180,8 +180,9 @@ Al 2026-10-15:
 1. **Meta:** esperar la decisión de la verificación del negocio (enviada el 01/11/2026, hasta 48 h). Con el negocio
    verificado, enviar el App Review (videos grabados, backend en `cale-api`) y cargar las URLs legales de `cale.com.ar` en la app.
 2. **Probar `/empezar` en producción** (con un alta de prueba que después se borra) y confirmar Turnstile en `cale.com.ar`.
-3. **Cambiar el `wa.me` de `LANDING_SAMPLE`** por un número imposible de que sea real, y actualizar la documentación del
-   dominio y el hosting (este archivo ya lo refleja).
+3. **Alinear la animación con «siempre coexistencia»:** el último escenario de la portada y de `/empezar` (`lib/chat-script.ts`) muestra
+   el aviso «para consultas escribí directamente a wa.me/…, este número es de mensajes automáticos», que es de la línea aparte ya
+   descartada. Hay que reemplazarlo (con tests) y revisar los textos de `lib/simulation.ts`.
 4. Confirmar las decisiones asumidas del texto legal (agenda, costos, plazo del formulario) y alinear la portada, que
    todavía nombra Google Calendar.
 5. Que un abogado revise los textos legales: el tope de responsabilidad se calcula sobre "lo pagado por el servicio"
