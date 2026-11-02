@@ -12,7 +12,9 @@ import {
   LANDING_BAND,
   LANDING_COPY,
   LANDING_SAMPLE,
+  LEAD_CONSENT_VERSION,
   LEGAL_LAST_UPDATED,
+  LIABILITY_CAP,
   LOCATION,
   REMINDER_PREVIEW,
   REMINDER_SEND_TIME,
@@ -513,8 +515,58 @@ describe('contenido requerido', () => {
   });
 
   // Decisión del 11/10/2026: ni la landing ni los legales hablan del precio del servicio
+  // La única cifra de dinero que admiten los términos es el monto mínimo del tope de responsabilidad (decisión del 02/11/2026),
+  // marcado con data-liability-minimum: se saca antes de buscar precios
   it.each(INDEXABLE_ROUTES)('%s no muestra precios', (route) => {
-    expect(bodyText(pages.get(route)!)).not.toMatch(/\$\s?\d|\bUSD\b|\bARS\b|\bpesos\b|por mes|\/mes\b/i);
+    const copy = parse(pages.get(route)!.toString());
+    for (const cap of copy.querySelectorAll('[data-liability-minimum]')) cap.remove();
+    expect(bodyText(copy)).not.toMatch(/\$\s?\d|\bUSD\b|\bARS\b|\bpesos\b|por mes|\/mes\b/i);
+  });
+
+  describe('decisiones legales del 02/11/2026', () => {
+    // El texto de una sección de las páginas legales: lo que hay entre su título (h2) y el siguiente
+    const sectionText = (page: HTMLElement, id: string): string => {
+      const parts: string[] = [];
+      for (let node = page.querySelector(`#${id}`)!.nextElementSibling; node && node.tagName !== 'H2'; node = node.nextElementSibling) {
+        parts.push(node.text);
+      }
+      return parts.join(' ').replace(/\s+/g, ' ');
+    };
+
+    it('el tope de responsabilidad es el mayor entre lo pagado y un monto fijo, y el monto sale de la configuración', () => {
+      const terms = pages.get(ROUTES.terms)!;
+      const caps = terms.querySelectorAll('[data-liability-minimum]');
+      expect(caps).toHaveLength(1);
+      expect(caps[0]!.text).toBe(LIABILITY_CAP.minimum);
+      const section = sectionText(terms, 'responsabilidad');
+      expect(section).toContain('se limita al mayor de estos dos montos');
+      // Valores escritos a mano, no tomados de la constante: si alguien cambia el plazo o el monto, tiene que cambiar este test a conciencia
+      expect(LIABILITY_CAP.lookbackMonths).toBe(12);
+      expect(section).toContain('en los 12 meses anteriores');
+      expect(LIABILITY_CAP.minimum).toMatch(/^ARS [1-9]\d{0,2}(\.\d{3})+$/);
+      expect(section).toContain('Esta limitación no se aplica en casos de dolo o culpa grave');
+    });
+
+    it('solo los términos llevan una cifra de dinero: la política de privacidad y la portada no', () => {
+      expect(pages.get(ROUTES.privacy)!.querySelectorAll('[data-liability-minimum]')).toHaveLength(0);
+      expect(pages.get(ROUTES.home)!.querySelectorAll('[data-liability-minimum]')).toHaveLength(0);
+    });
+
+    // Art. 6 de la Ley 25.326: quien recoge los datos se identifica y da un medio de contacto, sin nombre ni domicilio personales
+    it('la política identifica al responsable y da el correo para ejercer los derechos, sin datos personales', () => {
+      const intro = sectionText(pages.get(ROUTES.privacy)!, 'quienes-somos');
+      expect(intro).toContain(`${BUSINESS_NAME} es un servicio con domicilio en ${LOCATION} y es el responsable del tratamiento de los datos que describe esta política`);
+      expect(intro).toContain('Ley 25.326');
+      expect(intro).toContain('Para ejercer tus derechos');
+      expect(intro).toContain(CONTACT_EMAIL);
+      expect(intro).toContain(LOCATION);
+    });
+
+    // El texto de consentimiento guardado con cada alta no puede ser más viejo que la política que acepta quien se anota
+    it('la versión del consentimiento no es anterior a la última actualización de los textos legales', () => {
+      expect(LEAD_CONSENT_VERSION >= LEGAL_LAST_UPDATED).toBe(true);
+      expect(LEAD_CONSENT_VERSION).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    });
   });
 
   // La CSP solo admite el propio dominio: fuentes, estilos, imágenes y videos se sirven desde el sitio
