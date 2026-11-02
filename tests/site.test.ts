@@ -222,7 +222,7 @@ describe('contenido requerido', () => {
     const hero = pages.get(ROUTES.home)!.querySelector('.hero')!;
     expect(hero.querySelector('h1')?.text).toBe('Tus recordatorios de turnos, en automático.');
     expect(hero.querySelector('.lead')?.text).toBe(
-      'Conectá tu agenda y dejá que Cale envíe los recordatorios por WhatsApp por vos.',
+      'Pasale tus turnos a Cale y dejá que envíe los recordatorios por WhatsApp por vos.',
     );
     expect(hero.querySelector('a.button')?.text.trim()).toBe('Empezar gratis');
     expect(hero.querySelector('.tagline')?.text.trim()).toBe('Menos mensajes manuales. Más tiempo para tu negocio.');
@@ -338,15 +338,24 @@ describe('contenido requerido', () => {
     });
   });
 
+  // Todavía no está definido de dónde salen los turnos (decisión del 01/11/2026): la portada no promete una agenda concreta
+  it('la portada no promete Google Calendar ni una cuenta de Google que hoy no existen', () => {
+    const home = pages.get(ROUTES.home)!;
+    expect(bodyText(home)).not.toMatch(/google|calendar/i);
+    expect(metaContent(home, 'meta[name="description"]')).not.toMatch(/google|calendar/i);
+    expect(metaContent(home, 'meta[property="og:description"]') ?? '').not.toMatch(/google|calendar/i);
+  });
+
   it('"Cómo funciona" tiene 3 pasos en orden', () => {
     const section = pages.get(ROUTES.home)!.querySelector('#como-funciona')!;
     expect(section.querySelector('h2')?.text).toBe('Cómo funciona');
     expect(section.querySelectorAll('ol > li h3').map((title) => title.text)).toEqual([
-      'Entrá con tu cuenta de Google',
-      'Anotá cada turno en tu calendario',
+      'Dejanos los datos de tu negocio',
+      'Pasale tus turnos a Cale',
       'Cale le escribe a tu cliente el día anterior',
     ]);
     expect(section.text).toContain('el nombre de tu cliente, el servicio y su celular');
+    expect(section.text).toContain('Son 3 pasos cortos');
     expect(section.text).toContain('en el horario que vos digas');
     expect(section.text).toContain('confirma, reprograma o cancela el turno con un botón');
   });
