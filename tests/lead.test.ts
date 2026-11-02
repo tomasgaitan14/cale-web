@@ -6,7 +6,9 @@ import {
   LEAD_LIMITS,
   LeadValidationError,
   WEEKLY_APPOINTMENTS,
+  PHONE_TAIL_DIGITS,
   cleanText,
+  closingMessage,
   normalizeWhatsapp,
   toLeadPayload,
   validateForm,
@@ -175,5 +177,23 @@ describe('toLeadPayload', () => {
       'currentMethod',
       'ownerName',
     ]);
+  });
+});
+
+describe('closingMessage', () => {
+  it('nombra solo los últimos dígitos del WhatsApp, no el número entero', () => {
+    const message = closingMessage('5493445123456');
+    expect(PHONE_TAIL_DIGITS).toBe(4);
+    expect(message).toContain('el que termina en 3456');
+    expect(message).not.toContain('5493445123456');
+    expect(message).not.toContain('123456');
+  });
+
+  // Con coexistencia no hay una línea aparte: el recordatorio sale del número del negocio
+  it('no promete una línea aparte de recordatorios', () => {
+    expect(closingMessage('5493445123456')).not.toMatch(/línea/i);
+    expect(closingMessage('5493445123456')).toBe(
+      'Te anotamos. Apenas Cale esté listo para tu negocio, te escribimos a tu WhatsApp (el que termina en 3456).',
+    );
   });
 });
