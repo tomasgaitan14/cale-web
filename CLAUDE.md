@@ -42,6 +42,9 @@ agregar acá nombre, teléfono, dirección, CUIT, situación fiscal ni IDs de cu
 
 ## Proyectos relacionados
 
+- **`cale-api`** (repo privado, `~/projects-claude/personal/cale-api/`): backend mínimo del App Review de Meta (Supabase Edge
+  Functions: crear una plantilla y enviar un mensaje) y panel local para grabar los videos. No se comunica con este sitio:
+  son dos piezas del camino a Tech Provider. Detalle y estado en su `CLAUDE.md`.
 - **`cale-app`** (repo privado, `~/projects-claude/personal/cale-app/`): el asistente de alta y el backend de Cale
   (entrar con Google, calendario, perfil, recordatorios, reservas por WhatsApp y webhook). **Está offline desde el
   2026-10-24** (su AWS se borró) y el sitio ya no enlaza a `app.cale.com.ar`: "Empezar gratis" va a `/empezar` y el
@@ -52,7 +55,7 @@ agregar acá nombre, teléfono, dirección, CUIT, situación fiscal ni IDs de cu
 
 ## Estado actual
 
-**Al 2026-11-01 (publicado en `https://cale-turnos.vercel.app`; `cale.com.ar` pendiente de DNS):**
+**Al 2026-11-01 (publicado en `https://cale.com.ar`; `cale-turnos.vercel.app` sigue activo):**
 
 - **Textos legales reescritos** (`privacidad`, `terminos`, `eliminar-datos`) para lo que existe hoy: formulario de alta
   (datos, hash de la IP, Turnstile), copia de mensajes de la coexistencia (se descartan los que no son recordatorios),
@@ -60,14 +63,17 @@ agregar acá nombre, teléfono, dirección, CUIT, situación fiscal ni IDs de cu
   Sin AWS, Google, asistente ni prueba gratis. `LEGAL_LAST_UPDATED` y `LEAD_CONSENT_VERSION` = 2026-11-01. Los datos de
   coexistencia (versión de la app, 180 días de historial, 20 mensajes por segundo) están en `COEXISTENCE` de `config.ts`.
 - Se sacó el botón "Ingresar a mi cuenta" (apuntaba a `app.cale.com.ar`, sin DNS).
-- **Dominio:** `cale.com.ar` y `www` están agregados al proyecto de Vercel, y Titular cambió en DonWeb los nameservers a
-  `ns1.vercel-dns.com` y `ns2.vercel-dns.com`. Al 01/11 el registro `.com.ar` seguía delegando a AWS: falta que
-  propague (hasta 24 h). El widget de Turnstile ya admite `cale.com.ar`.
+- **Dominio (01/11/2026, ~22:20): `cale.com.ar` está online.** Responde con HTTPS (Let's Encrypt), `www` y `http`
+  redirigen con 308, el DNS de DonWeb apunta a Vercel y las páginas legales y `/empezar` dan 200. El widget de Turnstile
+  ya admite `cale.com.ar`. Un recorrido del sitio en vivo no encontró nombre, teléfono ni otros correos.
+- **Ojo, número de ejemplo:** `LANDING_SAMPLE.businessWhatsapp` (el `wa.me` de la animación) tiene forma de celular real de
+  Rosario; cambiarlo por uno que no pueda existir (ver Próximos pasos).
 - **Decisiones del texto legal (asumidas, a confirmar):** la agenda del negocio no se nombra (la portada todavía dice
   Google Calendar), sin costos ni precio, los datos del formulario se guardan 12 meses si no se activa el servicio.
-- **Meta:** la verificación del negocio está en curso (los datos concretos del formulario están fuera del repo);
-  falta enviarla cuando `cale.com.ar` responda. Pendientes: backend para el App Review (ver `docs/roadmap.md`) y cargar las URLs legales de `cale.com.ar`
-  en la app.
+- **Meta:** la verificación del negocio se **envió el 01/11/2026** y está a la espera (hasta 48 h; los datos concretos
+  están fuera del repo). El dominio `cale.com.ar` figura verificado. El backend del App Review está hecho en `cale-api`
+  y los dos videos están grabados; el App Review se envía cuando el negocio quede verificado. Falta cargar las URLs
+  legales de `cale.com.ar` en la app de Meta.
 
 **Al 2026-10-24: toda la infraestructura de AWS está borrada y el sitio está offline** (decisión de Titular, para no
 tener ningún costo por ahora). Se eliminaron los stacks `cale-site`, `cale-app` y el de SAM, los buckets, la zona de
@@ -171,12 +177,11 @@ Al 2026-10-15:
 
 ## Próximos pasos
 
-1. **Dominio:** esperar que `cale.com.ar` propague a Vercel y verificarlo (`dig`, HTTPS, redirección de `www`, el
-   formulario con Turnstile).
-2. **Meta:** terminar de cargar y enviar la verificación del negocio cuando `cale.com.ar` responda, y volver a
-   verificar el dominio si hace falta.
-3. **Backend del App Review** (enviar un mensaje y crear una plantilla): decidir la arquitectura. Propuesta: un repo
-   privado aparte, con funciones en Vercel y Supabase; no en este repo, que es público.
+1. **Meta:** esperar la decisión de la verificación del negocio (enviada el 01/11/2026, hasta 48 h). Con el negocio
+   verificado, enviar el App Review (videos grabados, backend en `cale-api`) y cargar las URLs legales de `cale.com.ar` en la app.
+2. **Probar `/empezar` en producción** (con un alta de prueba que después se borra) y confirmar Turnstile en `cale.com.ar`.
+3. **Cambiar el `wa.me` de `LANDING_SAMPLE`** por un número imposible de que sea real, y actualizar la documentación del
+   dominio y el hosting (este archivo ya lo refleja).
 4. Confirmar las decisiones asumidas del texto legal (agenda, costos, plazo del formulario) y alinear la portada, que
    todavía nombra Google Calendar.
 5. Que un abogado revise los textos legales: el tope de responsabilidad se calcula sobre "lo pagado por el servicio"
