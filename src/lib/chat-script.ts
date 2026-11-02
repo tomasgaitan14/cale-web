@@ -1,7 +1,7 @@
 // Guion de la simulación animada del final de /empezar: cuatro escenas de WhatsApp. Los textos de las respuestas son
-// los de cale-app (api/src/whatsapp/messages.ts: confirmedReply, cancelledReply, SLOTS_INTRO.choose, movedReply); el aviso
-// de "mensajes automáticos" es el patrón de la línea solo para recordatorios. Este módulo no toca el DOM: el reproductor
-// (scripts/chat-player.ts) lo recorre paso a paso.
+// los de cale-app (api/src/whatsapp/messages.ts: confirmedReply, cancelledReply, SLOTS_INTRO.choose, movedReply). Lo que la
+// clienta escribe fuera de los botones le llega al negocio (coexistencia) y lo contesta él, no Cale. Este módulo no toca el
+// DOM: el reproductor (scripts/chat-player.ts) lo recorre paso a paso.
 import {
   SAMPLE_APPOINTMENT_TIME,
   SAMPLE_CLIENT_NAME,
@@ -19,8 +19,8 @@ export const SCENARIO_IDS = ['confirm', 'cancel', 'reschedule', 'free-text'] as 
 export type ScenarioId = (typeof SCENARIO_IDS)[number];
 
 export type ChatStep =
-  // Mensaje de Cale, que llega después de "escribiendo…". Puede llevar botones.
-  | { kind: 'bot'; text: string; buttons?: readonly string[] }
+  // Mensaje de Cale, que llega después de "escribiendo…". Puede llevar botones. Con byBusiness lo escribe el negocio, no Cale.
+  | { kind: 'bot'; text: string; buttons?: readonly string[]; byBusiness?: true }
   // La clienta toca uno de los botones del último mensaje de Cale
   | { kind: 'press'; button: string }
   // Mensaje de la clienta
@@ -136,24 +136,30 @@ export function buildScenarios(input: SimulationInput): ChatScenario[] {
     },
     {
       id: 'free-text',
-      caption: 'Si escribe otra cosa, lo mandamos a tu número',
+      caption: 'Si escribe otra cosa, te llega a vos, como siempre',
       steps: [
         reminder,
         { kind: 'customer', text: simulation.freeText },
-        { kind: 'bot', text: simulation.redirect },
+        { kind: 'bot', text: simulation.businessReply, byBusiness: true },
       ],
     },
   ];
 }
 
 // Los textos de la animación, uno por mensaje, para quien no la ve: se lee de corrido sin esperar a que pase
+// Quién habla, para el texto de corrido de quien no ve la animación
+function speakerOf(step: Extract<ChatStep, { text: string }>): string {
+  if (step.kind === 'customer') return 'Tu cliente';
+  return step.byBusiness ? 'Vos' : 'Cale';
+}
+
 export function transcriptOf(scenarios: readonly ChatScenario[]): string[] {
   return scenarios.map(
     (scenario) =>
       `${scenario.caption}. ` +
       scenario.steps
         .filter((step): step is Extract<ChatStep, { text: string }> => step.kind !== 'press')
-        .map((step) => `${step.kind === 'customer' ? 'Tu cliente' : 'Cale'}: ${step.text}`)
+        .map((step) => `${speakerOf(step)}: ${step.text}`)
         .join(' '),
   );
 }

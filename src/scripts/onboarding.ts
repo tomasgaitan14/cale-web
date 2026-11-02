@@ -177,7 +177,7 @@ function showResult(payload: LeadPayload, outcome: LeadResult): void {
   required<HTMLElement>(result, '[data-result-title]').focus();
   startSimulation(
     required<HTMLElement>(result, '[data-sim]'),
-    buildScenarios({ businessName: payload.p_business_name, businessWhatsapp: payload.p_business_phone, today: new Date() }),
+    buildScenarios({ businessName: payload.p_business_name, today: new Date() }),
   );
 }
 

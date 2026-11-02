@@ -7,14 +7,14 @@ export const SAMPLE_CLIENT_NAME = 'Lucía';
 export const SAMPLE_APPOINTMENT_TIME = '17:30';
 // Lo que escribe el cliente de ejemplo cuando no usa los botones
 export const SAMPLE_FREE_TEXT = '¿Tenés lugar el sábado?';
+// Lo que le contesta el negocio, desde su propio WhatsApp: con coexistencia, lo que no es un botón le llega al negocio y Cale no responde
+export const SAMPLE_BUSINESS_REPLY = `¡Hola, ${SAMPLE_CLIENT_NAME}! Sí, tengo lugar el sábado a las 11:00. ¿Te lo agendo?`;
 
 const ARGENTINA_TIME_ZONE = 'America/Argentina/Buenos_Aires';
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 export interface SimulationInput {
   businessName: string;
-  // Número de WhatsApp del negocio: 549 + código de área + número
-  businessWhatsapp: string;
   // Hoy; el turno de ejemplo es mañana
   today: Date;
 }
@@ -23,9 +23,9 @@ export interface Simulation {
   // Recordatorio automático, con los botones de la plantilla
   reminder: string;
   replies: readonly string[];
-  // Cuando el cliente escribe algo distinto de los botones
+  // Cuando el cliente escribe algo distinto de los botones, y lo que le contesta el negocio
   freeText: string;
-  redirect: string;
+  businessReply: string;
 }
 
 export interface DayLabel {
@@ -73,10 +73,6 @@ export function businessInitials(businessName: string): string {
     .join('');
 }
 
-export function businessWhatsappLink(businessWhatsapp: string): string {
-  return `wa.me/${businessWhatsapp}`;
-}
-
 export function buildSimulation(input: SimulationInput): Simulation {
   const { weekday, date } = dayAfter(input.today, 1);
 
@@ -90,6 +86,6 @@ export function buildSimulation(input: SimulationInput): Simulation {
     }),
     replies: REMINDER_PREVIEW.replies,
     freeText: SAMPLE_FREE_TEXT,
-    redirect: `Para consultas escribí directamente a ${businessWhatsappLink(input.businessWhatsapp)}, este número es de mensajes automáticos.`,
+    businessReply: SAMPLE_BUSINESS_REPLY,
   };
 }

@@ -246,7 +246,6 @@ describe('contenido requerido', () => {
     const preview = () => pages.get(ROUTES.home)!.querySelector('.hero figure')!;
     const sample = buildScenarios({
       businessName: LANDING_SAMPLE.businessName,
-      businessWhatsapp: LANDING_SAMPLE.businessWhatsapp,
       today: new Date(LANDING_SAMPLE.today),
     });
 
