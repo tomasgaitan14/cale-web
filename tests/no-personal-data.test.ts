@@ -20,6 +20,7 @@ const FORBIDDEN: ReadonlyArray<readonly [string, RegExp]> = [
   ['el CUIT', new RegExp(`20-?${'4118'}${'8294'}`)],
   ['el celular personal', new RegExp(`${'344'}${'6'}[0-9]{6}`)],
   ['la situación fiscal', new RegExp(`${'monot'}${'ribut'}`, 'i')],
+  ['el nombre del equipo de Vercel (lleva el nombre de pila)', new RegExp(`${'tomas'}g-${'projects'}`, 'i')],
 ];
 
 function trackedTextFiles(): string[] {
@@ -34,7 +35,7 @@ describe('el repo público no tiene datos personales', () => {
 
   it('revisa los archivos versionados (si no encuentra ninguno, el test no sirve)', () => {
     expect(files.length).toBeGreaterThan(20);
-    expect(files).toContain('CLAUDE.md');
+    expect(files).toContain('README.md');
     expect(files).toContain('src/config.ts');
   });
 
