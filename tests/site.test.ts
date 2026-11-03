@@ -647,6 +647,7 @@ describe('contenido requerido', () => {
       'los demás los descarta sin guardarlos',
       // El sitio mide las visitas con HubSpot solo en la portada y los textos legales, y lo dice
       'cargamos el código de seguimiento de HubSpot',
+      'tienen un chat de HubSpot',
       'El formulario de alta y la página de error no cargan ese código',
       `${RETENTION.leadMonths} meses`,
       `${RETENTION.appointmentDataMonths} meses`,

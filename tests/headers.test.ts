@@ -12,16 +12,24 @@ interface HeaderRule {
 }
 
 const VERCEL_CONFIG = JSON.parse(readFileSync(join(import.meta.dirname, '..', 'vercel.json'), 'utf8')) as { headers: HeaderRule[] };
-// Textos legales: solo el script de HubSpot. La portada (ROUTES.home) lleva además el script del propio sitio. La 404 no
+// Textos legales: solo los scripts de HubSpot. La portada (ROUTES.home) lleva además el script del propio sitio. La 404 no
 // lleva ninguno.
 const LEGAL_PAGES = Object.values(ROUTES).filter((route) => route !== ROUTES.home);
 const STRICT_PAGES = ['/404'];
 const SITE_PAGES = [...LEGAL_PAGES, ...STRICT_PAGES];
 const TURNSTILE_ORIGIN = 'https://challenges.cloudflare.com';
-// Solo el seguimiento y el aviso de cookies. El chat (usemessages) y la captura de formularios (hscollectedforms) que trae el
-// código de HubSpot quedan afuera a propósito.
-const HUBSPOT_SCRIPT_ORIGINS = [new URL(HUBSPOT_SCRIPT_URL).origin, 'https://js.hs-analytics.net', 'https://js.hs-banner.com'];
-const HUBSPOT_BLOCKED_ORIGINS = ['usemessages', 'hscollectedforms', 'hsforms', 'hubapi'];
+// El seguimiento, el aviso de cookies y el chat. La captura de formularios (hscollectedforms) que trae el código de HubSpot
+// queda afuera a propósito.
+const HUBSPOT_SCRIPT_ORIGINS = [
+  new URL(HUBSPOT_SCRIPT_URL).origin,
+  'https://js.hs-analytics.net',
+  'https://js.hs-banner.com',
+  'https://js.usemessages.com',
+];
+const HUBSPOT_CONNECT_ORIGINS = ['https://api.hubspot.com'];
+// El chat se muestra en un iframe de HubSpot
+const HUBSPOT_FRAME_ORIGINS = ['https://app.hubspot.com'];
+const HUBSPOT_BLOCKED_ORIGINS = ['hscollectedforms', 'hsforms', 'hubapi'];
 
 // Los `source` de vercel.json son patrones tipo path-to-regexp; los que usa este archivo son expresiones regulares válidas
 function rulesFor(path: string, key: string): HeaderRule[] {
@@ -50,22 +58,40 @@ describe('Content-Security-Policy', () => {
     expect(csp).not.toContain('hs-');
   });
 
-  it.each(LEGAL_PAGES)('%s recibe una sola CSP: solo los scripts de HubSpot, sin conexiones', (path) => {
+  it.each(LEGAL_PAGES)('%s recibe una sola CSP: solo los scripts, la API y el iframe de HubSpot', (path) => {
     const rules = rulesFor(path, 'Content-Security-Policy');
     expect(rules).toHaveLength(1);
     const csp = headerValue(rules[0], 'Content-Security-Policy');
     expect(directive(csp, 'script-src')).toEqual(HUBSPOT_SCRIPT_ORIGINS);
-    expect(directive(csp, 'connect-src')).toEqual(["'none'"]);
+    expect(directive(csp, 'connect-src')).toEqual(HUBSPOT_CONNECT_ORIGINS);
+    expect(directive(csp, 'frame-src')).toEqual(HUBSPOT_FRAME_ORIGINS);
     expect(csp).not.toContain('cloudflare');
   });
 
-  it('la portada recibe una sola CSP: su propio script y los de HubSpot, sin conexiones ni Cloudflare', () => {
+  it('la portada recibe una sola CSP: su propio script y los de HubSpot, sin Cloudflare', () => {
     const rules = rulesFor(ROUTES.home, 'Content-Security-Policy');
     expect(rules).toHaveLength(1);
     const csp = headerValue(rules[0], 'Content-Security-Policy');
     expect(directive(csp, 'script-src')).toEqual(["'self'", ...HUBSPOT_SCRIPT_ORIGINS]);
-    expect(directive(csp, 'connect-src')).toEqual(["'none'"]);
+    expect(directive(csp, 'connect-src')).toEqual(HUBSPOT_CONNECT_ORIGINS);
+    expect(directive(csp, 'frame-src')).toEqual(HUBSPOT_FRAME_ORIGINS);
     expect(csp).not.toContain('cloudflare');
+  });
+
+  // El chat de HubSpot inyecta una hoja de estilos en la página: sin esto se pinta roto. Solo en estas páginas, y solo
+  // para elementos <style>; los estilos de las demás páginas y los atributos siguen cerrados.
+  it.each([ROUTES.home, ...LEGAL_PAGES])('%s admite estilos inline solo en elementos <style> (los del chat)', (path) => {
+    const csp = headerValue(rulesFor(path, 'Content-Security-Policy')[0], 'Content-Security-Policy');
+    expect(directive(csp, 'style-src')).toEqual(["'self'"]);
+    expect(directive(csp, 'style-src-elem')).toEqual(["'self'", "'unsafe-inline'"]);
+    expect(directive(csp, 'style-src-attr')).toEqual([]);
+  });
+
+  it.each([START_ROUTE, ...STRICT_PAGES])('%s no admite estilos inline ni el chat', (path) => {
+    const csp = headerValue(rulesFor(path, 'Content-Security-Policy')[0], 'Content-Security-Policy');
+    expect(csp).not.toContain('unsafe-inline');
+    expect(csp).not.toContain('usemessages');
+    expect(csp).not.toContain('app.hubspot.com');
   });
 
   it.each([ROUTES.home, ...LEGAL_PAGES])('%s admite las imágenes de seguimiento de HubSpot y nada más de afuera', (path) => {
@@ -73,7 +99,7 @@ describe('Content-Security-Policy', () => {
     expect(directive(csp, 'img-src')).toEqual(["'self'", 'data:', 'https://track.hubspot.com']);
   });
 
-  it.each([ROUTES.home, ...LEGAL_PAGES])('%s no admite el chat ni la captura de formularios de HubSpot', (path) => {
+  it.each([ROUTES.home, ...LEGAL_PAGES])('%s no admite la captura de formularios de HubSpot', (path) => {
     const csp = headerValue(rulesFor(path, 'Content-Security-Policy')[0], 'Content-Security-Policy');
     for (const origin of HUBSPOT_BLOCKED_ORIGINS) expect(csp).not.toContain(origin);
   });
@@ -103,7 +129,9 @@ describe('Content-Security-Policy', () => {
     expect(directive(csp, 'frame-ancestors')).toEqual(["'none'"]);
     expect(directive(csp, 'form-action')).toEqual(["'none'"]);
     expect(directive(csp, 'style-src')).toEqual(["'self'"]);
-    expect(csp).not.toMatch(/unsafe-inline|unsafe-eval|\*/);
+    // Los estilos inline solo los admiten la portada y los legales, en style-src-elem (lo cubre otro test)
+    expect(csp.replace(/style-src-elem [^;]*/, '')).not.toMatch(/unsafe-inline|unsafe-eval|\*/);
+    expect(csp).not.toMatch(/unsafe-eval|\*/);
   });
 });
 
