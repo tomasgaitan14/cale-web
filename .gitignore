@@ -17,3 +17,6 @@ dist/
 
 # proyecto de Vercel vinculado (local)
 .vercel
+
+# Contexto local del proyecto (estado, decisiones, planes): no se versiona
+CLAUDE.md
