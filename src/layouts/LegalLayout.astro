@@ -18,7 +18,7 @@ const lastUpdatedLabel = new Intl.DateTimeFormat('es-AR', {
 }).format(new Date(`${LEGAL_LAST_UPDATED}T00:00:00Z`));
 ---
 
-<BaseLayout title={`${heading} · ${BUSINESS_NAME}`} description={description} path={path}>
+<BaseLayout title={`${heading} · ${BUSINESS_NAME}`} description={description} path={path} hubspot>
   <article class="container legal">
     <header class="legal-header">
       <h1>{heading}</h1>

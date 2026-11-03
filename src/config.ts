@@ -12,6 +12,11 @@ export const JURISDICTION = 'la República Argentina';
 // Verificación del dominio en el portfolio de Meta (no es secreta: va en el HTML público).
 export const FACEBOOK_DOMAIN_VERIFICATION = 'myontabf6taia94eztrrd8p475ancg';
 
+// Código de seguimiento de HubSpot (el ID del portal no es secreto: va en el HTML público). Se carga solo en la portada y
+// en los textos legales, nunca en el formulario de alta: HubSpot puede capturar los datos de los formularios que ve.
+export const HUBSPOT_PORTAL_ID = '52262548';
+export const HUBSPOT_SCRIPT_URL = `https://js.hs-scripts.com/${HUBSPOT_PORTAL_ID}.js`;
+
 export const ROUTES = {
   home: '/',
   privacy: '/privacidad',
@@ -23,10 +28,10 @@ export const ROUTES = {
 export const START_ROUTE = '/empezar';
 // Versión del texto de consentimiento que se guarda con cada alta. Cambiarla cuando cambie ese texto o la política
 // de privacidad (se ajusta junto con los textos legales).
-export const LEAD_CONSENT_VERSION = '2026-11-02';
+export const LEAD_CONSENT_VERSION = '2026-11-03';
 
 // Fecha de vigencia de los textos legales (ISO, se formatea al renderizar).
-export const LEGAL_LAST_UPDATED = '2026-11-02';
+export const LEGAL_LAST_UPDATED = '2026-11-03';
 
 // Tope de responsabilidad de los términos (decisión del 02/11/2026): el mayor entre lo pagado en los últimos meses y un
 // monto fijo mínimo, para que el tope no sea cero mientras no haya cobro. Cambiar el monto es una decisión del titular.

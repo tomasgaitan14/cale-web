@@ -8,6 +8,7 @@ import {
   BUSINESS_NAME,
   CONTACT_EMAIL,
   FACEBOOK_DOMAIN_VERIFICATION,
+  HUBSPOT_SCRIPT_URL,
   LOCATION,
   ROUTES,
 } from '../config';
@@ -22,9 +23,11 @@ interface Props {
   path?: string;
   // Datos estructurados (JSON-LD) de la página, si los tiene
   structuredData?: object;
+  // Carga el código de seguimiento de HubSpot. Solo la portada y los textos legales; nunca el formulario de alta.
+  hubspot?: boolean;
 }
 
-const { title, description, path, structuredData } = Astro.props;
+const { title, description, path, structuredData, hubspot = false } = Astro.props;
 const canonical = path ? canonicalUrl(path) : undefined;
 const ogImageUrl = canonicalUrl(OG_IMAGE.path);
 // Las dos tipografías del sitio (títulos y texto), solo el subconjunto latino que usa el español: se piden junto con el
@@ -69,6 +72,7 @@ const LEGAL_LINKS = [
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content={ogImageUrl} />
     {structuredData && <script type="application/ld+json" set:html={jsonLd(structuredData)} />}
+    {hubspot && <script is:inline type="text/javascript" id="hs-script-loader" async defer src={HUBSPOT_SCRIPT_URL}></script>}
   </head>
   <body>
     <a class="skip-link" href="#contenido">Saltar al contenido</a>

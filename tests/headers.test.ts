@@ -4,7 +4,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { ROUTES, START_ROUTE } from '../src/config';
+import { HUBSPOT_SCRIPT_URL, ROUTES, START_ROUTE } from '../src/config';
 
 interface HeaderRule {
   source: string;
@@ -12,9 +12,16 @@ interface HeaderRule {
 }
 
 const VERCEL_CONFIG = JSON.parse(readFileSync(join(import.meta.dirname, '..', 'vercel.json'), 'utf8')) as { headers: HeaderRule[] };
-// Páginas sin ningún script: los textos legales y la 404. La portada (ROUTES.home) lleva solo el script del propio sitio.
-const SITE_PAGES = [...Object.values(ROUTES).filter((route) => route !== ROUTES.home), '/404'];
+// Textos legales: solo el script de HubSpot. La portada (ROUTES.home) lleva además el script del propio sitio. La 404 no
+// lleva ninguno.
+const LEGAL_PAGES = Object.values(ROUTES).filter((route) => route !== ROUTES.home);
+const STRICT_PAGES = ['/404'];
+const SITE_PAGES = [...LEGAL_PAGES, ...STRICT_PAGES];
 const TURNSTILE_ORIGIN = 'https://challenges.cloudflare.com';
+// Solo el seguimiento y el aviso de cookies. El chat (usemessages) y la captura de formularios (hscollectedforms) que trae el
+// código de HubSpot quedan afuera a propósito.
+const HUBSPOT_SCRIPT_ORIGINS = [new URL(HUBSPOT_SCRIPT_URL).origin, 'https://js.hs-analytics.net', 'https://js.hs-banner.com'];
+const HUBSPOT_BLOCKED_ORIGINS = ['usemessages', 'hscollectedforms', 'hsforms', 'hubapi'];
 
 // Los `source` de vercel.json son patrones tipo path-to-regexp; los que usa este archivo son expresiones regulares válidas
 function rulesFor(path: string, key: string): HeaderRule[] {
@@ -33,21 +40,42 @@ function directive(csp: string, name: string): string[] {
 }
 
 describe('Content-Security-Policy', () => {
-  it.each(SITE_PAGES)('%s recibe una sola CSP, la estricta: sin scripts ni conexiones', (path) => {
+  it.each(STRICT_PAGES)('%s recibe una sola CSP, la estricta: sin scripts ni conexiones', (path) => {
     const rules = rulesFor(path, 'Content-Security-Policy');
     expect(rules).toHaveLength(1);
     const csp = headerValue(rules[0], 'Content-Security-Policy');
     expect(directive(csp, 'script-src')).toEqual(["'none'"]);
     expect(directive(csp, 'connect-src')).toEqual(["'none'"]);
+    expect(csp).not.toContain('hubspot');
+    expect(csp).not.toContain('hs-');
   });
 
-  it('la portada recibe una sola CSP: solo su propio script, sin conexiones ni Cloudflare', () => {
+  it.each(LEGAL_PAGES)('%s recibe una sola CSP: solo los scripts de HubSpot, sin conexiones', (path) => {
+    const rules = rulesFor(path, 'Content-Security-Policy');
+    expect(rules).toHaveLength(1);
+    const csp = headerValue(rules[0], 'Content-Security-Policy');
+    expect(directive(csp, 'script-src')).toEqual(HUBSPOT_SCRIPT_ORIGINS);
+    expect(directive(csp, 'connect-src')).toEqual(["'none'"]);
+    expect(csp).not.toContain('cloudflare');
+  });
+
+  it('la portada recibe una sola CSP: su propio script y los de HubSpot, sin conexiones ni Cloudflare', () => {
     const rules = rulesFor(ROUTES.home, 'Content-Security-Policy');
     expect(rules).toHaveLength(1);
     const csp = headerValue(rules[0], 'Content-Security-Policy');
-    expect(directive(csp, 'script-src')).toEqual(["'self'"]);
+    expect(directive(csp, 'script-src')).toEqual(["'self'", ...HUBSPOT_SCRIPT_ORIGINS]);
     expect(directive(csp, 'connect-src')).toEqual(["'none'"]);
     expect(csp).not.toContain('cloudflare');
+  });
+
+  it.each([ROUTES.home, ...LEGAL_PAGES])('%s admite las imágenes de seguimiento de HubSpot y nada más de afuera', (path) => {
+    const csp = headerValue(rulesFor(path, 'Content-Security-Policy')[0], 'Content-Security-Policy');
+    expect(directive(csp, 'img-src')).toEqual(["'self'", 'data:', 'https://track.hubspot.com']);
+  });
+
+  it.each([ROUTES.home, ...LEGAL_PAGES])('%s no admite el chat ni la captura de formularios de HubSpot', (path) => {
+    const csp = headerValue(rulesFor(path, 'Content-Security-Policy')[0], 'Content-Security-Policy');
+    for (const origin of HUBSPOT_BLOCKED_ORIGINS) expect(csp).not.toContain(origin);
   });
 
   it('el formulario recibe una sola CSP: su script, el captcha de Cloudflare y nada de Supabase en el navegador', () => {
@@ -59,6 +87,9 @@ describe('Content-Security-Policy', () => {
     // El formulario habla solo con /api/lead, del propio sitio
     expect(directive(csp, 'connect-src')).toEqual(["'self'"]);
     expect(csp).not.toContain('supabase');
+    // El formulario no lleva el seguimiento de HubSpot: podría capturar lo que se escribe
+    expect(csp).not.toContain('hs-');
+    expect(csp).not.toContain('hubspot');
   });
 
   it.each(SITE_PAGES)('%s no admite el captcha: no lo usa', (path) => {

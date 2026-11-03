@@ -11,6 +11,7 @@ import {
   FAQ_ITEMS,
   LANDING_BAND,
   LANDING_COPY,
+  HUBSPOT_SCRIPT_URL,
   LANDING_SAMPLE,
   LEAD_CONSENT_VERSION,
   LEGAL_LAST_UPDATED,
@@ -36,7 +37,7 @@ const TEXT_NODE = NodeType.TEXT_NODE;
 const JSON_LD_TYPE = 'application/ld+json';
 const TECHNICAL_JARGON =/\bAPI\b|Cloud API|plantilla|opt-in|webhook|token|Business Platform/i;
 // Palabras con mayúscula interna que no son texto pegado
-const WORDS_WITH_INNER_CAPITALS = ['WhatsApp'];
+const WORDS_WITH_INNER_CAPITALS = ['WhatsApp', 'HubSpot'];
 const PLACEHOLDER_PATTERN = /en construcci[oó]n|pr[oó]ximamente|lorem ipsum|coming soon/i;
 // En mayúsculas: sin distinguir, "TODO" también encuentra la palabra "todo"
 const PENDING_MARKER_PATTERN = /\bTODO\b|\bTBD\b/;
@@ -171,18 +172,20 @@ describe.each(INDEXABLE_ROUTES)('página %s', (route) => {
     expect(bodyText(page())).not.toMatch(PENDING_MARKER_PATTERN);
   });
 
-  // La CSP (vercel.json) bloquea scripts y estilos inline: si aparecen, se rompen en producción. La portada admite solo
-  // los scripts externos del propio sitio (las animaciones); en las demás páginas, ninguno. El JSON-LD (datos
-  // estructurados) es un bloque de datos, no se ejecuta y la CSP no lo toca: solo lo lleva la portada.
+  // La CSP (vercel.json) bloquea scripts y estilos inline: si aparecen, se rompen en producción. La portada admite los
+  // scripts externos del propio sitio (las animaciones) y, junto con los textos legales, el código de seguimiento de
+  // HubSpot; en las demás páginas, ninguno. El JSON-LD (datos estructurados) es un bloque de datos, no se ejecuta y la
+  // CSP no lo toca: solo lo lleva la portada.
   it('no tiene scripts inline ni estilos inline, y los scripts externos son solo los permitidos', () => {
     const scripts = page()
       .querySelectorAll('script')
       .filter((script) => script.getAttribute('type') !== JSON_LD_TYPE);
-    for (const script of scripts) {
+    const ownScripts = scripts.filter((script) => script.getAttribute('src') !== HUBSPOT_SCRIPT_URL);
+    for (const script of ownScripts) {
       expect(script.getAttribute('src'), 'un script sin src es inline').toMatch(/^\/_astro\/.+\.js$/);
       expect(script.text.trim()).toBe('');
     }
-    if (route !== ROUTES.home) expect(scripts).toHaveLength(0);
+    if (route !== ROUTES.home) expect(ownScripts).toHaveLength(0);
     expect(page().querySelectorAll(`script[type="${JSON_LD_TYPE}"]`)).toHaveLength(route === ROUTES.home ? 1 : 0);
     expect(page().querySelectorAll('style')).toHaveLength(0);
     expect(page().querySelectorAll('[style]')).toHaveLength(0);
@@ -574,14 +577,28 @@ describe('contenido requerido', () => {
     });
   });
 
-  // La CSP solo admite el propio dominio: fuentes, estilos, imágenes y videos se sirven desde el sitio
+  // El código de seguimiento de HubSpot va en la portada y en los textos legales, una sola vez, nunca en el formulario de
+  // alta (HubSpot puede capturar lo que se escribe en los formularios) ni en la 404.
+  it.each(INDEXABLE_ROUTES)('%s carga el código de seguimiento de HubSpot una sola vez', (route) => {
+    const loaders = pages.get(route)!.querySelectorAll(`script[src="${HUBSPOT_SCRIPT_URL}"]`);
+    expect(loaders).toHaveLength(1);
+    expect(loaders[0].getAttribute('id')).toBe('hs-script-loader');
+    expect(loaders[0].text.trim()).toBe('');
+  });
+
+  it.each([START_ROUTE, '/404'])('%s no carga el código de seguimiento de HubSpot', (route) => {
+    const page = loadPage(route === '/404' ? NOT_FOUND_FILE : routeToFile(route));
+    expect(page.querySelectorAll('script[src*="hs-scripts"], script[src*="hubspot"]')).toHaveLength(0);
+  });
+
+  // La CSP solo admite el propio dominio, salvo el script de HubSpot en la portada y los textos legales
   it.each([...INDEXABLE_ROUTES, '/404'])('%s no carga recursos de orígenes externos', (route) => {
     const page = loadPage(route === '/404' ? NOT_FOUND_FILE : routeToFile(route));
     const sources = page
       .querySelectorAll('link[href], script[src], img[src], source[src], video[src], iframe[src]')
       .filter((element) => element.tagName !== 'LINK' || element.getAttribute('rel') !== 'canonical')
       .map((element) => element.getAttribute('href') ?? element.getAttribute('src') ?? '');
-    expect(sources.filter((source) => /^(https?:)?\/\//.test(source))).toEqual([]);
+    expect(sources.filter((source) => /^(https?:)?\/\//.test(source) && source !== HUBSPOT_SCRIPT_URL)).toEqual([]);
   });
 
   it('los estilos generados no importan nada de afuera y las fuentes son las del diseño', () => {
@@ -624,10 +641,13 @@ describe('contenido requerido', () => {
       'Vercel Inc.',
       'Supabase Inc.',
       'Cloudflare, Inc.',
+      'HubSpot, Inc.',
       // Coexistencia: copia de los mensajes del negocio y qué se hace con ellos
       `hasta ${COEXISTENCE.historyDays} días de historial`,
       'los demás los descarta sin guardarlos',
-      'Este sitio no usa cookies ni herramientas de analítica o publicidad',
+      // El sitio mide las visitas con HubSpot solo en la portada y los textos legales, y lo dice
+      'cargamos el código de seguimiento de HubSpot',
+      'El formulario de alta y la página de error no cargan ese código',
       `${RETENTION.leadMonths} meses`,
       `${RETENTION.appointmentDataMonths} meses`,
       `${RETENTION.afterTerminationDays} días`,
